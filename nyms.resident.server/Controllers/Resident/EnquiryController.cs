@@ -1,4 +1,5 @@
-﻿using nyms.resident.server.Filters;
+﻿using NLog;
+using nyms.resident.server.Filters;
 using nyms.resident.server.Services.Interfaces;
 using System;
 using System.Linq;
@@ -12,6 +13,7 @@ namespace nyms.resident.server.Controllers
     [UserAuthenticationFilter]
     public class EnquiryController : ApiController
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         private readonly IUserService _userService;
         private readonly IEnquiryService _enquiryService;
 
@@ -25,12 +27,17 @@ namespace nyms.resident.server.Controllers
         [Route("api/carehomes/enquires")]
         public IHttpActionResult GetAllEnquires()
         {
-            var u = HttpContext.Current.User.Identity.Name;
+            var identityName = HttpContext.Current.User.Identity.Name;
+            logger.Info($"All enquires requested by {identityName}");
 
             var enquires = _enquiryService.GetAll();
 
             if (enquires == null)
+            {
+                logger.Warn($"No enquires found");
                 return NotFound();
+            }
+                
 
             return Ok(enquires.ToArray());
         }
@@ -40,12 +47,21 @@ namespace nyms.resident.server.Controllers
         public IHttpActionResult GetEnquiryByReferenceId(string referenceId)
         {
             // add validateon
-            var u = HttpContext.Current.User.Identity.Name;
+            if (string.IsNullOrEmpty(referenceId))
+            {
+                throw new ArgumentNullException(nameof(referenceId));
+            }
+
+            var identityName = HttpContext.Current.User.Identity.Name;
+            logger.Info($"All enquires requested by {identityName}");
 
             var enquiry = _enquiryService.GetByReferenceId(new Guid(referenceId)).Result;
 
             if (enquiry == null)
+            {
+                logger.Warn($"No enquiry found for {referenceId}");
                 return NotFound();
+            }
 
             return Ok(enquiry);
         }

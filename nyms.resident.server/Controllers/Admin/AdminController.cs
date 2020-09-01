@@ -1,5 +1,7 @@
-﻿using nyms.resident.server.Filters;
+﻿using NLog;
+using nyms.resident.server.Filters;
 using nyms.resident.server.Services.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Web;
 using System.Web.Http;
@@ -11,11 +13,12 @@ namespace nyms.resident.server.Controllers.Admin
     [AdminAuthenticationFilter]
     public class AdminController : ApiController
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         private readonly IUserService _userService;
 
         public AdminController(IUserService userService)
         {
-            _userService = userService; // throw error
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         }
 
         // GET: api/Admin
@@ -30,6 +33,7 @@ namespace nyms.resident.server.Controllers.Admin
         [Route("api/admin/user/setpassword")]
         public IHttpActionResult SetPassword([FromBody] Models.User user)
         {
+
             // validate user has role [Admin]...
             
             // throw error if user.ref or pwd is null...
