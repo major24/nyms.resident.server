@@ -1,4 +1,5 @@
-﻿using nyms.resident.server.Filters;
+﻿using NLog;
+using nyms.resident.server.Filters;
 using nyms.resident.server.Services.Interfaces;
 using System;
 using System.Web.Http;
@@ -10,6 +11,7 @@ namespace nyms.resident.server.Controllers.User
     [UserAuthenticationFilter]
     public class UsersController : ApiController
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         private readonly IUserService _userService;
 
         public UsersController(IUserService userService)
@@ -21,6 +23,8 @@ namespace nyms.resident.server.Controllers.User
         [Route("api/users/{referenceId}")]
         public IHttpActionResult GetUserByReferenceId(string referenceId)
         {
+            logger.Info($"Request user info for {referenceId}");
+
             if (referenceId == null || referenceId == "")
             {
                 return BadRequest($"Must provide a user reference id");
@@ -29,7 +33,10 @@ namespace nyms.resident.server.Controllers.User
             Guid _referenceId = new Guid(referenceId);
             var user = _userService.GetByRefereneId(_referenceId).Result;
             if (user == null)
+            {
+                logger.Error($"No user info found for {referenceId}.");
                 return NotFound();
+            }
 
             return Ok(user);
         }
@@ -38,6 +45,8 @@ namespace nyms.resident.server.Controllers.User
         [Route("api/users/carehomeusers/{referenceId}")]
         public IHttpActionResult GetCareHomeUserByReferenceId(string referenceId)
         {
+            logger.Info($"Request care home user info for {referenceId}");
+
             if (referenceId == null || referenceId == "")
             {
                 return BadRequest($"Must provide a user reference id");
@@ -46,12 +55,15 @@ namespace nyms.resident.server.Controllers.User
             Guid _referenceId = new Guid(referenceId);
             var user = _userService.GetCareHomeUser(_referenceId).Result;
             if (user == null)
+            {
+                logger.Error($"No user info found for {referenceId}.");
                 return NotFound();
+            }
 
             return Ok(user);
         }
 
-        [HttpGet]
+/*        [HttpGet]
         [Route("api/users/{referenceId}/roles")]
         public IHttpActionResult GetByUserAndRolesByReferenceId(string referenceId)
         {
@@ -66,7 +78,7 @@ namespace nyms.resident.server.Controllers.User
                 return NotFound();
 
             return Ok(user);
-        }
+        }*/
 
         // PUT: api/Users/5
         // [HttpPut("{referenceId}")]
