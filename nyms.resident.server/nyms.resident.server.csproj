@@ -239,6 +239,12 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Invoice\ContributorBase.cs" />
+    <Compile Include="Invoice\FeeCalculatorService.cs" />
+    <Compile Include="Invoice\InvoiceResident.cs" />
+    <Compile Include="Invoice\LaContributor.cs" />
+    <Compile Include="Invoice\ResidentContributor.cs" />
+    <Compile Include="Invoice\Schedule.cs" />
     <Compile Include="Models\Authentication\AuthenticationRequest.cs" />
     <Compile Include="Models\Authentication\AuthenticationResponse.cs" />
     <Compile Include="Models\CareHome\CareCategory.cs" />
