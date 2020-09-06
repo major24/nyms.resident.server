@@ -1,7 +1,7 @@
 ﻿using nyms.resident.server.Models.Base;
 using System;
 
-namespace nyms.resident.server.Models.Resident
+namespace nyms.resident.server.Models
 {
     public abstract class ResidentBase : IPerson
     {

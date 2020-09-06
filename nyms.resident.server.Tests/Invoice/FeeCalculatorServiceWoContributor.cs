@@ -1,36 +1,29 @@
-﻿/*
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using nyms.resident.server.Invoice;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using nyms.resident.server.Invoice;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace nyms.resident.server.Tests.Invoice
 {
     [TestClass]
-    public class FeeCalculatorServiceTest
+    public class FeeCalculatorServiceWoContributor
     {
-        
-        
         [TestMethod]
         public void CalculateFeeLaFullPeriodNoFeeChange()
         {
             FeeCalculatorService srv = new FeeCalculatorService();
-            // InvoiceResident invoiceResident = getResidentLaFullPeriodNoFeeChange(10);
 
-            // each resi may have multiple contributors, LA || LA and CC || LA and CC1, CC2 
-            List<ContributorBase> allContributors = new List<ContributorBase>();
-            LaContributor la1 = new LaContributor("Derbyshare", getSchedules(10));
-            allContributors.Add(la1);
-            // create resident
-            //var invoiceResident = new InvoiceResident(10, "John", new DateTime(2018, 01, 01), new DateTime(2050, 12, 31), allContributors);
-            var invoiceResident = new InvoiceResident(10, "John", allContributors);
+            // get schedules for John
+            var schedules = getSchedules(10);
+            var invoiceResident = new InvoiceResident(10, "John", schedules);
 
             var resident = srv.CalculateFee(invoiceResident, new DateTime(2020, 01, 01), new DateTime(2020, 01, 28));
 
-            var feeContributors = resident.GetContributors();
-            var amounts = feeContributors.Select(c => c.GetSchedules().Select(f => f.AmountDue)).ToArray()[0];
+            var feesPerSchedules = resident.GetSchedules();
+            var amounts = feesPerSchedules.Select(c => c.AmountDue).ToArray();
             var totalAmount = amounts.Sum();
 
             // Fee = 599.99M 
@@ -42,18 +35,14 @@ namespace nyms.resident.server.Tests.Invoice
         public void CalculateFeeLaAndCcFullPeriodNoFeeChange()
         {
             FeeCalculatorService srv = new FeeCalculatorService();
-            //InvoiceResident invoiceResident = getResidentLaCcFullPeriodNoFeeChange(11); 
-            List<ContributorBase> allContributors = new List<ContributorBase>();
-            LaContributor laAndCcc = new LaContributor("Derbyshare", getSchedules(11));
-            allContributors.Add(laAndCcc);
 
-            //var invoiceResident = new InvoiceResident(11, "Papa", new DateTime(2018, 01, 01), new DateTime(2050, 12, 31), allContributors);
-            var invoiceResident = new InvoiceResident(11, "Papa", allContributors);
+            var schedules = getSchedules(11);
+            var invoiceResident = new InvoiceResident(11, "John", schedules);
 
             var resident = srv.CalculateFee(invoiceResident, new DateTime(2020, 01, 01), new DateTime(2020, 01, 28));
 
-            var feeContributors = resident.GetContributors();
-            var amounts = feeContributors.Select(c => c.GetSchedules().Select(f => f.AmountDue)).ToArray()[0];
+            var feesPerSchedules = resident.GetSchedules();
+            var amounts = feesPerSchedules.Select(c => c.AmountDue).ToArray();
             var totalAmount = amounts.Sum();
 
             // Fee = la= 555.75M  cc= 245.43M
@@ -61,22 +50,19 @@ namespace nyms.resident.server.Tests.Invoice
             Assert.AreEqual(3204.72M, totalAmount);
         }
 
+
         [TestMethod]
         public void CalculateFeeLaResidentLeavesMidMonth()
         {
             FeeCalculatorService srv = new FeeCalculatorService();
-            // InvoiceResident invoiceResident = getResidentLaResidentLevesMidMonth(20);
-            List<ContributorBase> allContributors = new List<ContributorBase>();
-            LaContributor la1 = new LaContributor("Derbyshare", getSchedules(20));
-            allContributors.Add(la1);
-            // res leaves on 15th
-            // var invoiceResident = new InvoiceResident(20, "John", new DateTime(2018, 01, 01), new DateTime(2020, 01, 15), allContributors);
-            var invoiceResident = new InvoiceResident(20, "John", allContributors);
+
+            var schedules = getSchedules(20);
+            var invoiceResident = new InvoiceResident(20, "John", schedules);
 
             var resident = srv.CalculateFee(invoiceResident, new DateTime(2020, 01, 01), new DateTime(2020, 01, 28));
 
-            var feeContributors = resident.GetContributors();
-            var amounts = feeContributors.Select(c => c.GetSchedules().Select(f => f.AmountDue)).ToArray()[0];
+            var feesPerSchedules = resident.GetSchedules();
+            var amounts = feesPerSchedules.Select(c => c.AmountDue).ToArray();
             var totalAmount = amounts.Sum();
 
             // Fee = la= 680.10 
@@ -88,18 +74,14 @@ namespace nyms.resident.server.Tests.Invoice
         public void CalculateFeeLaResidentArrivesMidMonth()
         {
             FeeCalculatorService srv = new FeeCalculatorService();
-            List<ContributorBase> allContributors = new List<ContributorBase>();
 
-            LaContributor la1 = new LaContributor("Derbyshare", getSchedules(21));
-            allContributors.Add(la1);
-            // res leaves on 15th
-            // var invoiceResident = new InvoiceResident(21, "John", new DateTime(2020, 01, 21), new DateTime(2050, 12, 31), allContributors);
-            var invoiceResident = new InvoiceResident(21, "John", allContributors);
+            var schedules = getSchedules(21);
+            var invoiceResident = new InvoiceResident(21, "John", schedules);
 
             var resident = srv.CalculateFee(invoiceResident, new DateTime(2020, 01, 01), new DateTime(2020, 01, 28));
 
-            var feeContributors = resident.GetContributors();
-            var amounts = feeContributors.Select(c => c.GetSchedules().Select(f => f.AmountDue)).ToArray()[0];
+            var feesPerSchedules = resident.GetSchedules();
+            var amounts = feesPerSchedules.Select(c => c.AmountDue).ToArray();
             var totalAmount = amounts.Sum();
 
             // Fee = la= 678.01 
@@ -112,19 +94,14 @@ namespace nyms.resident.server.Tests.Invoice
         public void CalculateFeeLaFullPeriodWithFeeChange()
         {
             FeeCalculatorService srv = new FeeCalculatorService();
-            List<ContributorBase> allContributors = new List<ContributorBase>();
 
-            LaContributor la1 = new LaContributor("Derbyshare", getSchedules(30));
-            allContributors.Add(la1);
-            // res fee changes
-
-            // var invoiceResident = new InvoiceResident(30, "John", new DateTime(2018, 01, 01), new DateTime(2050, 12, 31), allContributors);
-            var invoiceResident = new InvoiceResident(30, "John", allContributors);
+            var schedules = getSchedules(30);
+            var invoiceResident = new InvoiceResident(30, "John", schedules);
 
             var resident = srv.CalculateFee(invoiceResident, new DateTime(2020, 01, 01), new DateTime(2020, 01, 28));
 
-            var feeContributors = resident.GetContributors();
-            var amounts = feeContributors.Select(c => c.GetSchedules().Select(f => f.AmountDue)).ToArray()[0];
+            var feesPerSchedules = resident.GetSchedules();
+            var amounts = feesPerSchedules.Select(c => c.AmountDue).ToArray();
             var totalAmount = amounts.Sum();
 
             // (30, 1, "LA", new DateTime(2019, 01, 01), new DateTime(2020, 01, 15), 630.50M));
@@ -138,19 +115,14 @@ namespace nyms.resident.server.Tests.Invoice
         public void CalculateFeeLaFullPeriodWithFeeChangeMultipleChgInOnePeriod()
         {
             FeeCalculatorService srv = new FeeCalculatorService();
-            List<ContributorBase> allContributors = new List<ContributorBase>();
 
-            LaContributor la1 = new LaContributor("Derbyshare", getSchedules(40));
-            allContributors.Add(la1);
-            // res fee changes
-
-            // var invoiceResident = new InvoiceResident(30, "John", new DateTime(2018, 01, 01), new DateTime(2050, 12, 31), allContributors);
-            var invoiceResident = new InvoiceResident(30, "John", allContributors);
+            var schedules = getSchedules(40);
+            var invoiceResident = new InvoiceResident(40, "John", schedules);
 
             var resident = srv.CalculateFee(invoiceResident, new DateTime(2020, 01, 01), new DateTime(2020, 01, 28));
 
-            var feeContributors = resident.GetContributors();
-            var amounts = feeContributors.Select(c => c.GetSchedules().Select(f => f.AmountDue)).ToArray()[0];
+            var feesPerSchedules = resident.GetSchedules();
+            var amounts = feesPerSchedules.Select(c => c.AmountDue).ToArray();
             var totalAmount = amounts.Sum();
 
             // Multiple Fee changes
@@ -168,25 +140,19 @@ namespace nyms.resident.server.Tests.Invoice
             Assert.AreEqual(3129.54M, totalAmount);
         }
 
-
         // Longer period than schecue
         [TestMethod]
         public void CalculateFeeLaFullPeriodNoFeeChangeForCustomDates()
         {
             FeeCalculatorService srv = new FeeCalculatorService();
 
-            // each resi may have multiple contributors, LA || LA and CC || LA and CC1, CC2 
-            List<ContributorBase> allContributors = new List<ContributorBase>();
-            LaContributor la1 = new LaContributor("Derbyshare", getSchedules(10));
-            allContributors.Add(la1);
-            // create resident
-            // var invoiceResident = new InvoiceResident(10, "John", new DateTime(2018, 01, 01), new DateTime(2050, 12, 31), allContributors);
-            var invoiceResident = new InvoiceResident(10, "John", allContributors);
+            var schedules = getSchedules(10);
+            var invoiceResident = new InvoiceResident(10, "John", schedules);
 
-            var resident = srv.CalculateFee(invoiceResident, new DateTime(2020, 01, 01), new DateTime(2020, 03, 31));
+            var resident = srv.CalculateFee(invoiceResident, new DateTime(2020, 01, 01), new DateTime(2020, 03, 31)); // <<--quarter
 
-            var feeContributors = resident.GetContributors();
-            var amounts = feeContributors.Select(c => c.GetSchedules().Select(f => f.AmountDue)).ToArray()[0];
+            var feesPerSchedules = resident.GetSchedules();
+            var amounts = feesPerSchedules.Select(c => c.AmountDue).ToArray();
             var totalAmount = amounts.Sum();
 
             // Fee = 599.99M 
@@ -194,24 +160,18 @@ namespace nyms.resident.server.Tests.Invoice
             Assert.AreEqual(7799.87M, totalAmount);
         }
 
-
         [TestMethod]
         public void CalculateFeeLaFullPeriodWithFeeChangeMultipleChgInOnePeriodForCustomDates()
         {
             FeeCalculatorService srv = new FeeCalculatorService();
-            List<ContributorBase> allContributors = new List<ContributorBase>();
 
-            LaContributor la1 = new LaContributor("Derbyshare", getSchedules(40));
-            allContributors.Add(la1);
-            // res fee changes
-
-            // var invoiceResident = new InvoiceResident(30, "John", new DateTime(2018, 01, 01), new DateTime(2050, 12, 31), allContributors);
-            var invoiceResident = new InvoiceResident(30, "John", allContributors);
+            var schedules = getSchedules(40);
+            var invoiceResident = new InvoiceResident(40, "John", schedules);
 
             var resident = srv.CalculateFee(invoiceResident, new DateTime(2020, 01, 01), new DateTime(2020, 03, 31));
 
-            var feeContributors = resident.GetContributors();
-            var amounts = feeContributors.Select(c => c.GetSchedules().Select(f => f.AmountDue)).ToArray()[0];
+            var feesPerSchedules = resident.GetSchedules();
+            var amounts = feesPerSchedules.Select(c => c.AmountDue).ToArray();
             var totalAmount = amounts.Sum();
 
             // Multiple Fee changes
@@ -229,26 +189,18 @@ namespace nyms.resident.server.Tests.Invoice
             Assert.AreEqual(10339.26M, totalAmount);
         }
 
-        
-
-
         [TestMethod]
         public void CalculateFeeLaAndCcWithLaMultiplePaymentsAndCcMultiplePayments()
         {
             FeeCalculatorService srv = new FeeCalculatorService();
 
-            // each resi may have multiple contributors, LA || LA and CC || LA and CC1, CC2 
-            List<ContributorBase> allContributors = new List<ContributorBase>();
-            LaContributor la1 = new LaContributor("Derbyshare", getSchedules(50));
-            allContributors.Add(la1);
-            // create resident
-            // var invoiceResident = new InvoiceResident(50, "John", new DateTime(2018, 01, 01), new DateTime(2050, 12, 31), allContributors);
-            var invoiceResident = new InvoiceResident(50, "John", allContributors);
+            var schedules = getSchedules(50);
+            var invoiceResident = new InvoiceResident(50, "John", schedules);
 
             var resident = srv.CalculateFee(invoiceResident, new DateTime(2020, 01, 01), new DateTime(2020, 01, 28));
 
-            var feeContributors = resident.GetContributors();
-            var amounts = feeContributors.Select(c => c.GetSchedules().Select(f => f.AmountDue)).ToArray()[0];
+            var feesPerSchedules = resident.GetSchedules();
+            var amounts = feesPerSchedules.Select(c => c.AmountDue).ToArray();
             var totalAmount = amounts.Sum();
 
             // multiple payments categories from la
@@ -265,14 +217,11 @@ namespace nyms.resident.server.Tests.Invoice
 
 
 
-
-
-        // private IEnumerable<Tuple<int, int, DateTime, DateTime, decimal>> getSchedules(int residentId)
         private IEnumerable<Schedule> getSchedules(int residentId)
         {
             // ResId, LaId, ContributorName, schBeginDate, schEndDate
-            List<Tuple<int, int, string, DateTime, DateTime, decimal>> allSchedules = new List<Tuple<int, int, string,DateTime, DateTime, decimal>>();
-            
+            List<Tuple<int, int, string, DateTime, DateTime, decimal>> allSchedules = new List<Tuple<int, int, string, DateTime, DateTime, decimal>>();
+
             // only la. one valid period
             allSchedules.Add(new Tuple<int, int, string, DateTime, DateTime, decimal>
                 (10, 1, "LA", new DateTime(2018, 01, 01), new DateTime(2018, 12, 31), 400.00M));
@@ -332,14 +281,12 @@ namespace nyms.resident.server.Tests.Invoice
             var list = allSchedules.Where(s => s.Item1 == residentId);
             var schs = list.Select(s =>
             {
-                return new Schedule() { LocalAuthorityId = s.Item2, PaymentFrom = s.Item3, ScheduleBeginDate = s.Item4, ScheduleEndDate = s.Item5, WeeklyFee = s.Item6 };
+                return new Schedule() { LocalAuthorityId = s.Item2, PaymentFromCode = s.Item3, ScheduleBeginDate = s.Item4, ScheduleEndDate = s.Item5, WeeklyFee = s.Item6 };
             });
 
             return schs.ToArray();
-        }        
-        
+        }
+
+
     }
 }
-
-
-*/

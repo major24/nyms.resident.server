@@ -80,14 +80,15 @@ namespace nyms.resident.server.Controllers.User
             return Ok(user);
         }*/
 
-        // PUT: api/Users/5
-        // [HttpPut("{referenceId}")]
-        [HttpPut]
-        [Route("api/users/{referenceId}")]
-        public void Put(string referenceId, [FromBody] Models.User user)
+
+/*      // SET PWD is in ADMIN Controller
+ *      [HttpPut]
+        [Route("api/users/{referenceId}/password")]
+        public void SetPassword(string referenceId, [FromBody] Models.User user)
         {
-            /*this._userService.UpdateUser(user);*/
-        }
+            if (string.IsNullOrEmpty(referenceId) || string.IsNullOrEmpty(user.Password)) throw new ArgumentException("Missing reference id or password");
+            this._userService.SetPassword(new Guid(referenceId), user.Password);
+        }*/
 
     }
 }

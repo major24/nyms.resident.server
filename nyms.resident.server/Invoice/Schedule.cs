@@ -11,8 +11,11 @@ namespace nyms.resident.server.Invoice
         {
             LocalAuthorityId = null;
         }
+        public int ResidentId { get; set; }
         public int? LocalAuthorityId { get; set; }
-        public string PaymentFrom { get; set; } // ContributorName { get; set; }
+        public string PaymentType { get; set; }
+        public string PaymentFromCode { get; set; }
+        public string PaymentFromDesc { get; set; }
         public string Description { get; set; }
         public DateTime ScheduleBeginDate { get; set; }
         public DateTime ScheduleEndDate { get; set; }
