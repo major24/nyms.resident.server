@@ -25,8 +25,8 @@ namespace nyms.resident.server.Services.Impl
         public IEnumerable<InvoiceResident> GetAllSchedules(DateTime billingBeginDate, DateTime billingEndDate)
         {
             // each resi may have multiple contributors, LA || LA and CC || LA and CC1, CC2 
-            var schedules = this._invoiceDataProvider.GetAllSchedules();
-            var residents = this._residentDataProvider.GetAll();
+            var schedules = this._invoiceDataProvider.GetAllSchedulesForInvoiceDate(billingBeginDate, billingEndDate); //GetAllSchedules();
+            var residents = this._residentDataProvider.GetResidentsForInvoice(billingBeginDate, billingEndDate); //.GetAll();
 
             // create invoiceResident
             var invResidents = residents.Select(r =>
@@ -37,8 +37,21 @@ namespace nyms.resident.server.Services.Impl
                 var residentsWithCalculatedFees = _feeCalculatorService.CalculateFee(_invResidents, billingBeginDate, billingEndDate);
 
                 // sum LA total, add LA fee and Supliment fees together..
-                var sum = residentsWithCalculatedFees.GetSchedules().Where(s => s.PaymentFromCode == "LA").Select(k => k.AmountDue).Sum();
-                residentsWithCalculatedFees.TotalLaFee = sum;
+                // PaymentTypeId 1 = LA     4 = SUP
+                var sumWeekly = residentsWithCalculatedFees.GetSchedules()
+                .Where(s => s.PaymentTypeId == 1 || s.PaymentTypeId == 4).Select(k => k.AmountDue).Sum();
+
+                /*.Where(s => s.PaymentFrom == "LA").Select(k => k.AmountDue).Sum();*/
+                residentsWithCalculatedFees.TotalLaFee = sumWeekly;
+
+                // get resident weekly fee (LA 1 + CC 2)
+                residentsWithCalculatedFees.ResidentWeeklyFee = residentsWithCalculatedFees.GetSchedules()
+                .Where(s => s.PaymentTypeId == 1 || s.PaymentTypeId == 2).Select(k => k.WeeklyFee).Sum();
+                //residentsWithCalculatedFees.ResidentWeeklyFee = sumLaAndCC;
+
+                // get GrandTotal (all amount dues)
+                residentsWithCalculatedFees.GrandTotal =  residentsWithCalculatedFees.GetSchedules()
+                .Select(s => s.AmountDue).Sum();
 
                 // order by local auth id
                 residentsWithCalculatedFees.SetSchedules(
@@ -50,7 +63,9 @@ namespace nyms.resident.server.Services.Impl
                 return residentsWithCalculatedFees;
             }).ToArray();
 
-            return invResidents;
+            var result = invResidents.OrderBy(r => r.Name);
+
+            return result; // invResidents;
         }
     }
 }

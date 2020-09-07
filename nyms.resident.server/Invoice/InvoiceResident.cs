@@ -11,7 +11,8 @@ namespace nyms.resident.server.Invoice
         public int Id { get; set; }
         public string Name { get; }
         public decimal TotalLaFee { get; set; }
-
+        public decimal ResidentWeeklyFee { get; set; }
+        public decimal GrandTotal { get; set; }
         public IEnumerable<Schedule> Schedules { get; set; }
 
         public InvoiceResident(int id, string name, IEnumerable<Schedule> schedules)

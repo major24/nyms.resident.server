@@ -10,5 +10,6 @@ namespace nyms.resident.server.DataProviders.Interfaces
     public interface IResidentDataProvider
     {
         IEnumerable<Resident> GetAll();
+        IEnumerable<Resident> GetResidentsForInvoice(DateTime billingStart, DateTime billingEnd);
     }
 }

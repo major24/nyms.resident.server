@@ -281,7 +281,7 @@ namespace nyms.resident.server.Tests.Invoice
             var list = allSchedules.Where(s => s.Item1 == residentId);
             var schs = list.Select(s =>
             {
-                return new Schedule() { LocalAuthorityId = s.Item2, PaymentFromCode = s.Item3, ScheduleBeginDate = s.Item4, ScheduleEndDate = s.Item5, WeeklyFee = s.Item6 };
+                return new Schedule() { LocalAuthorityId = s.Item2, PaymentFrom = s.Item3, ScheduleBeginDate = s.Item4, ScheduleEndDate = s.Item5, WeeklyFee = s.Item6 };
             });
 
             return schs.ToArray();

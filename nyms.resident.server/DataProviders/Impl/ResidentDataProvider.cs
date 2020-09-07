@@ -65,5 +65,30 @@ namespace nyms.resident.server.DataProviders.Impl
                 return result;
             }
         }
+
+        public IEnumerable<Resident> GetResidentsForInvoice(DateTime billingStart, DateTime billingEnd)
+        {
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                string sql = @"SELECT
+                               [id] as id
+                              ,[reference_id] as referenceid
+                              ,[local_authority_id] as localauthorityid
+                              ,[fore_name] as forename
+                              ,[sur_name] as surname
+                            ,[created_date] as createddate
+                        FROM [dbo].[residents]
+                        WHERE [exit_date] >= @billingstart             
+                        and adminition_date <= @billingend";
+                // rpt begin date
+                // rpt end date";
+                DynamicParameters dp = new DynamicParameters();
+                dp.Add("billingstart", billingStart.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input);
+                dp.Add("billingend", billingEnd.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input);
+                conn.Open();
+                var result = conn.QueryAsync<Resident>(sql, dp).Result;
+                return result;
+            }
+        }
     }
 }
