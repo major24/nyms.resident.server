@@ -58,26 +58,6 @@ namespace nyms.resident.server.Invoice
             return true;
         }
 
-/*        private bool IsScheduleExpiresInReportPeriod(DateTime scheduleBeginDate, DateTime scheduleEndDate, DateTime reportBeginDate, DateTime reportEndDate)
-        {
-            if (scheduleEndDate < reportEndDate)
-            {
-                // Schedule expires in the middle of the month
-                return true;
-            }
-            return false;
-        }*/
-
-/*        private bool IsScheduleBeginsInReportPeriod(DateTime scheduleBeginDate, DateTime scheduleEndDate, DateTime reportBeginDate, DateTime reportEndDate)
-        {
-            if (scheduleBeginDate > reportBeginDate)
-            {
-                // Schedule starts in the middle of the month
-                return true;
-            }
-            return false;
-        }*/
-
         private int GetNumberOfDaysInMonth(DateTime beginDate, DateTime endDate)
         {
             DateTime start = new DateTime(beginDate.Year, beginDate.Month, beginDate.Day);

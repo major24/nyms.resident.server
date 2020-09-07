@@ -34,20 +34,18 @@ namespace nyms.resident.server.Services.Impl
                 // find their schedules. by LA or CC or LA+CC?
                 var _schedules = schedules.Where(s => s.ResidentId == r.Id);
                 var _invResidents = new InvoiceResident(r.Id, $"{r.ForeName} {r.SurName}", _schedules);
+                _invResidents.LocalAuthorityId = _schedules.Select(s => s.LocalAuthorityId).FirstOrDefault();
                 var residentsWithCalculatedFees = _feeCalculatorService.CalculateFee(_invResidents, billingBeginDate, billingEndDate);
 
                 // sum LA total, add LA fee and Supliment fees together..
                 // PaymentTypeId 1 = LA     4 = SUP
                 var sumWeekly = residentsWithCalculatedFees.GetSchedules()
                 .Where(s => s.PaymentTypeId == 1 || s.PaymentTypeId == 4).Select(k => k.AmountDue).Sum();
-
-                /*.Where(s => s.PaymentFrom == "LA").Select(k => k.AmountDue).Sum();*/
                 residentsWithCalculatedFees.TotalLaFee = sumWeekly;
 
-                // get resident weekly fee (LA 1 + CC 2)
+                // get resident weekly fee (LA 1 + CC 2 + PV 3)
                 residentsWithCalculatedFees.ResidentWeeklyFee = residentsWithCalculatedFees.GetSchedules()
-                .Where(s => s.PaymentTypeId == 1 || s.PaymentTypeId == 2).Select(k => k.WeeklyFee).Sum();
-                //residentsWithCalculatedFees.ResidentWeeklyFee = sumLaAndCC;
+                .Where(s => s.PaymentTypeId == 1 || s.PaymentTypeId == 2 || s.PaymentTypeId == 3).Select(k => k.WeeklyFee).Sum();
 
                 // get GrandTotal (all amount dues)
                 residentsWithCalculatedFees.GrandTotal =  residentsWithCalculatedFees.GetSchedules()
