@@ -1,4 +1,5 @@
-﻿using nyms.resident.server.Models;
+﻿using NLog;
+using nyms.resident.server.Models;
 using nyms.resident.server.Services.Core;
 using nyms.resident.server.Services.Interfaces;
 using System;
@@ -12,6 +13,7 @@ namespace nyms.resident.server.Services.Impl
     {
         private readonly IJwtService _jwtService;
         private readonly IUserService _userService;
+        private static Logger logger = LogManager.GetCurrentClassLogger();
 
         public AuthenticationService(IJwtService jwtService, IUserService userService)
         {
@@ -21,25 +23,47 @@ namespace nyms.resident.server.Services.Impl
 
         public string GenerateJWTToken(string name, string referenceId, int expire_in_Minutes = 30)
         {
-            return _jwtService.GenerateJWTToken(name, referenceId, expire_in_Minutes);
+            logger.Info($"Generating token for {name}");
+            try
+            {
+                return _jwtService.GenerateJWTToken(name, referenceId, expire_in_Minutes);
+            }
+            catch(Exception ex)
+            {
+                logger.Error($"Faild to generate token for {name}, {ex.Message}");
+                throw;
+            }
+            
         }
 
         public AuthenticationResponse Authenticate(AuthenticationRequest authenticationRequest)
         {
             // get user with user name pwd
+            logger.Info($"Authenticating , {authenticationRequest.UserName} for access.");
             var userExists = _userService.GetUserByUserNamePassword(authenticationRequest.UserName, authenticationRequest.Password).Result;  //_authenticationRepository.EnsureValidUser(model.UserName, model.Password);
-            if (userExists == null) return null;
-
-            // validate pwd with bcypt??
-            bool verified = BCrypt.Net.BCrypt.Verify(authenticationRequest.Password, userExists.Password);
-
-            if (!verified)
+            if (userExists == null)
             {
+                logger.Error($"No user found for, {authenticationRequest.UserName}");
                 return null;
+            }
+                
+            try
+            {
+                // validate pwd with bcypt??
+                bool verified = BCrypt.Net.BCrypt.Verify(authenticationRequest.Password, userExists.Password);
+                if (!verified)
+                {
+                    logger.Error($"User could not be validated. Could be incorrect password.");
+                    return null;
+                }
+            }
+            catch(Exception ex)
+            {
+                logger.Error($"Faild to validate user password, {ex.Message}");
+                throw;
             }
 
             // if not valid send error..
-
 
             // pwd is valid. get user
             var user = _userService.GetByRefereneId(userExists.ReferenceId).Result;

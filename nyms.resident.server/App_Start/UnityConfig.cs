@@ -1,5 +1,6 @@
 using nyms.resident.server.DataProviders.Impl;
 using nyms.resident.server.DataProviders.Interfaces;
+using nyms.resident.server.Invoice;
 using nyms.resident.server.Services.Core;
 using nyms.resident.server.Services.Impl;
 using nyms.resident.server.Services.Interfaces;
@@ -24,10 +25,13 @@ namespace nyms.resident.server
             container.RegisterType<IUserService, UserService>();
             container.RegisterType<IEnquiryDataProvider, EnquiryDataProvider>(new InjectionConstructor(connectionString));
             container.RegisterType<IEnquiryService, EnquiryService>();
-
             container.RegisterType<ICareHomeDataProvider, CareHomeDataProvider>(new InjectionConstructor(connectionString));
             container.RegisterType<ICareHomeService, CareHomeService>();
-            
+            container.RegisterType<IInvoiceDataProvider, InvoiceDataProvider>(new InjectionConstructor(connectionString));
+            container.RegisterType<IInvoiceService, InvoiceService>();
+            container.RegisterType<IResidentDataProvider, ResidentDataProvider>(new InjectionConstructor(connectionString));
+            container.RegisterType<IResidentService, ResidentService>();
+            container.RegisterType<IFeeCalculatorService, FeeCalculatorService>();
             
             DependencyResolver.SetResolver(new Unity.Mvc5.UnityDependencyResolver(container));
 
