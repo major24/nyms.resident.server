@@ -79,7 +79,8 @@ namespace nyms.resident.server.DataProviders.Impl
                             ,[created_date] as createddate
                         FROM [dbo].[residents]
                         WHERE [exit_date] >= @billingstart             
-                        and adminition_date <= @billingend";
+                        AND adminition_date <= @billingend
+                        AND active = 'Y'";
                 // rpt begin date
                 // rpt end date";
                 DynamicParameters dp = new DynamicParameters();

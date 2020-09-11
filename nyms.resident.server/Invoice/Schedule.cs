@@ -13,7 +13,7 @@ namespace nyms.resident.server.Invoice
         }
         public int ResidentId { get; set; }
         public int? LocalAuthorityId { get; set; }
-        public int PaymentTypeId { get; set; }
+        public string PaymentType { get; set; }
         public string PaymentFrom { get; set; }
         public string PaymentFromName { get; set; }
         public string Description { get; set; }
@@ -21,5 +21,6 @@ namespace nyms.resident.server.Invoice
         public DateTime ScheduleEndDate { get; set; }
         public decimal WeeklyFee { get; set; }
         public decimal AmountDue { get; set; }
+        public int NumberOfDays { get; set; }
     }
 }
