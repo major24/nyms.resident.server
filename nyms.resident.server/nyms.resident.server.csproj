@@ -226,6 +226,7 @@
     <Compile Include="Controllers\Invoice\InvoicesController.cs" />
     <Compile Include="Controllers\Resident\CareHomeController.cs" />
     <Compile Include="Controllers\Resident\EnquiryController.cs" />
+    <Compile Include="Controllers\Resident\ResidentsController.cs" />
     <Compile Include="Controllers\User\UsersController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="Core\Constants.cs" />
@@ -250,6 +251,7 @@
     <Compile Include="Invoice\Schedule.cs" />
     <Compile Include="Models\Authentication\AuthenticationRequest.cs" />
     <Compile Include="Models\Authentication\AuthenticationResponse.cs" />
+    <Compile Include="Models\Authentication\SecurityPrincipal.cs" />
     <Compile Include="Models\CareHome\CareCategory.cs" />
     <Compile Include="Models\CareHome\CareHome.cs" />
     <Compile Include="Models\CareHome\LocalAuthority.cs" />

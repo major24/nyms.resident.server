@@ -5,8 +5,9 @@ namespace nyms.resident.server.Models
 {
     public class User : IPerson
     {
+        public int Id { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
-        public IEnumerable<Role> Roles { get; }
+        public IEnumerable<CareHomeRole> CareHomeRoles { get; set; }
     }
 }

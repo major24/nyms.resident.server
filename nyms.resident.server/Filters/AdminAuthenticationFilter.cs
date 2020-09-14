@@ -1,4 +1,5 @@
 ﻿using NLog;
+using nyms.resident.server.Models.Authentication;
 using nyms.resident.server.Models.Core;
 using nyms.resident.server.Services.Interfaces;
 using System;
@@ -9,6 +10,7 @@ using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.Http.Filters;
 
 namespace nyms.resident.server.Filters
@@ -57,9 +59,9 @@ namespace nyms.resident.server.Filters
             {
                 logger.Info($"{Constants.REQUST_ACCESS_FOR} {identity.Result.Name}");
                 var refid = identity.Result.Name;
-                var user = _userService.GetCareHomeUser(new Guid(refid)).Result;
+                var user = _userService.GetByRefereneId(new Guid(refid)).Result;
 
-                var role = user.CareHomeRoles.Where(r => r.RoleName == "Admin").FirstOrDefault();
+                var role = user.CareHomeRoles.Where(r => r.Name == "Admin").FirstOrDefault();
                 if (role == null)
                 {
                     logger.Error($"{Constants.TOKEN_ACCESS_DENIED_NO_ROLE_FOR} {identity.Result.Name}");
@@ -69,7 +71,18 @@ namespace nyms.resident.server.Filters
                 IPrincipal identityUser = new ClaimsPrincipal(identity.Result);
                 logger.Info($"{Constants.REQUST_ACCESS_GRANTED_FOR} {identity.Result.Name}");
 
-                context.Principal = identityUser;
+                IPrincipal securityPrincipal = new SecurityPrincipal() {
+                    Id = user.Id, 
+                    ReferenceId = user.ReferenceId, 
+                    ForeName = user.ForeName, 
+                    SurName = user.SurName, 
+                    Roles = user.CareHomeRoles
+                };
+
+                // context.Principal = identityUser;
+                context.Principal = securityPrincipal;
+                HttpContext.Current.User = securityPrincipal;
+                System.Threading.Thread.CurrentPrincipal = securityPrincipal;
             }
 
         }

@@ -16,9 +16,14 @@ namespace nyms.resident.server.Services.Impl
             _residentDataProvider = residentDataProvider ?? throw new ArgumentException(nameof(residentDataProvider));
         }
 
-        public IEnumerable<Resident> GetAll()
+        public IEnumerable<Resident> GetResidentsByCareHomeId(int careHomeId)
         {
-            return this._residentDataProvider.GetAll();
+            return this._residentDataProvider.GetResidentsByCareHomeId(careHomeId);
+        }
+
+        public bool UpdateExitDate(Guid referenceId, DateTime exitDate)
+        {
+            return this._residentDataProvider.UpdateExitDate(referenceId, exitDate);
         }
     }
 }

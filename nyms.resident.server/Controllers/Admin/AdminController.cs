@@ -25,8 +25,11 @@ namespace nyms.resident.server.Controllers.Admin
         [Route("api/admin/test")]
         public IEnumerable<string> Get()
         {
-            var u = HttpContext.Current.User.Identity.Name;
-            return new string[] { "value1 admintest", "value2 admintest", u };
+            // var u = HttpContext.Current.User.Identity.Name;
+            var uu = HttpContext.Current.User;
+            var uuu = System.Threading.Thread.CurrentPrincipal;
+
+            return new string[] { "value1 admintest" + uu.ToString(), "value2 admintest", uuu.ToString() };
         }
 
         [HttpPut]

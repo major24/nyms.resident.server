@@ -31,11 +31,6 @@ namespace nyms.resident.server.Services.Impl
             return _userDataProvider.GetUserByUserNamePassword(userName, password);
         }
 
-        public Task<CareHomeUser> GetCareHomeUser(Guid referenceId)
-        {
-            return _userDataProvider.GetCareHomeUser(referenceId);
-        }
-
         public void SetPassword(Guid referenceId, string password)
         {
             _userDataProvider.SetPassword(referenceId, BCrypt.Net.BCrypt.HashPassword(password));

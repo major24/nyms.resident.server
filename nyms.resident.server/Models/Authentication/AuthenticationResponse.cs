@@ -8,7 +8,7 @@ namespace nyms.resident.server.Models
         public string ForeName { get; set; }
         public string SurName { get; set; }
         public string JwtToken { get; set; }
-        public IEnumerable<Role> Roles { get; set; }
+        public IEnumerable<CareHomeRole> Roles { get; set; }
         // public string RefreshToken { get; set; }
 
         public AuthenticationResponse(User user, string jwtToken) //, string refreshToken)
@@ -16,7 +16,7 @@ namespace nyms.resident.server.Models
             ReferenceId = user.ReferenceId.ToString();
             ForeName = user.ForeName;
             SurName = user.SurName;
-            Roles = user.Roles;
+            Roles = user.CareHomeRoles;
             JwtToken = jwtToken;
             // RefreshToken = refreshToken;
         }

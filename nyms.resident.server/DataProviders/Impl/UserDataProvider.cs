@@ -6,6 +6,8 @@ using Dapper;
 using System.Data.SqlClient;
 using System.Data;
 using nyms.resident.server.DataProviders.Interfaces;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace nyms.resident.server.DataProviders.Impl
 {
@@ -29,7 +31,7 @@ namespace nyms.resident.server.DataProviders.Impl
                                                     FROM [users]
                                                     WHERE id = @id";
                     DynamicParameters dp = new DynamicParameters();
-                    dp.Add("id", id, System.Data.DbType.Int32, System.Data.ParameterDirection.Input, 60);
+                    dp.Add("id", id, DbType.Int32, ParameterDirection.Input, 60);
 
                     conn.Open();
                     var result = conn.QueryFirstOrDefault<User>(sql, dp);
@@ -46,41 +48,15 @@ namespace nyms.resident.server.DataProviders.Impl
         {
             try
             {
+                User user = new User();
                 using (IDbConnection conn = new SqlConnection(_connectionString))
                 {
-                    // todo: remove pwd  // 
-                    string sql = @"SELECT id as id, reference_id as referenceid, fore_name as forename, sur_name as surname
-                                    FROM [users]
-                                    WHERE reference_id = @referenceid";
-
-                    DynamicParameters dp = new DynamicParameters();
-                    dp.Add("referenceid", referenceId, DbType.Guid, System.Data.ParameterDirection.Input, 60);
-
-                    conn.Open();
-                    var result = conn.QuerySingleAsync<User>(sql, dp);
-                    return Task.FromResult(result.Result);
-                }
-            }
-            catch(Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-
-        }
-
-        public Task<CareHomeUser> GetCareHomeUser(Guid referenceId)
-        {
-            try
-            {
-                CareHomeUser careHomeUser = new CareHomeUser();
-                using (IDbConnection conn = new SqlConnection(_connectionString))
-                {
-                    string sqlCareHomeUser = @"SELECT u.reference_id as referenceid, u.fore_name as forename, u.sur_name as surname 
+                    string sqlUser = @"SELECT u.reference_id as referenceid, u.fore_name as forename, u.sur_name as surname 
                                         FROM [users] u
                                         WHERE u.reference_id = @referenceid";
 
                     string sqlCareHomeRoles = @"SELECT
-                                            r.name as rolename, ch.name as carehomename, ch.reference_id as carehomereferenceid
+                                            r.name as name, ch.name as carehomename, ch.reference_id as carehomereferenceid
                                         FROM [users] u
                                         INNER JOIN [users_roles] ur
                                         ON u.id = ur.user_id
@@ -92,16 +68,16 @@ namespace nyms.resident.server.DataProviders.Impl
                                         AND r.active = 'Y'
                                         AND u.reference_id = @referenceid";
 
-                    var queries = $"{sqlCareHomeUser} {sqlCareHomeRoles}";
+                    var queries = $"{sqlUser} {sqlCareHomeRoles}";
 
                     conn.Open();
                     using (var multi = conn.QueryMultiple(queries, new { referenceid = referenceId }))
                     {
-                        careHomeUser = multi.Read<CareHomeUser>().FirstOrDefault();
+                        user = multi.Read<User>().FirstOrDefault();
                         var careHomeRoles = multi.Read<CareHomeRole>();
-                        careHomeUser.CareHomeRoles = careHomeRoles.ToArray();
+                        user.CareHomeRoles = careHomeRoles.ToArray();
                     }
-                    return Task.FromResult(careHomeUser);
+                    return Task.FromResult(user);
                 }
             }
             catch (Exception ex)
@@ -109,6 +85,7 @@ namespace nyms.resident.server.DataProviders.Impl
                 // Log error
                 throw new Exception("Error fetching user data: " + ex.Message);
             }
+
         }
 
         public Task<User> GetUserByUserNamePassword(string userName, string password)
@@ -151,6 +128,8 @@ namespace nyms.resident.server.DataProviders.Impl
                 var result = conn.Execute(sqlUpdate, dp, commandType: CommandType.Text);
             }
         }
+
+
     }
 }
 

@@ -10,7 +10,7 @@ using System.Web.Http.Cors;
 namespace nyms.resident.server.Controllers
 {
     [EnableCors(origins: "http://localhost:4200", headers: "*", methods: "*")]
-    // [UserAuthenticationFilter]
+    [UserAuthenticationFilter]
     public class EnquiryController : ApiController
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
@@ -27,8 +27,10 @@ namespace nyms.resident.server.Controllers
         [Route("api/carehomes/enquires")]
         public IHttpActionResult GetAllEnquires()
         {
-            var identityName = HttpContext.Current.User.Identity.Name;
-            logger.Info($"All enquires requested by {identityName}");
+            // var identityName = HttpContext.Current.User.Identity.Name;
+            var curUser = System.Threading.Thread.CurrentPrincipal;
+
+            logger.Info($"All enquires requested by {curUser}");
 
             var enquires = _enquiryService.GetAll();
 

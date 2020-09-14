@@ -1,4 +1,4 @@
-﻿using System;
+﻿/*using System;
 using System.Collections.Generic;
 
 namespace nyms.resident.server.Models
@@ -10,4 +10,4 @@ namespace nyms.resident.server.Models
         public string SurName { get; set; }
         public IEnumerable<CareHomeRole> CareHomeRoles { get; set; }
     }
-}
+}*/
