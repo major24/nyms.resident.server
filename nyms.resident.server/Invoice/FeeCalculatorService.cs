@@ -1,4 +1,5 @@
-﻿using System;
+﻿using nyms.resident.server.Models;
+using System;
 using System.Linq;
 
 namespace nyms.resident.server.Invoice
@@ -37,6 +38,7 @@ namespace nyms.resident.server.Invoice
                         
                     var fee = CalculateFee(schedule.WeeklyFee, numberOfDays);
                     schedule.AmountDue = fee;
+                    schedule.NumberOfDays = numberOfDays;
                 }
             }
 
@@ -75,8 +77,8 @@ namespace nyms.resident.server.Invoice
 
         private decimal CalculateFee(decimal agreedWeeklyFee, int numberOfDays)
         {
-            if (agreedWeeklyFee <= 0)
-                throw new ArgumentNullException(nameof(agreedWeeklyFee));
+            //if (agreedWeeklyFee <= 0)
+              //  throw new ArgumentNullException(nameof(agreedWeeklyFee));
             if (numberOfDays <= 0)
                 throw new ArgumentNullException(nameof(numberOfDays));
 

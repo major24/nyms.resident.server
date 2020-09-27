@@ -10,7 +10,7 @@ namespace nyms.resident.server.Services.Interfaces
         AuthenticationResponse Authenticate(AuthenticationRequest authenticationRequest);
         bool ValidateToken(string token);
         Task<ClaimsIdentity> GetClaimsIdentity(string token);
-        string GenerateJWTToken(string name, string referenceId, int expire_in_Minutes = 30);
+        // string GenerateJWTToken(string name, string referenceId, int expire_in_Minutes = 30);
         Task<User> GetUserByRefereneId(Guid referenceId);
     }
 }

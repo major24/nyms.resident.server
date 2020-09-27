@@ -4,6 +4,7 @@ using nyms.resident.server.Services.Core;
 using nyms.resident.server.Services.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -21,7 +22,7 @@ namespace nyms.resident.server.Services.Impl
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         }
 
-        public string GenerateJWTToken(string name, string referenceId, int expire_in_Minutes = 30)
+/*        public string GenerateJWTToken(string name, string referenceId, int expire_in_Minutes = 30)
         {
             logger.Info($"Generating token for {name}");
             try
@@ -34,11 +35,12 @@ namespace nyms.resident.server.Services.Impl
                 throw;
             }
             
-        }
+        }*/
 
         public AuthenticationResponse Authenticate(AuthenticationRequest authenticationRequest)
         {
             // get user with user name pwd
+            int expireIn = 480; // 60Min * 8 hours = 480
             logger.Info($"Authenticating , {authenticationRequest.UserName} for access.");
             var userExists = _userService.GetUserByUserNamePassword(authenticationRequest.UserName, authenticationRequest.Password).Result;  //_authenticationRepository.EnsureValidUser(model.UserName, model.Password);
             if (userExists == null)
@@ -67,9 +69,10 @@ namespace nyms.resident.server.Services.Impl
 
             // pwd is valid. get user
             var user = _userService.GetByRefereneId(userExists.ReferenceId).Result;
+            var roles = user.CareHomeRoles.Select(r => r.Name);
             user.Password = string.Empty;
 
-            return new AuthenticationResponse(user, _jwtService.GenerateJWTToken(user.ForeName, user.ReferenceId.ToString())); //, GenerateJwtRefreshToken(user));
+            return new AuthenticationResponse(user, _jwtService.GenerateJWTToken(user.ForeName, user.ReferenceId.ToString(), roles.ToArray(), expireIn)); //, GenerateJwtRefreshToken(user));
         }
 
         public bool ValidateToken(string token)

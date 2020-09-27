@@ -1,16 +1,19 @@
 ﻿using NLog;
 using nyms.resident.server.Filters;
+using nyms.resident.server.Models;
+using nyms.resident.server.Models.Authentication;
 using nyms.resident.server.Services.Interfaces;
 using System;
 using System.Linq;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.Cors;
+using WebGrease.Css.Extensions;
 
 namespace nyms.resident.server.Controllers
 {
     [EnableCors(origins: "http://localhost:4200", headers: "*", methods: "*")]
-    // [UserAuthenticationFilter]
+    [UserAuthenticationFilter]
     public class EnquiryController : ApiController
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
@@ -23,12 +26,12 @@ namespace nyms.resident.server.Controllers
             _enquiryService = enquiryService ?? throw new ArgumentNullException(nameof(enquiryService));
         }
 
-        // GET: api/Enquiry
-        [Route("api/carehomes/enquires")]
+        [HttpGet]
+        [Route("api/carehomes/{careHomeId}/enquires")]
         public IHttpActionResult GetAllEnquires()
         {
-            var identityName = HttpContext.Current.User.Identity.Name;
-            logger.Info($"All enquires requested by {identityName}");
+            var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
+            logger.Info($"All enquires requested by {loggedInUser.ForeName}");
 
             var enquires = _enquiryService.GetAll();
 
@@ -37,8 +40,7 @@ namespace nyms.resident.server.Controllers
                 logger.Warn($"No enquires found");
                 return NotFound();
             }
-                
-
+            
             return Ok(enquires.ToArray());
         }
 
@@ -52,8 +54,8 @@ namespace nyms.resident.server.Controllers
                 throw new ArgumentNullException(nameof(referenceId));
             }
 
-            var identityName = HttpContext.Current.User.Identity.Name;
-            logger.Info($"All enquires requested by {identityName}");
+            var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
+            logger.Info($"Enquiry requested by {loggedInUser.ForeName}");
 
             var enquiry = _enquiryService.GetByReferenceId(new Guid(referenceId)).Result;
 
@@ -67,8 +69,19 @@ namespace nyms.resident.server.Controllers
         }
 
         // POST: api/Enquiry
-        public void Post([FromBody]string value)
+        [HttpPost]
+        [Route("api/carehomes/{careHomeId}/enquires")]
+        public IHttpActionResult SaveEnquiry([FromUri] int careHomeId, [FromBody] Enquiry enquiry)
         {
+            if (enquiry == null) return BadRequest(nameof(enquiry));
+            if (careHomeId <= 0 && enquiry.CareCategoryId <= 0) return BadRequest("CareHomeId is required");
+
+            var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
+            logger.Info($"Enquiry created by {loggedInUser.ForeName}");
+            enquiry.UpdatedBy = loggedInUser.Id;
+
+            var newEnquiry = this._enquiryService.Create(enquiry).Result;
+            return Created("", newEnquiry); 
         }
 
         // PUT: api/Enquiry/5
@@ -76,9 +89,5 @@ namespace nyms.resident.server.Controllers
         {
         }
 
-        // DELETE: api/Enquiry/5
-        public void Delete(int id)
-        {
-        }
     }
 }

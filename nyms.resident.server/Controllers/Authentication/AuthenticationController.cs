@@ -17,7 +17,7 @@ namespace nyms.resident.server.Controllers
         public AuthenticationController(IUserService userService, IAuthenticationService authenticationService)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
-            _authenticationService = authenticationService; // add throw error null??
+            _authenticationService = authenticationService ?? throw new ArgumentNullException(nameof(authenticationService));
         }
 
         [HttpPost]

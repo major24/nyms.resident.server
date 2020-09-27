@@ -226,6 +226,8 @@
     <Compile Include="Controllers\Invoice\InvoicesController.cs" />
     <Compile Include="Controllers\Resident\CareHomeController.cs" />
     <Compile Include="Controllers\Resident\EnquiryController.cs" />
+    <Compile Include="Controllers\Resident\ResidentsController.cs" />
+    <Compile Include="Controllers\Resident\ScheduleController.cs" />
     <Compile Include="Controllers\User\UsersController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="Core\Constants.cs" />
@@ -233,13 +235,16 @@
     <Compile Include="DataProviders\Impl\EnquiryDataProvider.cs" />
     <Compile Include="DataProviders\Impl\InvoiceDataProvider.cs" />
     <Compile Include="DataProviders\Impl\ResidentDataProvider.cs" />
+    <Compile Include="DataProviders\Impl\ScheduleDataProvider.cs" />
     <Compile Include="DataProviders\Impl\UserDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\IEnquiryDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\ICareHomeDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\IInvoiceDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\IResidentDataProvider.cs" />
+    <Compile Include="DataProviders\Interfaces\IScheduleDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\IUserDataProvider.cs" />
     <Compile Include="Filters\AdminAuthenticationFilter.cs" />
+    <Compile Include="Filters\CustomExceptionHandler.cs" />
     <Compile Include="Filters\UserAuthenticationFilter.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -247,9 +252,12 @@
     <Compile Include="Invoice\FeeCalculatorService.cs" />
     <Compile Include="Invoice\IFeeCalculatorService.cs" />
     <Compile Include="Invoice\InvoiceResident.cs" />
-    <Compile Include="Invoice\Schedule.cs" />
+    <Compile Include="Models\Resident\ResidentSchedule.cs" />
+    <Compile Include="Models\Resident\ResidentScheduleEntity.cs" />
+    <Compile Include="Models\Resident\Schedule.cs" />
     <Compile Include="Models\Authentication\AuthenticationRequest.cs" />
     <Compile Include="Models\Authentication\AuthenticationResponse.cs" />
+    <Compile Include="Models\Authentication\SecurityPrincipal.cs" />
     <Compile Include="Models\CareHome\CareCategory.cs" />
     <Compile Include="Models\CareHome\CareHome.cs" />
     <Compile Include="Models\CareHome\LocalAuthority.cs" />
@@ -259,7 +267,9 @@
     <Compile Include="Models\Core\AuthenticationFailureResult.cs" />
     <Compile Include="Models\Core\AuthFailureResult.cs" />
     <Compile Include="Models\Core\IPerson.cs" />
-    <Compile Include="Models\Core\SocialWorker.cs" />
+    <Compile Include="Models\Resident\EnquiryEntity.cs" />
+    <Compile Include="Models\Resident\ScheduleEndDateEntity.cs" />
+    <Compile Include="Models\Resident\SocialWorker.cs" />
     <Compile Include="Models\Resident\Enquiry.cs" />
     <Compile Include="Models\Resident\Resident.cs" />
     <Compile Include="Models\Resident\ResidentBase.cs" />
@@ -276,12 +286,14 @@
     <Compile Include="Services\Impl\EnquiryService.cs" />
     <Compile Include="Services\Impl\InvoiceService.cs" />
     <Compile Include="Services\Impl\ResidentService.cs" />
+    <Compile Include="Services\Impl\ScheduleService.cs" />
     <Compile Include="Services\Impl\UserService.cs" />
     <Compile Include="Services\Interfaces\IAuthenticationService.cs" />
     <Compile Include="Services\Interfaces\ICareHomeService.cs" />
     <Compile Include="Services\Interfaces\IEnquiryService.cs" />
     <Compile Include="Services\Interfaces\IInvoiceService.cs" />
     <Compile Include="Services\Interfaces\IResidentService.cs" />
+    <Compile Include="Services\Interfaces\IScheduleService.cs" />
     <Compile Include="Services\Interfaces\IUserService.cs" />
   </ItemGroup>
   <ItemGroup>

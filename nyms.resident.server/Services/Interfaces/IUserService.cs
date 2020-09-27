@@ -9,7 +9,6 @@ namespace nyms.resident.server.Services.Interfaces
         Task<User> GetById(int id);
         Task<User> GetByRefereneId(Guid referenceId);
         Task<User> GetUserByUserNamePassword(string userName, string password);
-        Task<CareHomeUser> GetCareHomeUser(Guid referenceId);
         void SetPassword(Guid referenceId, string password);
     }
 }

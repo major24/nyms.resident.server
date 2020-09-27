@@ -1,15 +1,19 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.Ajax.Utilities;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using System;
 using System.Configuration;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
+using System.Web.Helpers;
 
 namespace nyms.resident.server.Services.Core
 {
     public class JwtService: IJwtService
     {
         public const string SecretKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ97eyJ1bmlxdWVfbmFtZSI6IjEiLCJuYmYiOjE1OTYzMzU3MzgsImV";
-        public string GenerateJWTToken(string name, string referenceId, int expire_in_Minutes = 30)
+        public string GenerateJWTToken(string name, string referenceId, string[] roles, int expire_in_Minutes = 30)
         {
             var symmetric_Key = Convert.FromBase64String(SecretKey);
             var token_Handler = new JwtSecurityTokenHandler();
@@ -20,7 +24,8 @@ namespace nyms.resident.server.Services.Core
                 Subject = new ClaimsIdentity(new[]
                         {
                             new Claim(ClaimTypes.Name, referenceId),
-                            new Claim("ForeName", name)
+                            new Claim("ForeName", name),
+                            new Claim("Roles", JsonConvert.SerializeObject(roles))
                         }),
 
                 Expires = now.AddMinutes(Convert.ToInt32(expire_in_Minutes)),
@@ -32,6 +37,12 @@ namespace nyms.resident.server.Services.Core
             var token = token_Handler.WriteToken(stoken);
 
             return token;
+        }
+
+        public string GenerateJWTToken(string name, string referenceId, int expire_in_Minutes = 30)
+        {
+            string[] roles = new string[] { };
+            return this.GenerateJWTToken(name, referenceId, roles, expire_in_Minutes);
         }
 
         public ClaimsPrincipal GetPrincipal(string token)

@@ -8,6 +8,7 @@ namespace nyms.resident.server.DataProviders.Interfaces
     public interface IEnquiryDataProvider
     {
         IEnumerable<Enquiry> GetAll();
-        Task<Enquiry> GetByReferenceId(Guid referenceId);
+        Task<EnquiryEntity> GetByReferenceId(Guid referenceId);
+        Task<Enquiry> Create(Enquiry enquiry);
     }
 }

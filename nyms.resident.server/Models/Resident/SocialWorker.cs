@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace nyms.resident.server.Models.Core
+namespace nyms.resident.server.Models
 {
     public class SocialWorker : IPerson
     {
