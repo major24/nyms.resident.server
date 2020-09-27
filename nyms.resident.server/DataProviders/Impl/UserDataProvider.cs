@@ -51,7 +51,7 @@ namespace nyms.resident.server.DataProviders.Impl
                 User user = new User();
                 using (IDbConnection conn = new SqlConnection(_connectionString))
                 {
-                    string sqlUser = @"SELECT u.reference_id as referenceid, u.fore_name as forename, u.sur_name as surname 
+                    string sqlUser = @"SELECT u.id as id, u.reference_id as referenceid, u.fore_name as forename, u.sur_name as surname 
                                         FROM [users] u
                                         WHERE u.reference_id = @referenceid";
 

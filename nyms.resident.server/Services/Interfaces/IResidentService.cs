@@ -10,6 +10,7 @@ namespace nyms.resident.server.Services.Interfaces
     public interface IResidentService
     {
         IEnumerable<Resident> GetResidentsByCareHomeId(int careHomeId);
+        Resident GetResident(Guid referenceId);
 
         bool UpdateExitDate(Guid referenceId, DateTime exitDate); 
     }

@@ -63,7 +63,7 @@ namespace nyms.resident.server.Services.Impl
 
             var result = invResidents.OrderBy(r => r.Name);
 
-            return result; // invResidents;
+            return result;
         }
     }
 }

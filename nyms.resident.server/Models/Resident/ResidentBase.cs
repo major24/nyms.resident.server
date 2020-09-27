@@ -8,6 +8,6 @@ namespace nyms.resident.server.Models
         public string MiddleName { get; set; }
         public DateTime? Dob { get; set; } = null;
         public string Gender { get; set; }
-        public string MartialStatus { get; set; }
+        public string MaritalStatus { get; set; }
     }
 }

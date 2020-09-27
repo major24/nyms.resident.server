@@ -1,4 +1,5 @@
-﻿using System;
+﻿using nyms.resident.server.Models;
+using System;
 using System.Linq;
 
 namespace nyms.resident.server.Invoice

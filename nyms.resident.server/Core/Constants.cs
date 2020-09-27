@@ -13,4 +13,11 @@
         public static readonly string REQUST_ACCESS_FOR = "Requesting Access for ";
         public static readonly string REQUST_ACCESS_GRANTED_FOR = "Access granted for ";
     }
+
+    public enum EnquiryStatus
+    {
+        active,
+        closed,
+        admit
+    }
 }

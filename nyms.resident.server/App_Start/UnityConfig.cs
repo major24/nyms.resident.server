@@ -32,6 +32,8 @@ namespace nyms.resident.server
             container.RegisterType<IResidentDataProvider, ResidentDataProvider>(new InjectionConstructor(connectionString));
             container.RegisterType<IResidentService, ResidentService>();
             container.RegisterType<IFeeCalculatorService, FeeCalculatorService>();
+            container.RegisterType<IScheduleDataProvider, ScheduleDataProvider>(new InjectionConstructor(connectionString));
+            container.RegisterType<IScheduleService, ScheduleService>();
             
             DependencyResolver.SetResolver(new Unity.Mvc5.UnityDependencyResolver(container));
 

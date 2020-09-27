@@ -51,7 +51,7 @@ namespace nyms.resident.server.Controllers
         //api/residents/${referenceId}/exit-date
         [HttpPut]
         [Route("api/residents/{referenceId}/exit-date")]
-        public IHttpActionResult UpdateExitDate(string referenceId, Resident resident)
+        public IHttpActionResult UpdateExitDate(string referenceId, Models.Resident resident)
         {
             var user = HttpContext.Current.User as SecurityPrincipal;
             var curUser = System.Threading.Thread.CurrentPrincipal;

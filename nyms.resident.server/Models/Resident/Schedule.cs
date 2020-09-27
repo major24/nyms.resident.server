@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace nyms.resident.server.Invoice
+namespace nyms.resident.server.Models
 {
     public class Schedule
     {
@@ -11,6 +11,7 @@ namespace nyms.resident.server.Invoice
         {
             LocalAuthorityId = null;
         }
+        public int Id { get; set; }
         public int ResidentId { get; set; }
         public int? LocalAuthorityId { get; set; }
         public string PaymentType { get; set; }

@@ -1,9 +1,5 @@
 ﻿using nyms.resident.server.Models.Core;
-using nyms.resident.server.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
 namespace nyms.resident.server.Models
 {
@@ -11,6 +7,7 @@ namespace nyms.resident.server.Models
     {
         public int Id { get; }
         public int CareHomeId { get; set; }
+        public int LocalAuthorityId { get; set; }
         public string PoNumber { get; set; }
         public string LaId { get; set; }
         public Address Address { get; set; }

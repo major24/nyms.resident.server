@@ -1,4 +1,5 @@
-﻿using System.Web.Http;
+﻿using nyms.resident.server.Filters;
+using System.Web.Http;
 
 namespace nyms.resident.server
 {
@@ -8,6 +9,7 @@ namespace nyms.resident.server
         {
             // Web API configuration and services
             config.EnableCors();
+            config.Filters.Add(new CustomExceptionHandler());
 
             // Web API routes
             config.MapHttpAttributeRoutes();

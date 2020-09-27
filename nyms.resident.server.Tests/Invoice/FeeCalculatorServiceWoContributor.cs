@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using nyms.resident.server.Invoice;
+using nyms.resident.server.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;

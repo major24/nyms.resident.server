@@ -1,6 +1,7 @@
 ﻿using NLog;
 using nyms.resident.server.Filters;
 using nyms.resident.server.Invoice;
+using nyms.resident.server.Models;
 using nyms.resident.server.Models.Authentication;
 using nyms.resident.server.Services.Interfaces;
 using System;

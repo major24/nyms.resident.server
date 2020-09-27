@@ -10,6 +10,7 @@ namespace nyms.resident.server.DataProviders.Interfaces
     public interface IResidentDataProvider
     {
         IEnumerable<Resident> GetResidentsByCareHomeId(int careHomeId);
+        Resident GetResident(Guid referenceId);
         IEnumerable<Resident> GetResidentsForInvoice(DateTime billingStart, DateTime billingEnd);
         bool UpdateExitDate(Guid referenceId, DateTime exitDate);
     }
