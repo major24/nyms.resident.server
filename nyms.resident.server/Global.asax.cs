@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
@@ -16,7 +17,9 @@ namespace nyms.resident.server
         protected void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();
-            UnityConfig.RegisterComponents(ConfigurationManager.AppSettings["connectionStringNyms24Dev"]);
+            // encrypted conn string
+            string connStr = DecryptString(ConfigurationManager.AppSettings["connectionStringNyms24Dev"]);
+            UnityConfig.RegisterComponents(connStr);
             GlobalConfiguration.Configure(WebApiConfig.Register);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
@@ -25,6 +28,22 @@ namespace nyms.resident.server
             HttpConfiguration config = GlobalConfiguration.Configuration;
             config.Formatters.JsonFormatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
             config.Formatters.JsonFormatter.UseDataContractJsonSerializer = false;
+        }
+
+        private string DecryptString(string encrString)
+        {
+            byte[] b;
+            string decrypted;
+            try
+            {
+                b = Convert.FromBase64String(encrString);
+                decrypted = ASCIIEncoding.ASCII.GetString(b);
+            }
+            catch (FormatException fe)
+            {
+                throw new Exception("Error in decrypting dbstring");
+            }
+            return decrypted;
         }
     }
 }

@@ -13,5 +13,6 @@ namespace nyms.resident.server.Services.Interfaces
         ResidentSchedule GetResidentSchedules(Guid referenceId);
         void UpdateScheduleEndDate(int id, DateTime scheduleEndDate);
         void CreateSchedule(Schedule schedule);
+        void InactivateSchedule(int id);
     }
 }

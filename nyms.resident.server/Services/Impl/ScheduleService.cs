@@ -98,5 +98,10 @@ namespace nyms.resident.server.Services.Impl
         {
             this._scheduleDataProvider.UpdateScheduleEndDate(id, scheduleEndDate);
         }
+
+        public void InactivateSchedule(int id)
+        {
+            this._scheduleDataProvider.InactivateSchedule(id);
+        }
     }
 }

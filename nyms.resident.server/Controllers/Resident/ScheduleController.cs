@@ -87,5 +87,17 @@ namespace nyms.resident.server.Controllers.Resident
             return Ok("Updated");
         }
 
+        [HttpPut]
+        [Route("api/residents/schedules/{id}/inactivate")]
+        public IHttpActionResult InactivteSchedule([FromUri]int id)
+        {
+            var user = System.Threading.Thread.CurrentPrincipal as SecurityPrincipal;
+            logger.Info($"Schedule updated by {user?.ForeName}");
+
+            this._scheduleService.InactivateSchedule(id);
+
+            return Ok("Updated");
+        }
+
     }
 }

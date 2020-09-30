@@ -57,7 +57,8 @@ namespace nyms.resident.server.DataProviders.Impl
                               ,[updated_date] as updateddate
                         FROM [dbo].[residents]
                         WHERE care_home_id = @carehomeid
-                        AND active = 'Y'";
+                        AND active = 'Y'
+                        ORDER BY fore_name";
 
                 DynamicParameters dp = new DynamicParameters();
                 dp.Add("carehomeid", carehomeId, DbType.Int32, ParameterDirection.Input);
