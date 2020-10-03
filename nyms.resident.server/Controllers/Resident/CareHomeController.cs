@@ -8,7 +8,6 @@ using System.Web.Http.Cors;
 
 namespace nyms.resident.server.Controllers
 {
-    [EnableCors(origins: "http://localhost:4200", headers: "*", methods: "*")]
     [UserAuthenticationFilter]
     public class CareHomeController : ApiController
     {

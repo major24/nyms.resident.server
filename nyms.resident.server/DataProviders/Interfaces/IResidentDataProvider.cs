@@ -13,5 +13,7 @@ namespace nyms.resident.server.DataProviders.Interfaces
         Resident GetResident(Guid referenceId);
         IEnumerable<Resident> GetResidentsForInvoice(DateTime billingStart, DateTime billingEnd);
         bool UpdateExitDate(Guid referenceId, DateTime exitDate);
+        Task<ResidentEntity> Create(ResidentEntity resident);
+        Task<ResidentEntity> Update(ResidentEntity resident);
     }
 }

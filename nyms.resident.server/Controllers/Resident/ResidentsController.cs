@@ -14,7 +14,6 @@ using System.Web.Http.Cors;
 
 namespace nyms.resident.server.Controllers
 {
-    [EnableCors(origins: "http://localhost:4200", headers: "*", methods: "*")]
     [UserAuthenticationFilter]
     public class ResidentsController : ApiController
     {
@@ -47,8 +46,6 @@ namespace nyms.resident.server.Controllers
             return Ok(residents.ToArray());
         }
 
-
-        //api/residents/${referenceId}/exit-date
         [HttpPut]
         [Route("api/residents/{referenceId}/exit-date")]
         public IHttpActionResult UpdateExitDate(string referenceId, Models.Resident resident)
@@ -68,12 +65,6 @@ namespace nyms.resident.server.Controllers
         }
 
 
-        // GET: api/Residents/5
-        public string Get(int id)
-        {
-            return "value";
-        }
-
         // POST: api/Residents
         public void Post([FromBody]string value)
         {
@@ -84,9 +75,5 @@ namespace nyms.resident.server.Controllers
         {
         }
 
-        // DELETE: api/Residents/5
-        public void Delete(int id)
-        {
-        }
     }
 }

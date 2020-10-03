@@ -13,7 +13,6 @@ using System.Web.Http.Cors;
 
 namespace nyms.resident.server.Controllers.Resident
 {
-    [EnableCors(origins: "http://localhost:4200", headers: "*", methods: "*")]
     [AdminAuthenticationFilter]
     public class ScheduleController : ApiController
     {

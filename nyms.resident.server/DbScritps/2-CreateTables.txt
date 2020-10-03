@@ -1,0 +1,311 @@
+
+/** --- NYMS24 - Care Home APP --- **/
+
+USE [nyms24]
+GO
+SET ANSI_NULLS ON
+GO
+SET ANSI_PADDING ON
+GO
+
+/** ----- CREATE TABLES ----- **/
+
+
+/** --- Care Homes --- */
+
+CREATE TABLE [dbo].[care_homes](
+	[id] [int] NOT NULL UNIQUE,
+  [reference_id] UNIQUEIDENTIFIER default NEWID(),
+  [name] [varchar](100) NOT NULL UNIQUE,
+	[active] [varchar] (1) NOT NULL DEFAULT 'Y',
+	CONSTRAINT [pk_care_homes] PRIMARY KEY CLUSTERED
+		([id])
+)
+GO
+
+/** --- CH Floor Locations and room details --- */
+
+CREATE TABLE [dbo].[room_locations](
+	[id] [int] NOT NULL UNIQUE,
+  [care_home_id] [int] NOT NULL,
+  [name] [varchar](60) NOT NULL UNIQUE,
+	[active] [varchar] (1) NOT NULL DEFAULT 'Y',
+	CONSTRAINT [pk_room_locations] PRIMARY KEY CLUSTERED
+		([id]),
+  CONSTRAINT [fk_rl_care_homes] FOREIGN KEY ([care_home_id])
+		REFERENCES [dbo].[care_homes] ([id]),
+)
+GO
+CREATE TABLE [dbo].[room_numbers](
+	[id] [int] NOT NULL UNIQUE,
+  [room_location_id] [int] NOT NULL,
+  [name] [varchar](50) NOT NULL UNIQUE,
+	[description] [varchar](100) NULL,
+	[status] [varchar] (20) NULL,
+	CONSTRAINT [pk_room_numbers] PRIMARY KEY CLUSTERED
+		([id]),
+  CONSTRAINT [fk_rn_room_numbers] FOREIGN KEY ([room_location_id])
+		REFERENCES [dbo].[room_locations] ([id]),
+)
+GO
+
+
+
+/** --- Local Authority --- **/
+
+CREATE TABLE [dbo].[local_authorities](
+	[id] [int] NOT NULL UNIQUE,
+  [reference_id] UNIQUEIDENTIFIER default NEWID(),
+  [name] [varchar](100) NOT NULL UNIQUE,
+	[active] [varchar] (1) NOT NULL DEFAULT 'Y',
+	CONSTRAINT [pk_local_auth] PRIMARY KEY CLUSTERED
+		([id])
+)
+GO
+
+/** --- each care home has ONE or MORE local authories to work with --- **/
+
+CREATE TABLE [dbo].[care_homes_local_authorities](
+  [care_home_id] [int] NOT NULL,
+  [local_authority_id] [int] NOT NULL,
+  CONSTRAINT [fk_chla_care_home_id] FOREIGN KEY ([care_home_id])
+		REFERENCES [dbo].[care_homes] ([id]),
+  CONSTRAINT [fk_chla_loauth_id] FOREIGN KEY ([local_authority_id])
+		REFERENCES [dbo].[local_authorities] ([id]),
+)
+GO
+
+
+/** --- Care Category - each home has one or more category to serve --- **/
+CREATE TABLE [dbo].[care_categories](
+	[id] [int] NOT NULL UNIQUE,
+  [care_category_code] [varchar](30) NOT NULL,
+  [name] [varchar](50) NOT NULL,
+	[active] [varchar] (1) NOT NULL DEFAULT 'Y',
+	CONSTRAINT [pk_care_categories] PRIMARY KEY CLUSTERED
+		([id])
+)
+GO
+
+CREATE TABLE [dbo].[care_homes_care_categories](
+  [care_home_id] [int] NOT NULL,
+  [care_category_id] [int] NOT NULL,
+  CONSTRAINT [fk_chcat_care_home_id] FOREIGN KEY ([care_home_id])
+		REFERENCES [dbo].[care_homes] ([id]),
+  CONSTRAINT [fk_chcat_care_cate_id] FOREIGN KEY ([care_category_id])
+		REFERENCES [dbo].[care_categories] ([id]),
+)
+GO
+
+
+/** --- Users --- **/
+
+CREATE TABLE [dbo].[users](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+  [reference_id] UNIQUEIDENTIFIER default NEWID(),
+  [user_name] [varchar](20) NOT NULL UNIQUE,
+	[fore_name] [varchar](50) NOT NULL,
+	[sur_name] [varchar](50) NOT NULL,
+  [email_address] [varchar] (100) NULL,
+  [phone_number] [varchar] (20) NULL,
+  [password] nvarchar(128) NOT NULL,
+  [last_password_change] [datetime] NULL,
+  [number_of_attempts] [int] NULL,
+	[active] [varchar] (1) NOT NULL DEFAULT 'Y',
+  [updated_date] [datetime] NULL,
+  [created_date] [datetime] NOT NULL DEFAULT GETDATE(),
+	CONSTRAINT [pk_users] PRIMARY KEY CLUSTERED
+		([id])
+)
+GO
+
+/** --- roles and permissions --- **/
+
+CREATE TABLE [dbo].[roles](
+  [id] [int] NOT NULL UNIQUE,
+  [name] [varchar](20) NOT NULL UNIQUE,
+  [active] [varchar] (1) NOT NULL DEFAULT 'Y',
+  CONSTRAINT [pk_roles] PRIMARY KEY CLUSTERED
+		([id]),
+)
+GO
+
+CREATE TABLE [dbo].[users_roles](
+  [user_id] [int] NOT NULL,
+  [role_id] [int] NOT NULL,
+  [care_home_id] [int] NULL,
+  CONSTRAINT [fk_ur_users] FOREIGN KEY ([user_id])
+		REFERENCES [dbo].[users] ([id]),
+  CONSTRAINT [fk_ur_roles] FOREIGN KEY ([role_id])
+		REFERENCES [dbo].[roles] ([id]),
+)
+GO
+
+
+
+/** --- Enquiry, Resident --- **/
+
+CREATE TABLE [dbo].[enquires](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+  [reference_id] UNIQUEIDENTIFIER default NEWID(),
+  [care_home_id] [int] NOT NULL,
+  [local_authority_id] [int] NULL,
+
+	[fore_name] [varchar](50) NOT NULL,
+	[sur_name] [varchar](50) NOT NULL,
+  [middle_name] [varchar](30) NULL,
+  [dob] [date] NULL,
+  [gender] [varchar] (20) NULL,
+  [marital_status] [varchar] (20) NULL,
+  [sw_fore_name] [varchar] (50) NULL,
+  [sw_sur_name] [varchar] (50) NULL,
+  [sw_email_address] [varchar] (100) NULL,
+  [sw_phone_number] [varchar] (20) NULL,
+
+  [care_category_id] [int] NULL,
+  [care_need] [varchar] (30) NULL,
+  [stay_type] [varchar] (30) NULL,
+  [move_in_date] [date] NULL,
+  [family_home_visit_date] [date] NULL,
+
+  [reserved_room_location] [int] NULL,
+  [reserved_room_number] [int] NULL,
+
+  [street] [varchar] (60) NULL,
+  [city] [varchar] (30) NULL,
+  [county] [varchar] (30) NULL,
+  [postcode] [varchar] (30) NULL,
+  [nok_fore_name] [varchar] (30) NULL,
+  [nok_sur_name] [varchar] (30) NULL,
+  [nok_email_address] [varchar] (60) NULL,
+  [nok_phone_number] [varchar] (30) NULL,
+
+  [response_date] [date] NULL,
+  [response] [varchar] (200) NULL,
+  [comments] [varchar] (200) NULL,
+  [active] [varchar] (1) NOT NULL DEFAULT 'Y',
+  [status] [varchar](30) NOT NULL,
+  [updated_by_id] [int] NOT NULL,
+  [updated_date] [datetime] NULL DEFAULT GETDATE(),
+  [created_date] [datetime] NOT NULL DEFAULT GETDATE(),
+	CONSTRAINT [pk_enquires] PRIMARY KEY CLUSTERED
+		([id]),
+  CONSTRAINT [fk_enq_users] FOREIGN KEY ([updated_by_id])
+		REFERENCES [dbo].[users] ([id]),
+)
+GO
+
+
+CREATE TABLE [dbo].[residents](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+  [reference_id] UNIQUEIDENTIFIER default NEWID(),
+  [care_home_id] [int] NOT NULL,
+  [local_authority_id] [int] NULL,
+  [nhs_number] [varchar](50) NULL,
+  [po_number] [varchar](50) NULL,
+  [la_id] [varchar](50) NULL,
+  [nyms_id] [varchar](50) NULL,
+
+	[fore_name] [varchar](30) NOT NULL,
+	[sur_name] [varchar](30) NOT NULL,
+  [middle_name] [varchar](30) NULL,
+  [dob] [date] NOT NULL DEFAULT CONVERT(smalldatetime, 0),
+  [gender] [varchar] (20) NULL,
+  [marital_status] [varchar] (20) NULL,
+
+  [sw_fore_name] [varchar] (50) NULL,
+  [sw_sur_name] [varchar] (50) NULL,
+  [sw_email_address] [varchar] (100) NULL,
+  [sw_phone_number] [varchar] (20) NULL,
+
+  [care_category_id] [int] NULL,
+  [care_need] [varchar] (30) NULL,
+  [stay_type] [varchar] (30) NULL,
+  [room_location] [int] NULL,
+  [room_number] [int] NULL,
+
+  [admission_date] [date] NULL,
+  [exit_date] [date] NULL DEFAULT '9999/12/31',
+  [exit_reason] [varchar] (50) NULL,
+  [comments] [varchar] (200) NULL,
+  [status] [varchar](30) NULL,
+  [payment_category] [varchar](30) NULL,
+  [active] [varchar] (1) NOT NULL DEFAULT 'Y',
+  [updated_by_id] [int] NOT NULL,
+  [updated_date] [datetime] NOT NULL DEFAULT GETDATE(),
+  [created_date] [datetime] NOT NULL DEFAULT GETDATE(),
+	CONSTRAINT [pk_residents] PRIMARY KEY CLUSTERED
+		([id]),
+  CONSTRAINT [fk_res_users] FOREIGN KEY ([updated_by_id])
+		REFERENCES [dbo].[users] ([id]),
+)
+GO
+
+ALTER TABLE [dbo].[residents]
+  ADD CONSTRAINT [uq_name] UNIQUE NONCLUSTERED
+  ( [fore_name], [sur_name], [dob] )
+GO
+
+
+
+/** Keep the casing and the format for Log **/
+
+CREATE TABLE [dbo].[Log] (
+	  [Id] [int] IDENTITY(1,1) NOT NULL,
+	  [MachineName] [nvarchar](50) NOT NULL,
+	  [Logged] [datetime] NOT NULL,
+	  [Level] [nvarchar](50) NOT NULL,
+	  [Message] [nvarchar](max) NOT NULL,
+	  [Logger] [nvarchar](250) NULL,
+	  [Callsite] [nvarchar](max) NULL,
+	  [Exception] [nvarchar](max) NULL,
+    CONSTRAINT [PK_dbo.Log] PRIMARY KEY CLUSTERED ([Id] ASC)
+      WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+  ) ON [PRIMARY]
+
+
+
+/** Invoice details **/
+
+CREATE TABLE [dbo].[billing_periods] (
+	  [id] [int] IDENTITY(1,1) NOT NULL,
+	  [local_authority_id] [int] NULL,
+    [period_start] [date] NOT NULL,
+    [period_end] [date] NOT NULL,
+    [active] [varchar] (1) NOT NULL DEFAULT 'Y',
+    [created_date] [datetime] NOT NULL DEFAULT GETDATE(),
+	CONSTRAINT [pk_billing_details] PRIMARY KEY CLUSTERED
+		([id]),
+)
+GO
+
+
+
+-- local auth id  ==  [from la table] | CC=100  | PV=101 (Private)
+-- payment_from   ==  LA | CC | PV
+-- payment_type   ==  WEEKLY | SUPPLEMENT | ADJUSTMENT
+-- desc:          ==  LA Weekly Fee | CC Weekly Fee | Private Weekly Fee | Covid Supplement | Weekly Adjustment
+-- To Get LA Total = add all payment from = LA
+
+CREATE TABLE [dbo].[schedules] (
+	  [id] [int] IDENTITY(1,1) NOT NULL,
+    [resident_id] [int] NOT NULL,
+	  [local_authority_id] [int] NULL,
+    [payment_from] [varchar] (10) NOT NULL,
+    [payment_type] [varchar] (20) NOT NULL,
+    [description] [varchar] (100) NULL,
+    [schedule_begin_date] [date] NOT NULL,
+    [schedule_end_date] [date] NOT NULL DEFAULT '9999/12/31',
+    [weekly_fee] [decimal] (10,2) NOT NULL DEFAULT 0.0,
+    [active] [varchar] (1) NOT NULL DEFAULT 'Y',
+    [updated_date] [datetime] NOT NULL DEFAULT GETDATE(),
+    [created_date] [datetime] NOT NULL DEFAULT GETDATE(),
+	CONSTRAINT [pk_schedules] PRIMARY KEY CLUSTERED
+		([id]),
+  CONSTRAINT [fk_sch_resident_id] FOREIGN KEY ([resident_id])
+	  REFERENCES [dbo].[residents] ([id]),
+)
+GO
+
+
+

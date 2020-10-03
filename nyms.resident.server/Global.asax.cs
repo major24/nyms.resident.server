@@ -18,7 +18,7 @@ namespace nyms.resident.server
         {
             AreaRegistration.RegisterAllAreas();
             // encrypted conn string
-            string connStr = DecryptString(ConfigurationManager.AppSettings["connectionStringNyms24Dev"]);
+            string connStr = DecryptString(ConfigurationManager.AppSettings["connectionString_nyms24"]);
             UnityConfig.RegisterComponents(connStr);
             GlobalConfiguration.Configure(WebApiConfig.Register);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);

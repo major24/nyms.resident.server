@@ -75,7 +75,8 @@ namespace nyms.resident.server.DataProviders.Impl
                     {
                         user = multi.Read<User>().FirstOrDefault();
                         var careHomeRoles = multi.Read<CareHomeRole>();
-                        user.CareHomeRoles = careHomeRoles.ToArray();
+                        if (user != null)
+                            user.CareHomeRoles = careHomeRoles.ToArray();
                     }
                     return Task.FromResult(user);
                 }
@@ -126,6 +127,26 @@ namespace nyms.resident.server.DataProviders.Impl
                 dp.Add("password", password, DbType.String, ParameterDirection.Input);
                 dp.Add("referenceid", referenceId, DbType.Guid, ParameterDirection.Input, 60);
                 var result = conn.Execute(sqlUpdate, dp, commandType: CommandType.Text);
+            }
+        }
+
+        public IEnumerable<User> GetUsers()
+        {
+            try
+            {
+                using (IDbConnection conn = new SqlConnection(_connectionString))
+                {
+                    string sql = @"SELECT reference_id as referenceid, fore_name as forename, sur_name as surname
+                                                                FROM [users]";
+
+                    conn.Open();
+                    var result = conn.QueryAsync<User>(sql).Result;
+                    return result;
+                }
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception(ex.Message);
             }
         }
 

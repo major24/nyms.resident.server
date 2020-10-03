@@ -11,10 +11,6 @@ namespace nyms.resident.server.Models
         public Address Address { get; set; }
         public int CareCategoryId { get; set; }
         public SocialWorker SocialWorker { get; set; }
-/*        public string SwForeName { get; set; }
-        public string SwSurName { get; set; }
-        public string SwEmailAddress { get; set; }
-        public string SwPhoneNumber { get; set; }*/
         public string CareNeed { get; set; }
         public string StayType { get; set; }
         public DateTime? MoveInDate { get; set; } = null;
@@ -27,5 +23,7 @@ namespace nyms.resident.server.Models
         public string Status { get; set; }
         public int UpdatedBy { get; set; }
         public DateTime? UpdatedDate { get; set; } = null;
+        public string LocalAuthorityName { get; set; }
+        public string CareCategoryName { get; set; }
     }
 }
