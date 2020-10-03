@@ -45,6 +45,7 @@ namespace nyms.resident.server.Services.Impl
         public Task<Resident> ConvertEnquiryToResident(Enquiry enquiry)
         {
             var residentEntity = ConvertToResident(enquiry);
+            // Add required values here and below conversions
             residentEntity.ReferenceId = Guid.NewGuid();
 
             var newEntity = _residentDataProvider.Create(residentEntity).Result;
@@ -68,7 +69,7 @@ namespace nyms.resident.server.Services.Impl
                 ForeName = enquiry.ForeName,
                 SurName = enquiry.SurName,
                 MiddleName = enquiry.MiddleName,
-                Dob = enquiry.Dob,
+                Dob = enquiry.Dob ?? Convert.ToDateTime("1800-01-01"),
                 Gender = enquiry.Gender,
                 MaritalStatus = enquiry.MaritalStatus,
                 SwForeName = enquiry.SocialWorker.ForeName,
@@ -80,7 +81,7 @@ namespace nyms.resident.server.Services.Impl
                 StayType = enquiry.StayType,
                 RoomLocation = enquiry.ReservedRoomLocation,
                 RoomNumber = enquiry.ReservedRoomNumber,
-                AdmissionDate = System.DateTime.UtcNow,  // todo: add contorl in UI
+                AdmissionDate = DateTime.UtcNow,  // todo: add contorl in UI
                 Comments = enquiry.Comments,
                 UpdatedById = enquiry.UpdatedBy,
                 ExitDate = Convert.ToDateTime("9999-12-31"),

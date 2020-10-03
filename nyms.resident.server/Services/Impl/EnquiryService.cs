@@ -80,20 +80,12 @@ namespace nyms.resident.server.Services.Impl
         {
             // TODO: Q: do we want to save first and let resident edit?
             // OR from UI, show both go to res edit and save??????? for now just update
-            var xx  = EnquiryStatus.admit.ToString();
-            if (enquiry.Status == "admit")
+            if (enquiry.Status == EnquiryStatus.admit.ToString())
             {
                 enquiry.UpdatedBy = enquiry.UpdatedBy;
                 _residentService.ConvertEnquiryToResident(enquiry);
-
-/*                var entity = ConvertEnquiryToResident(enquiry);
-                // Add new reqd fields
-                entity.ReferenceId = Guid.NewGuid();
-                entity.UpdatedById = enquiry.UpdatedBy;
-
-                _residentDataProvider.Create(entity);*/
                 
-                // todo update enquiry status to [admit] as well
+                // update enquiry status to [admit] as well
                 this._enquiryDataProvider.Update(enquiry);
 
                 return Task.FromResult(enquiry);
