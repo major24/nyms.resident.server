@@ -64,6 +64,13 @@ namespace nyms.resident.server.Filters
                 var refid = identity.Result.Name;
                 var user = _userService.GetByRefereneId(new Guid(refid)).Result; // .GetCareHomeUser(new Guid(refid)).Result;
 
+                if (user == null)
+                {
+                    logger.Error($"User not for {refid}");
+                    context.ErrorResult = new AuthenticationFailureResult($"User not found. Ensure to logout and login", request);
+                    return;
+                }
+
                 var role = user.CareHomeRoles.Where(r => r.Name == "Admin" || r.Name == "Manager").FirstOrDefault();
                 if (role == null)
                 {

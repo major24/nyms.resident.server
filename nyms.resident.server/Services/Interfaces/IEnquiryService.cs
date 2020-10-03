@@ -10,5 +10,6 @@ namespace nyms.resident.server.Services.Interfaces
         IEnumerable<Enquiry> GetAll();
         Task<Enquiry> GetByReferenceId(Guid referenceId);
         Task<Enquiry> Create(Enquiry enquiry);
+        Task<Enquiry> Update(Enquiry enquiry);
     }
 }

@@ -12,7 +12,6 @@ using WebGrease.Css.Extensions;
 
 namespace nyms.resident.server.Controllers
 {
-    [EnableCors(origins: "http://localhost:4200", headers: "*", methods: "*")]
     [UserAuthenticationFilter]
     public class EnquiryController : ApiController
     {
@@ -85,8 +84,19 @@ namespace nyms.resident.server.Controllers
         }
 
         // PUT: api/Enquiry/5
-        public void Put(int id, [FromBody]string value)
+        [HttpPut]
+        [Route("api/enquires/{referenceId}")]
+        public IHttpActionResult UpdateEnquiry(string referenceId, [FromBody] Enquiry enquiry)
         {
+            if (enquiry == null) return BadRequest(nameof(enquiry));
+            if (string.IsNullOrEmpty(referenceId)) return BadRequest(nameof(referenceId));
+
+            var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
+            logger.Info($"Enquiry updated by {loggedInUser.ForeName}");
+            enquiry.UpdatedBy = loggedInUser.Id;
+
+            var updEnquiry = this._enquiryService.Update(enquiry).Result;
+            return Created("", updEnquiry);
         }
 
     }

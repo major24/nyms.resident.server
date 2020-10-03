@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace nyms.resident.server.DataProviders.Impl
@@ -42,7 +43,7 @@ namespace nyms.resident.server.DataProviders.Impl
                               ,[sw_email_address] as sweamiladdress
                               ,[sw_phone_number] as swphonenumber
                               ,[care_category_id] carecategoryid
-                              ,[care_needs] as careneeds
+                              ,[care_need] as careneed
                               ,[stay_type] as staytype
                               ,[room_location] as roomlocation
                               ,[room_number] as roomnumber
@@ -53,7 +54,7 @@ namespace nyms.resident.server.DataProviders.Impl
                               ,[status] as status
                               ,[payment_category] as paymentcategory
                               ,[active] as active
-                              ,[updated_by] as updatedby
+                              ,[updated_by_id] as updatedbyid
                               ,[updated_date] as updateddate
                         FROM [dbo].[residents]
                         WHERE care_home_id = @carehomeid
@@ -92,7 +93,7 @@ namespace nyms.resident.server.DataProviders.Impl
                               ,[sw_email_address] as sweamiladdress
                               ,[sw_phone_number] as swphonenumber
                               ,[care_category_id] carecategoryid
-                              ,[care_needs] as careneeds
+                              ,[care_need] as careneed
                               ,[stay_type] as staytype
                               ,[room_location] as roomlocation
                               ,[room_number] as roomnumber
@@ -103,7 +104,7 @@ namespace nyms.resident.server.DataProviders.Impl
                               ,[status] as status
                               ,[payment_category] as paymentcategory
                               ,[active] as active
-                              ,[updated_by] as updatedby
+                              ,[updated_by_id] as updatedbyid
                               ,[updated_date] as updateddate
                         FROM [dbo].[residents]
                         WHERE reference_id = @referenceid";
@@ -115,6 +116,7 @@ namespace nyms.resident.server.DataProviders.Impl
                 return result;
             }
         }
+
         public IEnumerable<Resident> GetResidentsForInvoice(DateTime billingStart, DateTime billingEnd)
         {
             using (IDbConnection conn = new SqlConnection(_connectionString))
@@ -176,6 +178,105 @@ namespace nyms.resident.server.DataProviders.Impl
             }
         }
 
-       
+        public Task<ResidentEntity> Create(ResidentEntity resident)
+        {
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                string sql = @"INSERT INTO [dbo].[residents]
+                   ([reference_id]
+                   ,[care_home_id]
+                   ,[local_authority_id]
+                   ,[nhs_number]
+                   ,[po_number]
+                   ,[la_id]
+                   ,[nyms_id]
+                   ,[fore_name]
+                   ,[sur_name]
+                   ,[middle_name]
+                   ,[dob]
+                   ,[gender]
+                   ,[marital_status]
+                   ,[sw_fore_name]
+                   ,[sw_sur_name]
+                   ,[sw_email_address]
+                   ,[sw_phone_number]
+                   ,[care_category_id]
+                   ,[care_need]
+                   ,[stay_type]
+                   ,[room_location]
+                   ,[room_number]
+                   ,[admission_date]
+                   ,[exit_date]
+                   ,[comments]
+                   ,[status]
+                   ,[updated_by_id])
+                VALUES
+                   (@referenceid
+                   ,@carehomeid
+                   ,@localauthorityid
+                   ,@nhsnumber
+                   ,@ponumber
+                   ,@laid
+                   ,@nymsid
+                   ,@forename
+                   ,@surname
+                   ,@middlename
+                   ,@dob
+                   ,@gender
+                   ,@maritalstatus
+                   ,@swforename
+                   ,@swsurname
+                   ,@swemailaddress
+                   ,@swphonenumber
+                   ,@carecategoryid
+                   ,@careneed
+                   ,@staytype
+                   ,@roomlocation
+                   ,@roomnumber
+                   ,@admissiondate
+                   ,@exitdate
+                   ,@comments
+                   ,@status
+                   ,@updatedbyid)";
+
+                DynamicParameters dp = new DynamicParameters();
+                conn.Open();
+                dp.Add("referenceid", resident.ReferenceId, DbType.Guid, ParameterDirection.Input, 80);
+                dp.Add("carehomeid", resident.CareHomeId, DbType.Int32, ParameterDirection.Input);
+                dp.Add("localauthorityid", resident.LocalAuthorityId, DbType.Int32, ParameterDirection.Input);
+                dp.Add("nhsnumber", resident.NhsNumber, DbType.String, ParameterDirection.Input, 20);
+                dp.Add("ponumber", resident.PoNumber, DbType.String, ParameterDirection.Input, 20);
+                dp.Add("laid", resident.LaId, DbType.String, ParameterDirection.Input, 20);
+                dp.Add("nymsid", resident.NymsId, DbType.String, ParameterDirection.Input, 20);
+                dp.Add("forename", resident.ForeName, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("surname", resident.SurName, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("middlename", resident.MiddleName, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("dob", resident.Dob, DbType.Date, ParameterDirection.Input, 80);
+                dp.Add("gender", resident.Gender, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("maritalstatus", resident.MaritalStatus, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("swforename", resident.SwForeName, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("swsurname", resident.SwSurName, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("swemailaddress", resident.SwEmailAddress, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("swphonenumber", resident.SwPhoneNumber, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("carecategoryid", resident.CareCategoryId, DbType.Int32, ParameterDirection.Input);
+                dp.Add("careneed", resident.CareNeed, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("staytype", resident.StayType, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("roomlocation", resident.RoomLocation, DbType.Int32, ParameterDirection.Input, 80);
+                dp.Add("roomnumber", resident.RoomNumber, DbType.Int32, ParameterDirection.Input, 80);
+                dp.Add("admissiondate", resident.AdmissionDate, DbType.Date, ParameterDirection.Input, 80);
+                dp.Add("exitdate", resident.ExitDate, DbType.Date, ParameterDirection.Input, 80);
+                dp.Add("comments", resident.Comments, DbType.String, ParameterDirection.Input, 500);
+                dp.Add("status", resident.Status, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("updatedbyid", resident.UpdatedById, DbType.Int32, ParameterDirection.Input);
+
+                var result = conn.Execute(sql, dp, commandType: CommandType.Text);
+            }
+            return Task.FromResult(resident);
+        }
+
+        public Task<ResidentEntity> Update(ResidentEntity resident)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

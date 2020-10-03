@@ -3,6 +3,7 @@ using nyms.resident.server.Filters;
 using nyms.resident.server.Models;
 using nyms.resident.server.Services.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace nyms.resident.server.Services.Impl
@@ -34,6 +35,18 @@ namespace nyms.resident.server.Services.Impl
         public void SetPassword(Guid referenceId, string password)
         {
             _userDataProvider.SetPassword(referenceId, BCrypt.Net.BCrypt.HashPassword(password));
+        }
+
+        public IEnumerable<User> GetUsers()
+        {
+            try
+            {
+                return this._userDataProvider.GetUsers();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
     }
 }

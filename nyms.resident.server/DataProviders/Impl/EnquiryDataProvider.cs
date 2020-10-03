@@ -19,17 +19,19 @@ namespace nyms.resident.server.DataProviders.Impl
             _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
 
         }
+
         public IEnumerable<Enquiry> GetAll()
         {
             // For list page, no need all the fields, 
             // when req for specific enq, should bring all fields
             try
             {
+                string status = EnquiryStatus.active.ToString();
                 IEnumerable<Enquiry> enquiries = new List<Enquiry>();
                 using (IDbConnection conn = new SqlConnection(_connectionString))
                 {
                     string sql = @"SELECT
-                       [reference_id] as referenceid
+                       e.reference_id as referenceid
                       ,[care_home_id] as carehomeid
                       ,[local_authority_id] as localauthorityid
                       ,[fore_name] as forename
@@ -49,12 +51,20 @@ namespace nyms.resident.server.DataProviders.Impl
                       ,[reserved_room_location] as reservedroomlocation
                       ,[reserved_room_number] as reservedroomnumber
                       ,[status] as status
-                        FROM [dbo].[enquires]
-                        WHERE status = 'admit'";
+                      ,[updated_date] as updateddate
+					  ,cc.name as carecategoryname
+					  ,la.name as localauthorityname
+                        FROM [dbo].[enquires] e
+						INNER JOIN [dbo].[local_authorities] la
+						ON e.local_authority_id = la.id
+						LEFT JOIN [dbo].[care_categories] cc
+						ON e.care_category_id = cc.id
+                        WHERE status = @status";
 
+                    DynamicParameters dp = new DynamicParameters();
+                    dp.Add("status", status, DbType.String, ParameterDirection.Input, 60);
                     conn.Open();
-                    var result = conn.QueryAsync<Enquiry>(sql).Result;
-                    // todo: create sworker obj and add to enq object...
+                    var result = conn.QueryAsync<Enquiry>(sql, dp).Result;
                     return result;
                 }
             }
@@ -92,10 +102,19 @@ namespace nyms.resident.server.DataProviders.Impl
                       ,[family_home_visit_date] as familyhomevisitdate
                       ,[reserved_room_location] as reservedroomlocation
                       ,[reserved_room_number] as reservedroomnumber
+                      ,[street] as street
+                      ,[city] as city
+                      ,[county] as county
+                      ,[postcode] as postcode
+                      ,[nok_fore_name] as nok_fore_name
+                      ,[nok_sur_name] as nok_sur_name
+                      ,[nok_email_address] as nok_email_address
+                      ,[nok_phone_number] as nok_phone_number
                       ,[response_date] as responsedate
                       ,[response] as response
                       ,[comments] as comments
                       ,[status] as status
+                      ,[updated_date] as updateddate
                         FROM [dbo].[enquires]
                         WHERE reference_id = @referenceid";
 
@@ -139,6 +158,14 @@ namespace nyms.resident.server.DataProviders.Impl
                    ,[family_home_visit_date]
                    ,[reserved_room_location]
                    ,[reserved_room_number]
+                   ,[street]
+                   ,[city]
+                   ,[county]
+                   ,[postcode]
+                   ,[nok_fore_name]
+                   ,[nok_sur_name]
+                   ,[nok_email_address]
+                   ,[nok_phone_number]
                    ,[response_date]
                    ,[response]
                    ,[comments]
@@ -165,6 +192,14 @@ namespace nyms.resident.server.DataProviders.Impl
                    ,@familyhomevisitdate
                    ,@reservedroomlocation
                    ,@reservedroomnumber
+                   ,@street
+                   ,@city
+                   ,@county
+                   ,@postcode
+                   ,@nokforename
+                   ,@noksurname
+                   ,@nokemailaddress
+                   ,@nokphonenumber
                    ,@responsedate
                    ,@response
                    ,@comments
@@ -193,6 +228,14 @@ namespace nyms.resident.server.DataProviders.Impl
                 dp.Add("familyhomevisitdate", enquiry.FamilyHomeVisitDate, DbType.Date, ParameterDirection.Input, 80);
                 dp.Add("reservedroomlocation", enquiry.ReservedRoomLocation, DbType.Int32, ParameterDirection.Input, 80);
                 dp.Add("reservedroomnumber", enquiry.ReservedRoomNumber, DbType.Int32, ParameterDirection.Input, 80);
+                dp.Add("street", enquiry.Address.Street1, DbType.String, ParameterDirection.Input, 100);
+                dp.Add("city", enquiry.Address.City, DbType.String, ParameterDirection.Input, 60);
+                dp.Add("county", enquiry.Address.County, DbType.String, ParameterDirection.Input, 30);
+                dp.Add("postcode", enquiry.Address.PostCode, DbType.String, ParameterDirection.Input, 20);
+                dp.Add("nokforename", "", DbType.String, ParameterDirection.Input, 60);
+                dp.Add("noksurname", "", DbType.String, ParameterDirection.Input, 60);
+                dp.Add("nokemailaddress", "", DbType.String, ParameterDirection.Input, 60);
+                dp.Add("nokphonenumber", "", DbType.String, ParameterDirection.Input, 20);
                 dp.Add("responsedate", enquiry.ResponseDate, DbType.Date, ParameterDirection.Input, 80);
                 dp.Add("response", enquiry.Response, DbType.String, ParameterDirection.Input, 100);
                 dp.Add("comments", enquiry.Comments, DbType.String, ParameterDirection.Input, 500);
@@ -204,45 +247,87 @@ namespace nyms.resident.server.DataProviders.Impl
             return Task.FromResult(enquiry);
         }
 
+        public Task<Enquiry> Update(Enquiry enquiry)
+        {
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                string sql = @"UPDATE [dbo].[enquires]
+                SET [care_home_id] = @carehomeid
+                   ,[local_authority_id] = @localauthorityid
+                   ,[fore_name] = @forename
+                   ,[sur_name] = @surname
+                   ,[middle_name] = @middlename
+                   ,[dob] = @dob
+                   ,[gender] = @gender
+                   ,[marital_status] = @maritalstatus
+                   ,[sw_fore_name] = @swforename
+                   ,[sw_sur_name] = @swsurname
+                   ,[sw_email_address] = @swemailaddress
+                   ,[sw_phone_number] = @swphonenumber
+                   ,[care_category_id] = @carecategoryid
+                   ,[care_need] = @careneed
+                   ,[stay_type] = @staytype
+                   ,[move_in_date] = @moveindate
+                   ,[family_home_visit_date] = @familyhomevisitdate
+                   ,[reserved_room_location] = @reservedroomlocation
+                   ,[reserved_room_number] = @reservedroomnumber
+                   ,[street] = @street
+                   ,[city] = @city
+                   ,[county] = @county
+                   ,[postcode] = @postcode
+                   ,[nok_fore_name] = @nokforename
+                   ,[nok_sur_name] = @noksurname
+                   ,[nok_email_address] = @nokemailaddress
+                   ,[nok_phone_number] = @nokphonenumber
+                   ,[response_date] = @responsedate
+                   ,[response] = @response
+                   ,[comments] = @comments
+                   ,[status] = @status
+                   ,[updated_by_id] = @updatedbyid
+                   ,[updated_date] = GETDATE()
+                WHERE [reference_id] = @referenceid";
 
+                DynamicParameters dp = new DynamicParameters();
+                conn.Open();
+                dp.Add("referenceid", enquiry.ReferenceId, DbType.Guid, ParameterDirection.Input, 80);
+                dp.Add("carehomeid", enquiry.CareHomeId, DbType.Int32, ParameterDirection.Input);
+                dp.Add("localauthorityid", enquiry.LocalAuthorityId, DbType.Int32, ParameterDirection.Input);
+                dp.Add("forename", enquiry.ForeName, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("surname", enquiry.SurName, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("middlename", enquiry.MiddleName, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("dob", enquiry.Dob, DbType.Date, ParameterDirection.Input, 80);
+                dp.Add("gender", enquiry.Gender, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("maritalstatus", enquiry.MaritalStatus, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("swforename", enquiry.SocialWorker.ForeName, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("swsurname", enquiry.SocialWorker.SurName, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("swemailaddress", enquiry.SocialWorker.Email, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("swphonenumber", enquiry.SocialWorker.PhoneNumber, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("carecategoryid", enquiry.CareCategoryId, DbType.Int32, ParameterDirection.Input);
+                dp.Add("careneed", enquiry.CareNeed, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("staytype", enquiry.StayType, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("moveindate", enquiry.MoveInDate, DbType.Date, ParameterDirection.Input, 80);
+                dp.Add("familyhomevisitdate", enquiry.FamilyHomeVisitDate, DbType.Date, ParameterDirection.Input, 80);
+                dp.Add("reservedroomlocation", enquiry.ReservedRoomLocation, DbType.Int32, ParameterDirection.Input, 80);
+                dp.Add("reservedroomnumber", enquiry.ReservedRoomNumber, DbType.Int32, ParameterDirection.Input, 80);
+                dp.Add("street", enquiry.Address.Street1, DbType.String, ParameterDirection.Input, 100);
+                dp.Add("city", enquiry.Address.City, DbType.String, ParameterDirection.Input, 60);
+                dp.Add("county", enquiry.Address.County, DbType.String, ParameterDirection.Input, 30);
+                dp.Add("postcode", enquiry.Address.PostCode, DbType.String, ParameterDirection.Input, 20);
+                dp.Add("nokforename", "", DbType.String, ParameterDirection.Input, 60);
+                dp.Add("noksurname", "", DbType.String, ParameterDirection.Input, 60);
+                dp.Add("nokemailaddress", "", DbType.String, ParameterDirection.Input, 60);
+                dp.Add("nokphonenumber", "", DbType.String, ParameterDirection.Input, 20);
+                dp.Add("responsedate", enquiry.ResponseDate, DbType.Date, ParameterDirection.Input, 80);
+                dp.Add("response", enquiry.Response, DbType.String, ParameterDirection.Input, 100);
+                dp.Add("comments", enquiry.Comments, DbType.String, ParameterDirection.Input, 500);
+                dp.Add("status", enquiry.Status, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("updatedbyid", enquiry.UpdatedBy, DbType.Int32, ParameterDirection.Input);
+
+                var result = conn.Execute(sql, dp, commandType: CommandType.Text);
+            }
+            return Task.FromResult(enquiry);
+        }
     }
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-/*
- SELECT
-                      [reference_id] as referenceid
-                      ,[care_home_id] as carehomeid
-                      ,[local_authority_id] as localauthorityid
-                      ,[fore_name] as forename
-                      ,[sur_name] as surname
-                      ,[middle_name] as middlename
-                      ,[dob] as dob
-                      ,[gender] as gender
-                      ,[marital_status] as maritalstatus
-                      ,[sw_fore_name] as swforname
-                      ,[sw_sur_name] as swsurname
-                      ,[sw_email_address] as swemailaddress
-                      ,[sw_phone_number] as swphonenumber
-                      ,[care_category_id] as carecategoryid
-                      ,[care_needs] as careneeds
-                      ,[stay_type] as staytype
-                      ,[move_in_date] as moveindate
-                      ,[family_home_visit_date] as familyhomevisitdate
-                      ,[reserved_room_location] as reservedroomlocation
-                      ,[reserved_room_number] as reservedroomnumber
-                      ,[status] as status
-                        FROM [dbo].[enquires]
-                        WHERE status = 'admit'*/

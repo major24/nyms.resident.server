@@ -11,9 +11,13 @@ namespace nyms.resident.server.Services.Impl
     public class EnquiryService : IEnquiryService
     {
         private readonly IEnquiryDataProvider _enquiryDataProvider;
-        public EnquiryService(IEnquiryDataProvider enquiryDataProvider)
+        private readonly IResidentService _residentService;
+        // private readonly IResidentDataProvider _residentDataProvider;
+
+        public EnquiryService(IEnquiryDataProvider enquiryDataProvider, IResidentService residentService)
         {
             _enquiryDataProvider = enquiryDataProvider ?? throw new ArgumentNullException(nameof(enquiryDataProvider));
+            _residentService = residentService ?? throw new ArgumentNullException(nameof(residentService));
         }
 
         public IEnumerable<Enquiry> GetAll()
@@ -30,6 +34,7 @@ namespace nyms.resident.server.Services.Impl
             if (entity != null)
             {
                 SocialWorker sw = new SocialWorker() { ForeName = entity.SwForeName, SurName = entity.SwSurName, Email = entity.SwEmailAddress, PhoneNumber = entity.SwPhoneNumber };
+                Address address = new Address() { Street1 = entity.Street, City = entity.City, County = entity.County, PostCode = entity.Postcode };
                 enquiry = new Enquiry()
                 {
                     ReferenceId = entity.ReferenceId,
@@ -55,7 +60,7 @@ namespace nyms.resident.server.Services.Impl
                     Status = entity.Status,
                     UpdatedBy = entity.UpdatedBy,
                     UpdatedDate = entity.UpdatedDate,
-                    Address = null, // todo
+                    Address = address
                 };
             }
 
@@ -66,9 +71,38 @@ namespace nyms.resident.server.Services.Impl
         {
             // assign guid and necessary values
             enquiry.ReferenceId = Guid.NewGuid();
-            enquiry.Status = EnquiryStatus.admit.ToString();
+            enquiry.Status = EnquiryStatus.active.ToString();
 
             return this._enquiryDataProvider.Create(enquiry);
         }
+
+        public Task<Enquiry> Update(Enquiry enquiry)
+        {
+            // TODO: Q: do we want to save first and let resident edit?
+            // OR from UI, show both go to res edit and save??????? for now just update
+            var xx  = EnquiryStatus.admit.ToString();
+            if (enquiry.Status == "admit")
+            {
+                enquiry.UpdatedBy = enquiry.UpdatedBy;
+                _residentService.ConvertEnquiryToResident(enquiry);
+
+/*                var entity = ConvertEnquiryToResident(enquiry);
+                // Add new reqd fields
+                entity.ReferenceId = Guid.NewGuid();
+                entity.UpdatedById = enquiry.UpdatedBy;
+
+                _residentDataProvider.Create(entity);*/
+                
+                // todo update enquiry status to [admit] as well
+                this._enquiryDataProvider.Update(enquiry);
+
+                return Task.FromResult(enquiry);
+            }
+            else
+            {
+                return this._enquiryDataProvider.Update(enquiry);
+            }
+        }
+
     }
 }
