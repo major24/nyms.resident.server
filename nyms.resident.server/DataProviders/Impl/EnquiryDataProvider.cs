@@ -34,14 +34,14 @@ namespace nyms.resident.server.DataProviders.Impl
                        e.reference_id as referenceid
                       ,[care_home_id] as carehomeid
                       ,[local_authority_id] as localauthorityid
-                      ,[fore_name] as forename
-                      ,[sur_name] as surname
+                      ,[forename] as forename
+                      ,[surname] as surname
                       ,[middle_name] as middlename
                       ,[dob] as dob
                       ,[gender] as gender
                       ,[marital_status] as maritalstatus
-                      ,[sw_fore_name] as swforname
-                      ,[sw_sur_name] as swsurname
+                      ,[sw_forename] as swforname
+                      ,[sw_surname] as swsurname
                       ,[sw_email_address] as swemailaddress
                       ,[sw_phone_number] as swphonenumber
                       ,[care_category_id] as carecategoryid
@@ -85,14 +85,14 @@ namespace nyms.resident.server.DataProviders.Impl
                        [reference_id] as referenceid
                       ,[care_home_id] as carehomeid
                       ,[local_authority_id] as localauthorityid
-                      ,[fore_name] as forename
-                      ,[sur_name] as surname
+                      ,[forename] as forename
+                      ,[surname] as surname
                       ,[middle_name] as middlename
                       ,[dob] as dob
                       ,[gender] as gender
                       ,[marital_status] as maritalstatus
-                      ,[sw_fore_name] as swforename
-                      ,[sw_sur_name] as swsurname
+                      ,[sw_forename] as swforename
+                      ,[sw_surname] as swsurname
                       ,[sw_email_address] as swemailaddress
                       ,[sw_phone_number] as swphonenumber
                       ,[care_category_id] as carecategoryid
@@ -106,8 +106,8 @@ namespace nyms.resident.server.DataProviders.Impl
                       ,[city] as city
                       ,[county] as county
                       ,[postcode] as postcode
-                      ,[nok_fore_name] as nok_fore_name
-                      ,[nok_sur_name] as nok_sur_name
+                      ,[nok_forename] as nok_forename
+                      ,[nok_surname] as nok_surname
                       ,[nok_email_address] as nok_email_address
                       ,[nok_phone_number] as nok_phone_number
                       ,[response_date] as responsedate
@@ -141,14 +141,14 @@ namespace nyms.resident.server.DataProviders.Impl
                    ([reference_id]
                    ,[care_home_id]
                    ,[local_authority_id]
-                   ,[fore_name]
-                   ,[sur_name]
+                   ,[forename]
+                   ,[surname]
                    ,[middle_name]
                    ,[dob]
                    ,[gender]
                    ,[marital_status]
-                   ,[sw_fore_name]
-                   ,[sw_sur_name]
+                   ,[sw_forename]
+                   ,[sw_surname]
                    ,[sw_email_address]
                    ,[sw_phone_number]
                    ,[care_category_id]
@@ -162,8 +162,8 @@ namespace nyms.resident.server.DataProviders.Impl
                    ,[city]
                    ,[county]
                    ,[postcode]
-                   ,[nok_fore_name]
-                   ,[nok_sur_name]
+                   ,[nok_forename]
+                   ,[nok_surname]
                    ,[nok_email_address]
                    ,[nok_phone_number]
                    ,[response_date]
@@ -254,14 +254,14 @@ namespace nyms.resident.server.DataProviders.Impl
                 string sql = @"UPDATE [dbo].[enquires]
                 SET [care_home_id] = @carehomeid
                    ,[local_authority_id] = @localauthorityid
-                   ,[fore_name] = @forename
-                   ,[sur_name] = @surname
+                   ,[forename] = @forename
+                   ,[surname] = @surname
                    ,[middle_name] = @middlename
                    ,[dob] = @dob
                    ,[gender] = @gender
                    ,[marital_status] = @maritalstatus
-                   ,[sw_fore_name] = @swforename
-                   ,[sw_sur_name] = @swsurname
+                   ,[sw_forename] = @swforename
+                   ,[sw_surname] = @swsurname
                    ,[sw_email_address] = @swemailaddress
                    ,[sw_phone_number] = @swphonenumber
                    ,[care_category_id] = @carecategoryid
@@ -275,8 +275,8 @@ namespace nyms.resident.server.DataProviders.Impl
                    ,[city] = @city
                    ,[county] = @county
                    ,[postcode] = @postcode
-                   ,[nok_fore_name] = @nokforename
-                   ,[nok_sur_name] = @noksurname
+                   ,[nok_forename] = @nokforename
+                   ,[nok_surname] = @noksurname
                    ,[nok_email_address] = @nokemailaddress
                    ,[nok_phone_number] = @nokphonenumber
                    ,[response_date] = @responsedate

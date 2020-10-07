@@ -28,8 +28,8 @@ namespace nyms.resident.server.DataProviders.Impl
                 string sql = @"SELECT
                                 r.id as residentid
                                 , r.reference_id referenceid
-                                , r.fore_name as forename
-                                , r.sur_name as surname
+                                , r.forename as forename
+                                , r.surname as surname
                                 , s.id as scheduleid
                                 , s.payment_from as paymentfrom
                                 , s.payment_type as paymenttype
@@ -46,7 +46,7 @@ namespace nyms.resident.server.DataProviders.Impl
                             LEFT JOIN [dbo].schedules s
                             ON s.resident_id = r.id
                             WHERE r.active = 'Y'
-                            ORDER BY r.fore_name";
+                            ORDER BY r.forename";
 
                 conn.Open();
                 var result = conn.QueryAsync<ResidentScheduleEntity>(sql).Result;
@@ -61,8 +61,8 @@ namespace nyms.resident.server.DataProviders.Impl
                 string sql = @"SELECT
                                 r.id as residentid
                                 , r.reference_id referenceid
-                                , r.fore_name as forename
-                                , r.sur_name as surname
+                                , r.forename as forename
+                                , r.surname as surname
                                 , s.id as scheduleid
                                 , s.payment_from as paymentfrom
                                 , s.payment_type as paymenttype

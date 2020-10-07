@@ -32,16 +32,12 @@ namespace nyms.resident.server.DataProviders.Impl
                               ,[po_number] as ponumber
                               ,[la_id] as laid
                               ,[nyms_id] as nymsid
-                              ,[fore_name] as forename
-                              ,[sur_name] as surname
+                              ,[forename] as forename
+                              ,[surname] as surname
                               ,[middle_name] as middlename
                               ,[dob] as dob
                               ,[gender] as gender
                               ,[marital_status] as maritalstatus
-                              ,[sw_fore_name] as swforename
-                              ,[sw_sur_name] as swsurname
-                              ,[sw_email_address] as sweamiladdress
-                              ,[sw_phone_number] as swphonenumber
                               ,[care_category_id] carecategoryid
                               ,[care_need] as careneed
                               ,[stay_type] as staytype
@@ -52,14 +48,13 @@ namespace nyms.resident.server.DataProviders.Impl
                               ,[exit_reason] as exitreason
                               ,[comments] as comments
                               ,[status] as status
-                              ,[payment_category] as paymentcategory
                               ,[active] as active
                               ,[updated_by_id] as updatedbyid
                               ,[updated_date] as updateddate
                         FROM [dbo].[residents]
                         WHERE care_home_id = @carehomeid
                         AND active = 'Y'
-                        ORDER BY fore_name";
+                        ORDER BY forename";
 
                 DynamicParameters dp = new DynamicParameters();
                 dp.Add("carehomeid", carehomeId, DbType.Int32, ParameterDirection.Input);
@@ -82,16 +77,12 @@ namespace nyms.resident.server.DataProviders.Impl
                               ,[po_number] as ponumber
                               ,[la_id] as laid
                               ,[nyms_id] as nymsid
-                              ,[fore_name] as forename
-                              ,[sur_name] as surname
+                              ,[forename] as forename
+                              ,[surname] as surname
                               ,[middle_name] as middlename
                               ,[dob] as dob
                               ,[gender] as gender
                               ,[marital_status] as maritalstatus
-                              ,[sw_fore_name] as swforename
-                              ,[sw_sur_name] as swsurname
-                              ,[sw_email_address] as sweamiladdress
-                              ,[sw_phone_number] as swphonenumber
                               ,[care_category_id] carecategoryid
                               ,[care_need] as careneed
                               ,[stay_type] as staytype
@@ -102,7 +93,6 @@ namespace nyms.resident.server.DataProviders.Impl
                               ,[exit_reason] as exitreason
                               ,[comments] as comments
                               ,[status] as status
-                              ,[payment_category] as paymentcategory
                               ,[active] as active
                               ,[updated_by_id] as updatedbyid
                               ,[updated_date] as updateddate
@@ -125,8 +115,8 @@ namespace nyms.resident.server.DataProviders.Impl
                                [id] as id
                               ,[reference_id] as referenceid
                               ,[local_authority_id] as localauthorityid
-                              ,[fore_name] as forename
-                              ,[sur_name] as surname
+                              ,[forename] as forename
+                              ,[surname] as surname
                             ,[created_date] as createddate
                         FROM [dbo].[residents]
                         WHERE [exit_date] >= @billingstart             
@@ -190,16 +180,12 @@ namespace nyms.resident.server.DataProviders.Impl
                    ,[po_number]
                    ,[la_id]
                    ,[nyms_id]
-                   ,[fore_name]
-                   ,[sur_name]
+                   ,[forename]
+                   ,[surname]
                    ,[middle_name]
                    ,[dob]
                    ,[gender]
                    ,[marital_status]
-                   ,[sw_fore_name]
-                   ,[sw_sur_name]
-                   ,[sw_email_address]
-                   ,[sw_phone_number]
                    ,[care_category_id]
                    ,[care_need]
                    ,[stay_type]
@@ -224,10 +210,6 @@ namespace nyms.resident.server.DataProviders.Impl
                    ,@dob
                    ,@gender
                    ,@maritalstatus
-                   ,@swforename
-                   ,@swsurname
-                   ,@swemailaddress
-                   ,@swphonenumber
                    ,@carecategoryid
                    ,@careneed
                    ,@staytype
@@ -254,10 +236,6 @@ namespace nyms.resident.server.DataProviders.Impl
                 dp.Add("dob", resident.Dob, DbType.Date, ParameterDirection.Input, 80);
                 dp.Add("gender", resident.Gender, DbType.String, ParameterDirection.Input, 80);
                 dp.Add("maritalstatus", resident.MaritalStatus, DbType.String, ParameterDirection.Input, 80);
-                dp.Add("swforename", resident.SwForeName, DbType.String, ParameterDirection.Input, 80);
-                dp.Add("swsurname", resident.SwSurName, DbType.String, ParameterDirection.Input, 80);
-                dp.Add("swemailaddress", resident.SwEmailAddress, DbType.String, ParameterDirection.Input, 80);
-                dp.Add("swphonenumber", resident.SwPhoneNumber, DbType.String, ParameterDirection.Input, 80);
                 dp.Add("carecategoryid", resident.CareCategoryId, DbType.Int32, ParameterDirection.Input);
                 dp.Add("careneed", resident.CareNeed, DbType.String, ParameterDirection.Input, 80);
                 dp.Add("staytype", resident.StayType, DbType.String, ParameterDirection.Input, 80);

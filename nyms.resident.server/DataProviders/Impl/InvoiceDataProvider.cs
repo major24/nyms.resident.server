@@ -6,7 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace nyms.resident.server.DataProviders.Impl
 {
@@ -24,7 +25,8 @@ namespace nyms.resident.server.DataProviders.Impl
         {
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
-                string sql = @"SELECT s.[resident_id] as residentid
+                string sql = @"SELECT s.[id] as id
+                              ,s.[resident_id] as residentid
                               ,s.[local_authority_id] as localauthorityid
                               ,s.[payment_from] paymentfrom
                               ,s.[payment_type] as paymenttype
@@ -39,7 +41,6 @@ namespace nyms.resident.server.DataProviders.Impl
                               WHERE s.schedule_end_date >= @billingstart
                               AND s.schedule_begin_date <= @billingend
 	                          AND s.[active] = 'Y'";
-                              //AND s.[weekly_fee] > 0";
 
                 // rpt begin date
                 // rpt end date";
@@ -49,6 +50,24 @@ namespace nyms.resident.server.DataProviders.Impl
                 conn.Open();
                 var result = conn.QueryAsync<Schedule>(sql, dp).Result;
                 return result;
+            }
+        }
+
+        public Task<IEnumerable<BillingCycle>> GetBillingCycles()
+        {
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                string sql = @"SELECT [id] as id
+                              ,[local_authority_id] as localauthorityid
+                              ,[period_start] as periodstart
+                              ,[period_end] as periodend
+                              ,[bill_date] as billdate
+                               FROM[dbo].[billing_periods]
+	                           WHERE [active] = 'Y'";
+
+                conn.Open();
+                var result = conn.QueryAsync<BillingCycle>(sql).Result;
+                return Task.FromResult(result);
             }
         }
     }

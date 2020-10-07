@@ -27,7 +27,7 @@ namespace nyms.resident.server.DataProviders.Impl
                 using (IDbConnection conn = new SqlConnection(_connectionString))
                 {
                     // todo: remove pwd  // 
-                    string sql = @"SELECT id as id, reference_id as referenceid, fore_name as forename, sur_name as surname, password as password
+                    string sql = @"SELECT id as id, reference_id as referenceid, forename as forename, surname as surname, password as password
                                                     FROM [users]
                                                     WHERE id = @id";
                     DynamicParameters dp = new DynamicParameters();
@@ -51,7 +51,7 @@ namespace nyms.resident.server.DataProviders.Impl
                 User user = new User();
                 using (IDbConnection conn = new SqlConnection(_connectionString))
                 {
-                    string sqlUser = @"SELECT u.id as id, u.reference_id as referenceid, u.fore_name as forename, u.sur_name as surname 
+                    string sqlUser = @"SELECT u.id as id, u.reference_id as referenceid, u.forename as forename, u.surname as surname 
                                         FROM [users] u
                                         WHERE u.reference_id = @referenceid";
 
@@ -96,9 +96,9 @@ namespace nyms.resident.server.DataProviders.Impl
                 using (IDbConnection conn = new SqlConnection(_connectionString))
                 {
                     // todo: remove pwd  // 
-                    string sql = @"SELECT id as id, reference_id as referenceid, fore_name as forename, sur_name as surname, password as password
+                    string sql = @"SELECT id as id, reference_id as referenceid, forename as forename, surname as surname, password as password
                                                                 FROM [users]
-                                                                WHERE user_name = @username";
+                                                                WHERE username = @username";
                     DynamicParameters dp = new DynamicParameters();
                     dp.Add("username", userName, DbType.String, ParameterDirection.Input, 60);
 
@@ -136,7 +136,7 @@ namespace nyms.resident.server.DataProviders.Impl
             {
                 using (IDbConnection conn = new SqlConnection(_connectionString))
                 {
-                    string sql = @"SELECT reference_id as referenceid, fore_name as forename, sur_name as surname
+                    string sql = @"SELECT reference_id as referenceid, forename as forename, surname as surname
                                                                 FROM [users]";
 
                     conn.Open();

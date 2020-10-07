@@ -50,6 +50,24 @@ namespace nyms.resident.server.Controllers.Invoice
         }
 
         [HttpGet]
+        [Route("api/invoices/localAuthorities/{localAuthorityId}/billingCycles/{billingCycleId}")]
+        public IHttpActionResult GetInvoicesByBillingCycle(int localAuthorityId, int billingCycleId)
+        {
+            var user = System.Threading.Thread.CurrentPrincipal as SecurityPrincipal;
+            logger.Info($"Invoice by billing cycle requested by {user?.ForeName}");
+
+            if (localAuthorityId <= 0) throw new ArgumentNullException(nameof(localAuthorityId));
+            if (billingCycleId <= 0) throw new ArgumentNullException(nameof(billingCycleId));
+
+            var invData = this._invoiceService.GetInvoiceData(localAuthorityId, billingCycleId);
+            if (invData == null)
+            {
+                return NotFound();
+            }
+            return Ok(invData);
+        }
+
+        [HttpGet]
         [Route("api/invoices/all/{billingBeginDate}/{billingEndDate}/download")]
         public HttpResponseMessage DownloadAllInvoices(string billingBeginDate, string billingEndDate)
         {
@@ -91,6 +109,28 @@ namespace nyms.resident.server.Controllers.Invoice
                 throw new Exception("Error creating file. " + ex.Message);
             }
         }
+
+        [HttpGet]
+        [Route("api/invoices/billing-cycles")]
+        public IHttpActionResult GetBillingCycles()
+        {
+            var billingCycles = _invoiceService.GetBillingCycles().Result;
+
+            if (billingCycles == null)
+            {
+                return NotFound();
+            }
+            return Ok(billingCycles);
+        }
+
+        ///api/invoices/validations
+        [HttpPost]
+        [Route("api/invoices/validations")]
+        public IHttpActionResult UpdateValidatedInvoices([FromBody] ResidentSchedule[] residentSchedules)
+        {
+            throw new NotImplementedException();
+        }
+
 
         private string CreateDetailCsvReport(IEnumerable<InvoiceResident> invResidents, string billingBeginDate, string billingEndDate)
         {
@@ -161,7 +201,7 @@ namespace nyms.resident.server.Controllers.Invoice
 
             if (billingBegin == null || billingEnd == null) throw new ArgumentException("Invalid dates");
 
-            return this._invoiceService.GetAllSchedules(billingBegin, billingEnd);
+            return this._invoiceService.GetInvoiceData(billingBegin, billingEnd);
         }
 
 
