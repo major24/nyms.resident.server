@@ -12,7 +12,7 @@ namespace nyms.resident.server.Models
         public int LocalAuthorityId { get; set; }
         public string PaymentFrom { get; set; }
         public string PaymentFromName { get; set; }
-        public string PaymentType { get; set; }
+        public int PaymentTypeId { get; set; }
         public string Description { get; set; }
         public DateTime ScheduleBeginDate { get; set; }
         public DateTime ScheduleEndDate { get; set; }

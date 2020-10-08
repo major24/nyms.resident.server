@@ -9,7 +9,8 @@ namespace nyms.resident.server.DataProviders.Interfaces
     public interface IInvoiceDataProvider
     {
         IEnumerable<Schedule> GetAllSchedulesForInvoiceDate(DateTime billingStart, DateTime billingEnd);
-        //IEnumerable<Schedule> GetAllSchedulesForInvoiceDate(DateTime billingStart, DateTime billingEnd);
         Task<IEnumerable<BillingCycle>> GetBillingCycles();
+        Task<bool> UpdateValidatedInvoices(IEnumerable<ValidatedInvoiceEntity> invoices);
+        Task<IEnumerable<ValidatedInvoiceEntity>> GetValidatedInvoices(int localAuthorityId, int billingCycleId);
     }
 }

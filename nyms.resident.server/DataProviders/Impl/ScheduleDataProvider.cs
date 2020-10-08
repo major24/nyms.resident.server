@@ -32,7 +32,7 @@ namespace nyms.resident.server.DataProviders.Impl
                                 , r.surname as surname
                                 , s.id as scheduleid
                                 , s.payment_from as paymentfrom
-                                , s.payment_type as paymenttype
+                                , s.payment_type_id as paymenttypeid
                                 , s.description as description
                                 , s.schedule_begin_date as schedulebegindate
                                 , s.schedule_end_date as scheduleenddate
@@ -65,7 +65,7 @@ namespace nyms.resident.server.DataProviders.Impl
                                 , r.surname as surname
                                 , s.id as scheduleid
                                 , s.payment_from as paymentfrom
-                                , s.payment_type as paymenttype
+                                , s.payment_type_id as paymenttypeid
                                 , s.description as description
                                 , s.schedule_begin_date as schedulebegindate
                                 , s.schedule_end_date as scheduleenddate
@@ -116,7 +116,7 @@ namespace nyms.resident.server.DataProviders.Impl
                            ([resident_id]
                            ,[local_authority_id]
                            ,[payment_from]
-                           ,[payment_type]
+                           ,[payment_type_id]
                            ,[description]
                            ,[schedule_begin_date]
                            ,[schedule_end_date]
@@ -125,7 +125,7 @@ namespace nyms.resident.server.DataProviders.Impl
                            (@residentid
                            ,@localauthorityid
                            ,@paymentfrom
-                           ,@paymenttype
+                           ,@paymenttypeid
                            ,@description
                            ,@schedulebegindate
                            ,@scheduleenddate
@@ -136,7 +136,7 @@ namespace nyms.resident.server.DataProviders.Impl
                 dp.Add("residentid", schedule.ResidentId, DbType.Int32, ParameterDirection.Input);
                 dp.Add("localauthorityid", schedule.LocalAuthorityId, DbType.Int32, ParameterDirection.Input);
                 dp.Add("paymentfrom", schedule.PaymentFrom, DbType.String, ParameterDirection.Input, 80);
-                dp.Add("paymenttype", schedule.PaymentType, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("paymenttypeid", schedule.PaymentTypeId, DbType.String, ParameterDirection.Input, 80);
                 dp.Add("description", schedule.Description, DbType.String, ParameterDirection.Input, 200);
                 dp.Add("schedulebegindate", schedule.ScheduleBeginDate, DbType.Date, ParameterDirection.Input, 80);
                 dp.Add("scheduleenddate", schedule.ScheduleEndDate, DbType.Date, ParameterDirection.Input, 80);

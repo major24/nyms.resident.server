@@ -35,7 +35,7 @@ namespace nyms.resident.server.Services.Impl
                     return new Schedule() {
                         Id = s.ScheduleId,
                         PaymentFrom = s.PaymentFrom, 
-                        PaymentType = s.PaymentType,
+                        PaymentTypeId = s.PaymentTypeId,
                         Description = s.Description,
                         ScheduleBeginDate = s.ScheduleBeginDate,
                         ScheduleEndDate = s.ScheduleEndDate,
@@ -69,7 +69,7 @@ namespace nyms.resident.server.Services.Impl
                 {
                     Id = s.ScheduleId,
                     PaymentFrom = s.PaymentFrom,
-                    PaymentType = s.PaymentType,
+                    PaymentTypeId = s.PaymentTypeId,
                     Description = s.Description,
                     ScheduleBeginDate = s.ScheduleBeginDate,
                     ScheduleEndDate = s.ScheduleEndDate,

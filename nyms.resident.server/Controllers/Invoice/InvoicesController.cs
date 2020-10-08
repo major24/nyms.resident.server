@@ -126,9 +126,16 @@ namespace nyms.resident.server.Controllers.Invoice
         ///api/invoices/validations
         [HttpPost]
         [Route("api/invoices/validations")]
-        public IHttpActionResult UpdateValidatedInvoices([FromBody] ResidentSchedule[] residentSchedules)
+        public IHttpActionResult UpdateValidatedInvoices([FromBody] InvoiceResident[] invoices)
         {
-            throw new NotImplementedException();
+            var user = System.Threading.Thread.CurrentPrincipal as SecurityPrincipal;
+            logger.Info($"Invoice is approved by {user?.ForeName}");
+
+            if (invoices == null || invoices.Length <= 0) throw new ArgumentNullException(nameof(invoices));
+
+            this._invoiceService.UpdateInvoicesApproved(invoices);
+
+            return Ok(invoices);
         }
 
 

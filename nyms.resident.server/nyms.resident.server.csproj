@@ -226,6 +226,7 @@
     <Compile Include="Invoice\FeeCalculatorService.cs" />
     <Compile Include="Invoice\IFeeCalculatorService.cs" />
     <Compile Include="Invoice\InvoiceResident.cs" />
+    <Compile Include="Invoice\ValidatedInvoiceEntity.cs" />
     <Compile Include="Models\Resident\ResidentEntity.cs" />
     <Compile Include="Models\Resident\ResidentSchedule.cs" />
     <Compile Include="Models\Resident\ResidentScheduleEntity.cs" />

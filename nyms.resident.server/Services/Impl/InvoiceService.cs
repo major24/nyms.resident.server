@@ -1,5 +1,6 @@
 ﻿using nyms.resident.server.DataProviders.Interfaces;
 using nyms.resident.server.Invoice;
+using nyms.resident.server.Models;
 using nyms.resident.server.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -46,7 +47,7 @@ namespace nyms.resident.server.Services.Impl
 
                 // get resident weekly fee (LA Fee + CC Fee)
                 residentsWithCalculatedFees.ResidentWeeklyFee = residentsWithCalculatedFees.GetSchedules()
-                .Where(s => s.PaymentType == "WEEKLY").Select(k => k.WeeklyFee).Sum();
+                .Where(s => s.PaymentTypeId == 1).Select(k => k.WeeklyFee).Sum(); // 1=Weekly
 
                 // get GrandTotal (all amount dues)
                 residentsWithCalculatedFees.GrandTotal =  residentsWithCalculatedFees.GetSchedules()
@@ -83,6 +84,64 @@ namespace nyms.resident.server.Services.Impl
         public Task<IEnumerable<BillingCycle>> GetBillingCycles()
         {
             return _invoiceDataProvider.GetBillingCycles();
+        }
+
+        public Task<bool> UpdateInvoicesApproved(IEnumerable<InvoiceResident> invoices)
+        {
+            // to do: billing id and userid
+            var laid = invoices.FirstOrDefault().LocalAuthorityId;
+            var billingCycleId = 1; // TODO
+            var updatedById = 1;
+            var existingData = _invoiceDataProvider.GetValidatedInvoices((int)laid, billingCycleId).Result;
+            var schedules = invoices.SelectMany(i => i.Schedules);
+
+            List<ValidatedInvoiceEntity> newRec = new List<ValidatedInvoiceEntity>();
+
+            var hasYorCmts = schedules.Where(s => (s.Validated == "Y" || s.Comments != null)).ToArray();
+            // now check if this rec exists in db?
+            foreach(var s in hasYorCmts)
+            {
+                var exists = existingData.Where(ed => ed.BillingCycleId == billingCycleId && ed.ResidentId == s.ResidentId && ed.PaymentTypeId == s.PaymentTypeId).FirstOrDefault();
+                if (exists == null)
+                {
+                    // not in db.
+                    newRec.Add(new ValidatedInvoiceEntity()
+                    {
+                        LocalAuthorityId = (int)s.LocalAuthorityId,
+                        BillingCycleId = billingCycleId,
+                        ResidentId = s.ResidentId,
+                        PaymentTypeId = s.PaymentTypeId,
+                        AmountDue = s.AmountDue,
+                        Validated = s.Validated,
+                        TransactionAmount = s.TransactionAmount,
+                        Comments = s.Comments,
+                        UpdatedById = updatedById
+                    });
+                }
+                // if exists, check if comment updated?
+                else 
+                {
+                    // rec exists, but check comments updated?
+                    if (exists.Comments != s.Comments)
+                    {
+                        newRec.Add(new ValidatedInvoiceEntity()
+                        {
+                            Id = exists.Id,
+                            LocalAuthorityId = (int)s.LocalAuthorityId,
+                            BillingCycleId = billingCycleId,
+                            ResidentId = s.ResidentId,
+                            PaymentTypeId = s.PaymentTypeId,
+                            AmountDue = s.AmountDue,
+                            Validated = s.Validated,
+                            TransactionAmount = s.TransactionAmount,
+                            Comments = s.Comments,
+                            UpdatedById = updatedById
+                        });
+                    }
+                }
+            }
+
+            return _invoiceDataProvider.UpdateValidatedInvoices(newRec);
         }
     }
 }

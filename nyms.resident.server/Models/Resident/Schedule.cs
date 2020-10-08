@@ -14,7 +14,7 @@ namespace nyms.resident.server.Models
         public int Id { get; set; }
         public int ResidentId { get; set; }
         public int? LocalAuthorityId { get; set; }
-        public string PaymentType { get; set; }
+        public int PaymentTypeId { get; set; }
         public string PaymentFrom { get; set; }
         public string PaymentFromName { get; set; }
         public string Description { get; set; }
@@ -23,9 +23,9 @@ namespace nyms.resident.server.Models
         public decimal WeeklyFee { get; set; }
         public decimal AmountDue { get; set; }
         public int NumberOfDays { get; set; }
-        public bool Validated { get; set; }
+        public string Validated { get; set; }
         public string ValidatedBy { get; set; }
-        public decimal AmountReceived { get; set; }
+        public decimal TransactionAmount { get; set; }
         public string Comments { get; set; } 
     }
 }

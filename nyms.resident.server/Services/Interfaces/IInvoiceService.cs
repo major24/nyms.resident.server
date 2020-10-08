@@ -10,5 +10,6 @@ namespace nyms.resident.server.Services.Interfaces
         IEnumerable<InvoiceResident> GetInvoiceData(DateTime billingBeginDate, DateTime billingEndDate);
         IEnumerable<InvoiceResident> GetInvoiceData(int localAuthorityId, int billingCycleId);
         Task<IEnumerable<BillingCycle>> GetBillingCycles();
+        Task<bool> UpdateInvoicesApproved(IEnumerable<InvoiceResident> invoices);
     }
 }
