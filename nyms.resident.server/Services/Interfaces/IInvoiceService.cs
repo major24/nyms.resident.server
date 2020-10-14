@@ -7,9 +7,11 @@ namespace nyms.resident.server.Services.Interfaces
 {
     public interface IInvoiceService
     {
-        IEnumerable<InvoiceResident> GetInvoiceData(DateTime billingBeginDate, DateTime billingEndDate);
-        IEnumerable<InvoiceResident> GetInvoiceData(int localAuthorityId, int billingCycleId);
+        InvoiceData GetInvoiceData(DateTime startDate, DateTime endDate);
+        InvoiceData GetInvoiceData(int localAuthorityId, int billingCycleId);
         Task<IEnumerable<BillingCycle>> GetBillingCycles();
-        Task<bool> UpdateInvoicesApproved(IEnumerable<InvoiceResident> invoices);
+        Task<bool> UpdateInvoicesValidated(InvoiceValidatedEntity[] invoiceValidatedEntities);
+        Task<bool> InsertInvoiceComments(InvoiceCommentsEntity invoiceCommentsEntity);
+        Task<IEnumerable<InvoiceCommentsEntity>> GetInvoiceComments(int localAuthorityId, int billingCycleId);
     }
 }

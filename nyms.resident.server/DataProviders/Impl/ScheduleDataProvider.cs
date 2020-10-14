@@ -108,7 +108,7 @@ namespace nyms.resident.server.DataProviders.Impl
             }
         }
 
-        public void CreateSchedule(Schedule schedule)
+        public void CreateSchedule(SchedulePayment schedule)
         {
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {

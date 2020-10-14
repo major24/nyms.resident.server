@@ -136,7 +136,7 @@ namespace nyms.resident.server.DataProviders.Impl
             {
                 using (IDbConnection conn = new SqlConnection(_connectionString))
                 {
-                    string sql = @"SELECT reference_id as referenceid, forename as forename, surname as surname
+                    string sql = @"SELECT id as id, reference_id as referenceid, forename as forename, surname as surname
                                                                 FROM [users]";
 
                     conn.Open();

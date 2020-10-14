@@ -12,6 +12,5 @@ namespace nyms.resident.server.Invoice
         public DateTime PeriodStart { get; set; }
         public DateTime PeriodEnd { get; set; }
         public DateTime BillDate { get; set; }
-        // public string Active { get; set; }
     }
 }
