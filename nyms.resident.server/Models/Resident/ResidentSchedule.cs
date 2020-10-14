@@ -11,6 +11,6 @@ namespace nyms.resident.server.Models
         public int ResidentId { get; set; }
         public int LocalAuthorityId { get; set; }
         public string PaymentFromName { get; set; }
-        public IEnumerable<Schedule> Schedules { get; set; }
+        public IEnumerable<SchedulePayment> Schedules { get; set; }
     }
 }

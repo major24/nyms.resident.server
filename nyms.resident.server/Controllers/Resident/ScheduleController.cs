@@ -54,7 +54,7 @@ namespace nyms.resident.server.Controllers.Resident
 
         [HttpPost]
         [Route("api/residents/{referenceId}/schedules")]
-        public IHttpActionResult Post([FromUri]string referenceId, [FromBody]Schedule schedule)
+        public IHttpActionResult Post([FromUri]string referenceId, [FromBody]SchedulePayment schedule)
         {
             if (string.IsNullOrEmpty(referenceId)) return BadRequest(referenceId);
 

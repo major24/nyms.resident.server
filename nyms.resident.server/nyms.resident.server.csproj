@@ -225,12 +225,15 @@
     <Compile Include="Invoice\BillingCycle.cs" />
     <Compile Include="Invoice\FeeCalculatorService.cs" />
     <Compile Include="Invoice\IFeeCalculatorService.cs" />
+    <Compile Include="Invoice\InvoiceCommentsEntity.cs" />
+    <Compile Include="Invoice\InvoiceData.cs" />
     <Compile Include="Invoice\InvoiceResident.cs" />
-    <Compile Include="Invoice\ValidatedInvoiceEntity.cs" />
+    <Compile Include="Invoice\InvoiceValidatedEntity.cs" />
+    <Compile Include="Invoice\InvoiceValidatedModel.cs" />
     <Compile Include="Models\Resident\ResidentEntity.cs" />
     <Compile Include="Models\Resident\ResidentSchedule.cs" />
     <Compile Include="Models\Resident\ResidentScheduleEntity.cs" />
-    <Compile Include="Models\Resident\Schedule.cs" />
+    <Compile Include="Models\Resident\SchedulePayment.cs" />
     <Compile Include="Models\Authentication\AuthenticationRequest.cs" />
     <Compile Include="Models\Authentication\AuthenticationResponse.cs" />
     <Compile Include="Models\Authentication\SecurityPrincipal.cs" />

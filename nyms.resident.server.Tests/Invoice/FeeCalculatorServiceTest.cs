@@ -268,7 +268,7 @@ namespace nyms.resident.server.Tests.Invoice
 
 
         // private IEnumerable<Tuple<int, int, DateTime, DateTime, decimal>> getSchedules(int residentId)
-        private IEnumerable<Schedule> getSchedules(int residentId)
+        private IEnumerable<SchedulePayment> getSchedules(int residentId)
         {
             // ResId, LaId, ContributorName, schBeginDate, schEndDate
             List<Tuple<int, int, string, DateTime, DateTime, decimal>> allSchedules = new List<Tuple<int, int, string,DateTime, DateTime, decimal>>();

@@ -39,14 +39,14 @@ namespace nyms.resident.server.Controllers.Invoice
             if (string.IsNullOrEmpty(billingBeginDate)) throw new ArgumentNullException(nameof(billingBeginDate));
             if (string.IsNullOrEmpty(billingEndDate)) throw new ArgumentNullException(nameof(billingEndDate));
 
-            var invResidents = GetAllInvoicesByDate(billingBeginDate, billingEndDate);
+            var invData = GetAllInvoicesByDate(billingBeginDate, billingEndDate);
             
-            if (invResidents == null)
+            if (invData == null)
             {
                 // logger.Error($"No user info found for {referenceId}.");
                 return NotFound();
             }
-            return Ok(invResidents);
+            return Ok(invData);
         }
 
         [HttpGet]
@@ -79,10 +79,10 @@ namespace nyms.resident.server.Controllers.Invoice
 
             try
             {
-                var invResidents = GetAllInvoicesByDate(billingBeginDate, billingEndDate);
+                var invData = GetAllInvoicesByDate(billingBeginDate, billingEndDate);
 
-                var detailCsvReport = CreateDetailCsvReport(invResidents, billingBeginDate, billingEndDate);
-                var singleLineCsvReport = CreateSingleLineCsvReport(invResidents, billingBeginDate, billingEndDate);
+                var detailCsvReport = CreateDetailCsvReport(invData.InvoiceResidents, billingBeginDate, billingEndDate);
+                var singleLineCsvReport = CreateSingleLineCsvReport(invData.InvoiceResidents, billingBeginDate, billingEndDate);
 
                 StringBuilder sb = new StringBuilder();
                 sb.Append(detailCsvReport)
@@ -126,17 +126,28 @@ namespace nyms.resident.server.Controllers.Invoice
         ///api/invoices/validations
         [HttpPost]
         [Route("api/invoices/validations")]
-        public IHttpActionResult UpdateValidatedInvoices([FromBody] InvoiceResident[] invoices)
+        public IHttpActionResult UpdateValidatedInvoices([FromBody] InvoiceValidatedEntity[] invoiceValidatedEntities) //InvoiceData invoiceData)
         {
             var user = System.Threading.Thread.CurrentPrincipal as SecurityPrincipal;
-            logger.Info($"Invoice is approved by {user?.ForeName}");
+            logger.Info($"Invoice is validated by {user?.ForeName}");
 
-            if (invoices == null || invoices.Length <= 0) throw new ArgumentNullException(nameof(invoices));
+            if (invoiceValidatedEntities == null || !invoiceValidatedEntities.Any()) throw new ArgumentNullException(nameof(invoiceValidatedEntities));
 
-            this._invoiceService.UpdateInvoicesApproved(invoices);
+            this._invoiceService.UpdateInvoicesValidated(invoiceValidatedEntities);
 
-            return Ok(invoices);
+            return Ok(invoiceValidatedEntities);
         }
+
+        [HttpPost]
+        [Route("api/invoices/comments")]
+        public IHttpActionResult InsertValidationComments([FromBody] InvoiceCommentsEntity invoiceCommentsEntity)
+        {
+            this._invoiceService.InsertInvoiceComments(invoiceCommentsEntity);
+
+            return Ok(invoiceCommentsEntity);
+        }
+        
+
 
 
         private string CreateDetailCsvReport(IEnumerable<InvoiceResident> invResidents, string billingBeginDate, string billingEndDate)
@@ -147,7 +158,7 @@ namespace nyms.resident.server.Controllers.Invoice
             string str = "{0},{1},{2},{3},{4},{5},{6},{7},{8},{9}";
             foreach (var r in invResidents)
             {
-                foreach (var s in r.Schedules)
+                foreach (var s in r.SchedulePayments)
                 {
                     sb.AppendFormat(str,
                         r.Name.Replace(",", ""),
@@ -174,10 +185,10 @@ namespace nyms.resident.server.Controllers.Invoice
             string str = "{0},{1},{2},{3},{4},{5},{6},{7}";
             foreach (var r in invResidents)
             {
-                var laAmt = GetTotal(r.Schedules, "LA");
-                var ccAmt = GetTotal(r.Schedules, "CC");
-                var pvAmt = GetTotal(r.Schedules, "PV");
-                var numOfDays = r.Schedules.Select(s => s.NumberOfDays).FirstOrDefault();
+                var laAmt = GetTotal(r.SchedulePayments, "LA");
+                var ccAmt = GetTotal(r.SchedulePayments, "CC");
+                var pvAmt = GetTotal(r.SchedulePayments, "PV");
+                var numOfDays = r.SchedulePayments.Select(s => s.NumberOfDays).FirstOrDefault();
 
                 sb.AppendFormat(str,
                     r.Name.Replace(",", ""),
@@ -193,13 +204,13 @@ namespace nyms.resident.server.Controllers.Invoice
             return header + sb.ToString();
         }
 
-        private decimal GetTotal(IEnumerable<Schedule> schedules, string paymentFrom)
+        private decimal GetTotal(IEnumerable<SchedulePayment> schedules, string paymentFrom)
         {
             var x = schedules.Where(s => s.PaymentFrom == paymentFrom).Select(k => k.AmountDue).Sum();
             return x;
         }
 
-        private IEnumerable<InvoiceResident> GetAllInvoicesByDate(string billingBeginDate, string billingEndDate)
+        private InvoiceData GetAllInvoicesByDate(string billingBeginDate, string billingEndDate)
         {
             DateTime billingBegin;
             DateTime billingEnd;

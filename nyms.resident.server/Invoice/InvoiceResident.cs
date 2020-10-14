@@ -8,29 +8,28 @@ namespace nyms.resident.server.Invoice
 {
     public class InvoiceResident
     {
-
         public int Id { get; set; }
         public string Name { get; set; }
         public decimal TotalLaFee { get; set; }
         public decimal ResidentWeeklyFee { get; set; }
         public decimal GrandTotal { get; set; }
         public int? LocalAuthorityId { get; set; }
-        public IEnumerable<Schedule> Schedules { get; set; }
+        public IEnumerable<SchedulePayment> SchedulePayments { get; set; }
 
-        public InvoiceResident(int id, string name, IEnumerable<Schedule> schedules)
+        public InvoiceResident(int id, string name, IEnumerable<SchedulePayment> schedulePayments)
         {
             this.Id = id;
             this.Name = name;
-            this.Schedules = schedules;
+            this.SchedulePayments = schedulePayments;
         }
 
-        public IEnumerable<Schedule> GetSchedules()
+        public IEnumerable<SchedulePayment> GetSchedules()
         {
-            return Schedules;
+            return SchedulePayments;
         }
-        public void SetSchedules(IEnumerable<Schedule> schedules)
+        public void SetSchedules(IEnumerable<SchedulePayment> schedulePayments)
         {
-            this.Schedules = schedules;
+            this.SchedulePayments = schedulePayments;
         }
     }
 }

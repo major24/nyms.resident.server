@@ -17,7 +17,7 @@ namespace nyms.resident.server.Invoice
             if (!schedules.Any())
                 return resident;
 
-            foreach (Schedule schedule in schedules)
+            foreach (SchedulePayment schedule in schedules)
             {
                 var isActiveSchedule = IsActiveSchedule(schedule.ScheduleBeginDate, schedule.ScheduleEndDate, reportBeginDate, reportEndDate);
 
@@ -90,58 +90,3 @@ namespace nyms.resident.server.Invoice
     }
 }
 
-
-
-
-
-
-
-
-
-
-/*
-         public InvoiceResident CalculateFee(InvoiceResident resident, DateTime reportBeginDate, DateTime reportEndDate)
-        {
-            if (resident == null)
-                throw new ArgumentNullException(nameof(resident));
-            if (reportBeginDate == DateTime.MinValue || reportEndDate == DateTime.MinValue)
-                throw new ArgumentOutOfRangeException("invalid date");
-
-            ICollection<ContributorBase> contributors = resident.GetContributors();
-
-            if (contributors == null || contributors.Count <= 0)
-                throw new ArgumentNullException(nameof(contributors));
-
-            // resident may have more than one contributer
-            // each contributer may have one or more schedule payment details
-            foreach (ContributorBase contributor in contributors)
-            {
-                var schedules = contributor.GetSchedules();
-                foreach (Schedule schedule in schedules)
-                {
-                    var isActiveSchedule = IsActiveSchedule(schedule.ScheduleBeginDate, schedule.ScheduleEndDate, reportBeginDate, reportEndDate);
-                    
-                    int numberOfDays = 0;
-                    if (isActiveSchedule)
-                    {
-                        // init var to be used in calc. NO modifiction to report date came in
-                        DateTime reportBeginDateForCalc = reportBeginDate;
-                        DateTime reportEndDateForCalc = reportEndDate;
-
-                        if (schedule.ScheduleBeginDate > reportBeginDate)
-                            reportBeginDateForCalc = schedule.ScheduleBeginDate;
-
-                        // Is Residnet leaves in mid reporting period? then endReportDate should be res. exit date
-                        if (schedule.ScheduleEndDate < reportEndDate)
-                            reportEndDateForCalc = (DateTime)schedule.ScheduleEndDate;
-
-                        numberOfDays = GetNumberOfDaysInMonth(reportBeginDateForCalc, reportEndDateForCalc);
-                        
-                        var fee = CalculateFee(schedule.WeeklyFee, numberOfDays);
-                        schedule.AmountDue = fee;
-                    }
-                }
-            }
-
-            return resident;
-        }*/

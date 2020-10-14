@@ -32,7 +32,7 @@ namespace nyms.resident.server.Services.Impl
                 var resident = residentScheduleEntity.Where(r => r.ResidentId == id).FirstOrDefault();
                 var schedules = residentScheduleEntity.Where(r => r.ResidentId == id).Select(s =>
                 {
-                    return new Schedule() {
+                    return new SchedulePayment() {
                         Id = s.ScheduleId,
                         PaymentFrom = s.PaymentFrom, 
                         PaymentTypeId = s.PaymentTypeId,
@@ -65,7 +65,7 @@ namespace nyms.resident.server.Services.Impl
 
             var schedules = residentScheduleEntity.Select(s =>
             {
-                return new Schedule()
+                return new SchedulePayment()
                 {
                     Id = s.ScheduleId,
                     PaymentFrom = s.PaymentFrom,
@@ -89,7 +89,7 @@ namespace nyms.resident.server.Services.Impl
             };
         }
 
-        public void CreateSchedule(Schedule schedule)
+        public void CreateSchedule(SchedulePayment schedule)
         {
             this._scheduleDataProvider.CreateSchedule(schedule);
         }

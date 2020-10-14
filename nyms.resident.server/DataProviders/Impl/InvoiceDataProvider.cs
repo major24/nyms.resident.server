@@ -21,7 +21,7 @@ namespace nyms.resident.server.DataProviders.Impl
 
         }
 
-        public IEnumerable<Schedule> GetAllSchedulesForInvoiceDate(DateTime billingStart, DateTime billingEnd)
+        public IEnumerable<SchedulePayment> GetAllSchedulesForInvoiceDate(DateTime billingStart, DateTime billingEnd)
         {
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
@@ -48,7 +48,7 @@ namespace nyms.resident.server.DataProviders.Impl
                 dp.Add("billingstart", billingStart.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input, 60);
                 dp.Add("billingend", billingEnd.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input, 60);
                 conn.Open();
-                var result = conn.QueryAsync<Schedule>(sql, dp).Result;
+                var result = conn.QueryAsync<SchedulePayment>(sql, dp).Result;
                 return result;
             }
         }
@@ -71,20 +71,18 @@ namespace nyms.resident.server.DataProviders.Impl
             }
         }
 
-        // public Task<bool> UpdateInvoicesApproved(IEnumerable<InvoiceResident> invoices)
-        public Task<bool> UpdateValidatedInvoices(IEnumerable<ValidatedInvoiceEntity> invoices)
+        public Task<bool> UpdateValidatedInvoices(IEnumerable<InvoiceValidatedEntity> InvoiceValidatedEntities)
         {
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
-                string sqlInsert = @"INSERT INTO [dbo].[validated_invoices]
+                string sqlInsert = @"INSERT INTO [dbo].[invoices_validated]
                                ([local_authority_id]
                                ,[billing_cycle_id]
                                ,[resident_id]
                                ,[payment_type_id]
                                ,[amount_due]
                                ,[validated]
-                               ,[transaction_amount]
-                               ,[comments]
+                               ,[validated_amount]
                                ,[updated_by_id])
                             VALUES
                                 (@localauthorityid
@@ -93,22 +91,13 @@ namespace nyms.resident.server.DataProviders.Impl
                                 ,@paymenttypeid
                                 ,@amountdue
                                 ,@validated
-                                ,@transactionamount
-                                ,@comments
+                                ,@validatedamount
                                 ,@updatedbyid)";
-
-                string sqlUpdate = @"UPDATE [dbo].[validated_invoices]
-                            SET [validated] = @validated
-                               ,[transaction_amount] = @transactionamount
-                               ,[comments] = @comments
-                               ,[updated_by_id] = @updatedbyid
-                               ,[updated_date] = GETDATE()
-                            WHERE id = @id";
 
                 conn.Open();
                 using (var tran = conn.BeginTransaction())
                 {
-                    foreach(var inv in invoices)
+                    foreach(var inv in InvoiceValidatedEntities)
                     {
                         DynamicParameters dp = new DynamicParameters();
                         dp.Add("localauthorityid", inv.LocalAuthorityId, DbType.Int32, ParameterDirection.Input);
@@ -117,20 +106,10 @@ namespace nyms.resident.server.DataProviders.Impl
                         dp.Add("paymenttypeid", inv.PaymentTypeId, DbType.Int32, ParameterDirection.Input);
                         dp.Add("amountdue", inv.AmountDue, DbType.Decimal, ParameterDirection.Input);
                         dp.Add("validated", inv.Validated, DbType.String, ParameterDirection.Input, 10);
-                        dp.Add("transactionamount", inv.TransactionAmount, DbType.Decimal, ParameterDirection.Input);
-                        dp.Add("comments", inv.Comments, DbType.String, ParameterDirection.Input, 6000);
-                        dp.Add("updatedbyid", inv.UpdatedById, DbType.Int32, ParameterDirection.Input);
+                        dp.Add("validatedamount", inv.ValidatedAmount, DbType.Decimal, ParameterDirection.Input);
                         dp.Add("updatedbyid", inv.UpdatedById, DbType.Int32, ParameterDirection.Input);
 
-                        if (inv.Id == 0)
-                        {
-                            var affRows = conn.Execute(sqlInsert, dp, transaction: tran);
-                        }
-                        else
-                        {
-                            dp.Add("id", inv.Id, DbType.Int32, ParameterDirection.Input);
-                            var affRows = conn.Execute(sqlUpdate, dp, transaction: tran);
-                        }
+                        var affRows = conn.Execute(sqlInsert, dp, transaction: tran);
                     }
                     tran.Commit();
                     Task.FromResult(true);
@@ -139,7 +118,7 @@ namespace nyms.resident.server.DataProviders.Impl
             return Task.FromResult(true);
         }
 
-        public Task<IEnumerable<ValidatedInvoiceEntity>> GetValidatedInvoices(int localAuthorityId, int billingCycleId)
+        public Task<IEnumerable<InvoiceValidatedEntity>> GetValidatedInvoices(int localAuthorityId, int billingCycleId)
         {
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
@@ -150,9 +129,10 @@ namespace nyms.resident.server.DataProviders.Impl
                               ,[payment_type_id] as paymenttypeid
                               ,[amount_due] as amountdue
                               ,[validated] as validated
-                              ,[transaction_amount] as transactionamount
-                              ,[comments] as comments
-                               FROM [dbo].[validated_invoices]
+                              ,[validated_amount] as validatedamount
+                              ,[updated_by_id] as updatedbyid
+                              ,[updated_date] as updateddate
+                               FROM [dbo].[invoices_validated]
 	                           WHERE [local_authority_id] = @localauthorityid
                                AND [billing_cycle_id] = @billingcycleid";
 
@@ -160,10 +140,76 @@ namespace nyms.resident.server.DataProviders.Impl
                 DynamicParameters dp = new DynamicParameters();
                 dp.Add("localauthorityid", localAuthorityId, DbType.Int32, ParameterDirection.Input);
                 dp.Add("billingcycleid", billingCycleId, DbType.Int32, ParameterDirection.Input);
-                var result = conn.QueryAsync<ValidatedInvoiceEntity>(sql, dp).Result;
+                var result = conn.QueryAsync<InvoiceValidatedEntity>(sql, dp).Result;
                 return Task.FromResult(result);
             }
         }
+
+        public Task<IEnumerable<InvoiceCommentsEntity>> GetInvoiceComments(int localAuthorityId, int billingCycleId)
+        {
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                string sql = @"SELECT [id] as id
+                              ,[local_authority_id] as localauthorityid
+                              ,[billing_cycle_id] as billingcycleid
+                              ,[resident_id] as residentid
+                              ,[payment_type_id] as paymenttypeid
+                              ,[transaction_amount] as transactionamount
+                              ,[comments] as comments
+                              ,[updated_by_id] as updatedbyid
+                              ,[updated_date] as updateddate
+                               FROM [dbo].[invoice_comments]
+	                           WHERE [local_authority_id] = @localauthorityid
+                               AND [billing_cycle_id] = @billingcycleid";
+
+                conn.Open();
+                DynamicParameters dp = new DynamicParameters();
+                dp.Add("localauthorityid", localAuthorityId, DbType.Int32, ParameterDirection.Input);
+                dp.Add("billingcycleid", billingCycleId, DbType.Int32, ParameterDirection.Input);
+                var result = conn.QueryAsync<InvoiceCommentsEntity>(sql, dp).Result;
+                return Task.FromResult(result);
+            }
+        }
+
+
+        public Task<bool> InsertInvoiceComments(InvoiceCommentsEntity invoiceCommentsEntity)
+        {
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                string sql = @"INSERT INTO [dbo].[invoice_comments]
+                               ([local_authority_id]
+                               ,[billing_cycle_id]
+                               ,[resident_id]
+                               ,[payment_type_id]
+                               ,[transaction_amount]
+                               ,[comments]
+                               ,[updated_by_id])
+                            VALUES
+                                (@localauthorityid
+                                ,@billingcycleid
+                                ,@residentid
+                                ,@paymenttypeid
+                                ,@transactionamount
+                                ,@comments
+                                ,@updatedbyid)";
+
+                conn.Open();
+                DynamicParameters dp = new DynamicParameters();
+                dp.Add("localauthorityid", invoiceCommentsEntity.LocalAuthorityId, DbType.Int32, ParameterDirection.Input);
+                dp.Add("billingcycleid", invoiceCommentsEntity.BillingCycleId, DbType.Int32, ParameterDirection.Input);
+                dp.Add("residentid", invoiceCommentsEntity.ResidentId, DbType.Int32, ParameterDirection.Input);
+                dp.Add("paymenttypeid", invoiceCommentsEntity.PaymentTypeId, DbType.Int32, ParameterDirection.Input);
+                dp.Add("transactionamount", invoiceCommentsEntity.TransactionAmount, DbType.Decimal, ParameterDirection.Input);
+                dp.Add("comments", invoiceCommentsEntity.Comments, DbType.String, ParameterDirection.Input);
+                dp.Add("updatedbyid", invoiceCommentsEntity.UpdatedById, DbType.Int32, ParameterDirection.Input);
+
+                var result = conn.Execute(sql, dp, commandType: CommandType.Text);
+            }
+            return Task.FromResult(true);
+
+            
+        }
+
 
     }
 }
