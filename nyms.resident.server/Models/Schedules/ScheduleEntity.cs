@@ -1,17 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
 
 namespace nyms.resident.server.Models
 {
-    public class ResidentScheduleEntity
+    public class ScheduleEntity
     {
+        public int Id { get; set; }
         public int ResidentId { get; set; }
-        public Guid ReferenceId { get; set; }
-        public string ForeName { get; set; }
-        public string SurName { get; set; }
-        public int ScheduleId { get; set; }
-        public int LocalAuthorityId { get; set; }
+        public int? LocalAuthorityId { get; set; }
         public int PaymentProviderId { get; set; }
-        public string PaymentFromName { get; set; }
         public int PaymentTypeId { get; set; }
         public string Description { get; set; }
         public DateTime ScheduleBeginDate { get; set; }

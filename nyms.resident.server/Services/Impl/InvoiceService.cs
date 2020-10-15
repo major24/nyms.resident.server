@@ -35,7 +35,7 @@ namespace nyms.resident.server.Services.Impl
             if (endDate == null) throw new ArgumentNullException(nameof(endDate));
 
             var invoiceResidents = this.GetInvoiceResidentData(startDate, endDate);
-            var numOfDays = invoiceResidents.Select(d => d.SchedulePayments.Select(sp => sp.NumberOfDays)).FirstOrDefault().FirstOrDefault();
+            var numOfDays = _feeCalculatorService.GetNumberOfDaysInMonth(startDate, endDate); // invoiceResidents.Select(d => d.SchedulePayments.Select(sp => sp.NumberOfDays)).FirstOrDefault().FirstOrDefault();
 
             return new InvoiceData()
             {
@@ -56,18 +56,23 @@ namespace nyms.resident.server.Services.Impl
             if (billingCycle == null) throw new ArgumentNullException(nameof(billingCycle));
 
             var invoiceResidents = this.GetInvoiceResidentData(billingCycle.PeriodStart, billingCycle.PeriodEnd);
+            if (invoiceResidents == null || !invoiceResidents.Any()) throw new ArgumentNullException(nameof(invoiceResidents));
+
             var invoiceDataByLa = invoiceResidents.Where(d => d.LocalAuthorityId == localAuthorityId);
-            var numOfDays = invoiceResidents.Select(d => d.SchedulePayments.Select(sp => sp.NumberOfDays)).FirstOrDefault().FirstOrDefault();
+            var numOfDays = _feeCalculatorService.GetNumberOfDaysInMonth(billingCycle.PeriodStart, billingCycle.PeriodEnd);  //invoiceResidents.Select(d => d.SchedulePayments.Select(sp => sp.NumberOfDays)).FirstOrDefault().FirstOrDefault();
 
             // assemble validated date with invoice data
-            var validatedInvoiceData = _invoiceDataProvider.GetValidatedInvoices((int)localAuthorityId, billingCycleId).Result;
+            var validatedInvoiceData = _invoiceDataProvider.GetValidatedInvoices(billingCycleId).Result; //(int)localAuthorityId, billingCycleId).Result;
             // get usernames for mapping
             var users = _userService.GetUsers();
             // get comments
-            var comments = _invoiceDataProvider.GetInvoiceComments((int)localAuthorityId, billingCycleId).Result;
+            var comments = _invoiceDataProvider.GetInvoiceComments(billingCycleId).Result; //(int)localAuthorityId, 
 
             invoiceDataByLa.ForEach(d =>
             {
+/*                var validatedInvoiceData = _invoiceDataProvider.GetValidatedInvoices(d.Id, billingCycleId).Result;
+                var comments = _invoiceDataProvider.GetInvoiceComments(d.Id, billingCycleId).Result;*/
+
                 d.SchedulePayments.ForEach(sp =>
                 {
                     var invoiceValidatedEntity = validatedInvoiceData.Where(ed => ed.LocalAuthorityId == sp.LocalAuthorityId && ed.PaymentTypeId == sp.PaymentTypeId && ed.ResidentId == sp.ResidentId).FirstOrDefault();
@@ -132,10 +137,10 @@ namespace nyms.resident.server.Services.Impl
             return _invoiceDataProvider.InsertInvoiceComments(invoiceCommentsEntity);
         }
 
-        public Task<IEnumerable<InvoiceCommentsEntity>> GetInvoiceComments(int localAuthorityId, int billingCycleId)
+/*        public Task<IEnumerable<InvoiceCommentsEntity>> GetInvoiceComments(int localAuthorityId, int billingCycleId)
         {
             return this._invoiceDataProvider.GetInvoiceComments(localAuthorityId, billingCycleId);
-        }
+        }*/
 
 
 
@@ -157,9 +162,9 @@ namespace nyms.resident.server.Services.Impl
                 var residentsWithCalculatedFees = _feeCalculatorService.CalculateFee(_invResidents, startDate, endDate);
 
                 // sum LA total, LA Fee + Supliment Fee(s)
-                // PaymentFrom = LA 
+                // PaymentProviderId = LA=1, CC=2, PV=3
                 var sumWeekly = residentsWithCalculatedFees.GetSchedules()
-                .Where(s => s.PaymentFrom == "LA").Select(k => k.AmountDue).Sum();
+                .Where(s => s.PaymentProviderId == 1).Select(k => k.AmountDue).Sum();
                 residentsWithCalculatedFees.TotalLaFee = sumWeekly;
 
                 // get resident weekly fee (LA Fee + CC Fee)
@@ -175,7 +180,7 @@ namespace nyms.resident.server.Services.Impl
                     residentsWithCalculatedFees.GetSchedules().OrderBy(s => s.LocalAuthorityId));
 
                 // make id zero, not visible to web client
-                residentsWithCalculatedFees.Id = 0;
+                // residentsWithCalculatedFees.Id = 0;
 
                 return residentsWithCalculatedFees;
             }).ToArray();

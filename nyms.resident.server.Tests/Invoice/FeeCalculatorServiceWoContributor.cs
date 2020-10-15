@@ -105,8 +105,8 @@ namespace nyms.resident.server.Tests.Invoice
             var amounts = feesPerSchedules.Select(c => c.AmountDue).ToArray();
             var totalAmount = amounts.Sum();
 
-            // (30, 1, "LA", new DateTime(2019, 01, 01), new DateTime(2020, 01, 15), 630.50M));
-            // (30, 1, "LA", new DateTime(2020, 01, 16), new DateTime(2050, 12, 31), 655.75M));
+            // (30, 1, 1, new DateTime(2019, 01, 01), new DateTime(2020, 01, 15), 630.50M));
+            // (30, 1, 1, new DateTime(2020, 01, 16), new DateTime(2050, 12, 31), 655.75M));
             // For 630.50 for 15 days = 1351.07
             // For 655.75 for 13 days = 1217.82  = 2568.89
             Assert.AreEqual(2568.89M, totalAmount);
@@ -127,12 +127,12 @@ namespace nyms.resident.server.Tests.Invoice
             var totalAmount = amounts.Sum();
 
             // Multiple Fee changes
-            // (40, 1, "LA", new DateTime(2019, 01, 01), new DateTime(2020, 01, 10), 600.50M));
-            // (40, 1, "LA", new DateTime(2020, 01, 11), new DateTime(2020, 01, 15), 630.90M));
-            // (40, 1, "LA", new DateTime(2020, 01, 16), new DateTime(2050, 12, 31), 250.50M));
-            // (40, 99, "CC", new DateTime(2019, 01, 01), new DateTime(2020, 01, 10), 150.44M));
-            // (40, 99, "CC", new DateTime(2020, 01, 11), new DateTime(2020, 01, 15), 165.78M));
-            // (40, 99, "CC", new DateTime(2020, 01, 16), new DateTime(2050, 12, 31), 550.58M));
+            // (40, 1, 1, new DateTime(2019, 01, 01), new DateTime(2020, 01, 10), 600.50M));
+            // (40, 1, 1, new DateTime(2020, 01, 11), new DateTime(2020, 01, 15), 630.90M));
+            // (40, 1, 1, new DateTime(2020, 01, 16), new DateTime(2050, 12, 31), 250.50M));
+            // (40, 99, 2, new DateTime(2019, 01, 01), new DateTime(2020, 01, 10), 150.44M));
+            // (40, 99, 2, new DateTime(2020, 01, 11), new DateTime(2020, 01, 15), 165.78M));
+            // (40, 99, 2, new DateTime(2020, 01, 16), new DateTime(2050, 12, 31), 550.58M));
 
             // LA 600.50    CC 150.44  for 10 days   
             // LA 630.90    CC 165.78  for  5 days
@@ -176,12 +176,12 @@ namespace nyms.resident.server.Tests.Invoice
             var totalAmount = amounts.Sum();
 
             // Multiple Fee changes
-            // (40, 1, "LA", new DateTime(2019, 01, 01), new DateTime(2020, 01, 10), 600.50M));
-            // (40, 1, "LA", new DateTime(2020, 01, 11), new DateTime(2020, 01, 15), 630.90M));
-            // (40, 1, "LA", new DateTime(2020, 01, 16), new DateTime(2050, 12, 31), 250.50M));
-            // (40, 99, "CC", new DateTime(2019, 01, 01), new DateTime(2020, 01, 10), 150.44M));
-            // (40, 99, "CC", new DateTime(2020, 01, 11), new DateTime(2020, 01, 15), 165.78M));
-            // (40, 99, "CC", new DateTime(2020, 01, 16), new DateTime(2050, 12, 31), 550.58M));
+            // (40, 1, 1, new DateTime(2019, 01, 01), new DateTime(2020, 01, 10), 600.50M));
+            // (40, 1, 1, new DateTime(2020, 01, 11), new DateTime(2020, 01, 15), 630.90M));
+            // (40, 1, 1, new DateTime(2020, 01, 16), new DateTime(2050, 12, 31), 250.50M));
+            // (40, 99, 2, new DateTime(2019, 01, 01), new DateTime(2020, 01, 10), 150.44M));
+            // (40, 99, 2, new DateTime(2020, 01, 11), new DateTime(2020, 01, 15), 165.78M));
+            // (40, 99, 2, new DateTime(2020, 01, 16), new DateTime(2050, 12, 31), 550.58M));
 
             // LA 600.50    CC 150.44  for 10 days   
             // LA 630.90    CC 165.78  for  5 days
@@ -205,11 +205,11 @@ namespace nyms.resident.server.Tests.Invoice
             var totalAmount = amounts.Sum();
 
             // multiple payments categories from la
-            // (50, 1, "LA", new DateTime(2019, 01, 01), new DateTime(2050, 12, 31), 499.99M));
-            // (50, 1, "LA", new DateTime(2019, 01, 01), new DateTime(2050, 12, 31), 69.75M));
-            // (50, 1, "LA", new DateTime(2019, 01, 01), new DateTime(2050, 12, 31), 25.55M));
-            // (50, 99, "CC", new DateTime(2019, 01, 01), new DateTime(2050, 12, 31), 125.75M));
-            // (50, 99, "CC", new DateTime(2019, 01, 01), new DateTime(2050, 12, 31), 13.33M));
+            // (50, 1, 1, new DateTime(2019, 01, 01), new DateTime(2050, 12, 31), 499.99M));
+            // (50, 1, 1, new DateTime(2019, 01, 01), new DateTime(2050, 12, 31), 69.75M));
+            // (50, 1, 1, new DateTime(2019, 01, 01), new DateTime(2050, 12, 31), 25.55M));
+            // (50, 99, 2, new DateTime(2019, 01, 01), new DateTime(2050, 12, 31), 125.75M));
+            // (50, 99, 2, new DateTime(2019, 01, 01), new DateTime(2050, 12, 31), 13.33M));
 
 
             // For 28 days: all totals = 2937.48
@@ -221,68 +221,68 @@ namespace nyms.resident.server.Tests.Invoice
         private IEnumerable<SchedulePayment> getSchedules(int residentId)
         {
             // ResId, LaId, ContributorName, schBeginDate, schEndDate
-            List<Tuple<int, int, string, DateTime, DateTime, decimal>> allSchedules = new List<Tuple<int, int, string, DateTime, DateTime, decimal>>();
+            List<Tuple<int, int, int, DateTime, DateTime, decimal>> allSchedules = new List<Tuple<int, int, int, DateTime, DateTime, decimal>>();
 
             // only la. one valid period
-            allSchedules.Add(new Tuple<int, int, string, DateTime, DateTime, decimal>
-                (10, 1, "LA", new DateTime(2018, 01, 01), new DateTime(2018, 12, 31), 400.00M));
-            allSchedules.Add(new Tuple<int, int, string, DateTime, DateTime, decimal>
-                (10, 1, "LA", new DateTime(2019, 01, 01), new DateTime(2050, 12, 31), 599.99M));
+            allSchedules.Add(new Tuple<int, int, int, DateTime, DateTime, decimal>
+                (10, 1, 1, new DateTime(2018, 01, 01), new DateTime(2018, 12, 31), 400.00M));
+            allSchedules.Add(new Tuple<int, int, int, DateTime, DateTime, decimal>
+                (10, 1, 1, new DateTime(2019, 01, 01), new DateTime(2050, 12, 31), 599.99M));
 
             // la and cc
-            allSchedules.Add(new Tuple<int, int, string, DateTime, DateTime, decimal>
-                (11, 1, "LA", new DateTime(2019, 01, 01), new DateTime(2050, 12, 31), 555.75M));
-            allSchedules.Add(new Tuple<int, int, string, DateTime, DateTime, decimal>
-                (11, -99, "CC", new DateTime(2019, 01, 01), new DateTime(2050, 12, 31), 245.43M));
+            allSchedules.Add(new Tuple<int, int, int, DateTime, DateTime, decimal>
+                (11, 1, 1, new DateTime(2019, 01, 01), new DateTime(2050, 12, 31), 555.75M));
+            allSchedules.Add(new Tuple<int, int, int, DateTime, DateTime, decimal>
+                (11, -99, 2, new DateTime(2019, 01, 01), new DateTime(2050, 12, 31), 245.43M));
 
 
             // resi leave mid month
-            allSchedules.Add(new Tuple<int, int, string, DateTime, DateTime, decimal>
-                (20, 1, "LA", new DateTime(2019, 01, 01), new DateTime(2020, 01, 15), 680.10M));
+            allSchedules.Add(new Tuple<int, int, int, DateTime, DateTime, decimal>
+                (20, 1, 1, new DateTime(2019, 01, 01), new DateTime(2020, 01, 15), 680.10M));
 
             // resi arrives mid month
-            allSchedules.Add(new Tuple<int, int, string, DateTime, DateTime, decimal>
-                (21, 1, "LA", new DateTime(2020, 01, 21), new DateTime(2050, 12, 31), 678.01M));
+            allSchedules.Add(new Tuple<int, int, int, DateTime, DateTime, decimal>
+                (21, 1, 1, new DateTime(2020, 01, 21), new DateTime(2050, 12, 31), 678.01M));
 
 
             // Fee change
-            allSchedules.Add(new Tuple<int, int, string, DateTime, DateTime, decimal>
-                (30, 1, "LA", new DateTime(2019, 01, 01), new DateTime(2020, 01, 15), 630.50M));
-            allSchedules.Add(new Tuple<int, int, string, DateTime, DateTime, decimal>
-                (30, 1, "LA", new DateTime(2020, 01, 16), new DateTime(2050, 12, 31), 655.75M));
+            allSchedules.Add(new Tuple<int, int, int, DateTime, DateTime, decimal>
+                (30, 1, 1, new DateTime(2019, 01, 01), new DateTime(2020, 01, 15), 630.50M));
+            allSchedules.Add(new Tuple<int, int, int, DateTime, DateTime, decimal>
+                (30, 1, 1, new DateTime(2020, 01, 16), new DateTime(2050, 12, 31), 655.75M));
 
 
             // Multiple Fee changes
-            allSchedules.Add(new Tuple<int, int, string, DateTime, DateTime, decimal>
-                (40, 1, "LA", new DateTime(2019, 01, 01), new DateTime(2020, 01, 10), 600.50M));
-            allSchedules.Add(new Tuple<int, int, string, DateTime, DateTime, decimal>
-                (40, 1, "LA", new DateTime(2020, 01, 11), new DateTime(2020, 01, 15), 630.90M));
-            allSchedules.Add(new Tuple<int, int, string, DateTime, DateTime, decimal>
-                (40, 1, "LA", new DateTime(2020, 01, 16), new DateTime(2050, 12, 31), 250.50M));
-            allSchedules.Add(new Tuple<int, int, string, DateTime, DateTime, decimal>
-                (40, 99, "CC", new DateTime(2019, 01, 01), new DateTime(2020, 01, 10), 150.44M));
-            allSchedules.Add(new Tuple<int, int, string, DateTime, DateTime, decimal>
-                (40, 99, "CC", new DateTime(2020, 01, 11), new DateTime(2020, 01, 15), 165.78M));
-            allSchedules.Add(new Tuple<int, int, string, DateTime, DateTime, decimal>
-                (40, 99, "CC", new DateTime(2020, 01, 16), new DateTime(2050, 12, 31), 550.58M));
+            allSchedules.Add(new Tuple<int, int, int, DateTime, DateTime, decimal>
+                (40, 1, 1, new DateTime(2019, 01, 01), new DateTime(2020, 01, 10), 600.50M));
+            allSchedules.Add(new Tuple<int, int, int, DateTime, DateTime, decimal>
+                (40, 1, 1, new DateTime(2020, 01, 11), new DateTime(2020, 01, 15), 630.90M));
+            allSchedules.Add(new Tuple<int, int, int, DateTime, DateTime, decimal>
+                (40, 1, 1, new DateTime(2020, 01, 16), new DateTime(2050, 12, 31), 250.50M));
+            allSchedules.Add(new Tuple<int, int, int, DateTime, DateTime, decimal>
+                (40, 99, 2, new DateTime(2019, 01, 01), new DateTime(2020, 01, 10), 150.44M));
+            allSchedules.Add(new Tuple<int, int, int, DateTime, DateTime, decimal>
+                (40, 99, 2, new DateTime(2020, 01, 11), new DateTime(2020, 01, 15), 165.78M));
+            allSchedules.Add(new Tuple<int, int, int, DateTime, DateTime, decimal>
+                (40, 99, 2, new DateTime(2020, 01, 16), new DateTime(2050, 12, 31), 550.58M));
 
 
             // multiple payments categories from la
-            allSchedules.Add(new Tuple<int, int, string, DateTime, DateTime, decimal>
-                (50, 1, "LA", new DateTime(2019, 01, 01), new DateTime(2050, 12, 31), 499.99M));
-            allSchedules.Add(new Tuple<int, int, string, DateTime, DateTime, decimal>
-                (50, 1, "LA", new DateTime(2019, 01, 01), new DateTime(2050, 12, 31), 69.75M));
-            allSchedules.Add(new Tuple<int, int, string, DateTime, DateTime, decimal>
-                (50, 1, "LA", new DateTime(2019, 01, 01), new DateTime(2050, 12, 31), 25.55M));
-            allSchedules.Add(new Tuple<int, int, string, DateTime, DateTime, decimal>
-                (50, 99, "CC", new DateTime(2019, 01, 01), new DateTime(2050, 12, 31), 125.75M));
-            allSchedules.Add(new Tuple<int, int, string, DateTime, DateTime, decimal>
-                (50, 99, "CC", new DateTime(2019, 01, 01), new DateTime(2050, 12, 31), 13.33M));
+            allSchedules.Add(new Tuple<int, int, int, DateTime, DateTime, decimal>
+                (50, 1, 1, new DateTime(2019, 01, 01), new DateTime(2050, 12, 31), 499.99M));
+            allSchedules.Add(new Tuple<int, int, int, DateTime, DateTime, decimal>
+                (50, 1, 1, new DateTime(2019, 01, 01), new DateTime(2050, 12, 31), 69.75M));
+            allSchedules.Add(new Tuple<int, int, int, DateTime, DateTime, decimal>
+                (50, 1, 1, new DateTime(2019, 01, 01), new DateTime(2050, 12, 31), 25.55M));
+            allSchedules.Add(new Tuple<int, int, int, DateTime, DateTime, decimal>
+                (50, 99, 2, new DateTime(2019, 01, 01), new DateTime(2050, 12, 31), 125.75M));
+            allSchedules.Add(new Tuple<int, int, int, DateTime, DateTime, decimal>
+                (50, 99, 2, new DateTime(2019, 01, 01), new DateTime(2050, 12, 31), 13.33M));
 
             var list = allSchedules.Where(s => s.Item1 == residentId);
             var schs = list.Select(s =>
             {
-                return new SchedulePayment() { LocalAuthorityId = s.Item2, PaymentFrom = s.Item3, ScheduleBeginDate = s.Item4, ScheduleEndDate = s.Item5, WeeklyFee = s.Item6 };
+                return new SchedulePayment() { LocalAuthorityId = s.Item2, PaymentProviderId = s.Item3, ScheduleBeginDate = s.Item4, ScheduleEndDate = s.Item5, WeeklyFee = s.Item6 };
             });
 
             return schs.ToArray();

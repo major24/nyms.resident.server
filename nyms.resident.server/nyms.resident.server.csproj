@@ -233,7 +233,10 @@
     <Compile Include="Models\Resident\ResidentEntity.cs" />
     <Compile Include="Models\Resident\ResidentSchedule.cs" />
     <Compile Include="Models\Resident\ResidentScheduleEntity.cs" />
-    <Compile Include="Models\Resident\SchedulePayment.cs" />
+    <Compile Include="Models\Schedules\PaymentProvider.cs" />
+    <Compile Include="Models\Schedules\PaymentType.cs" />
+    <Compile Include="Models\Schedules\ScheduleEntity.cs" />
+    <Compile Include="Models\Schedules\SchedulePayment.cs" />
     <Compile Include="Models\Authentication\AuthenticationRequest.cs" />
     <Compile Include="Models\Authentication\AuthenticationResponse.cs" />
     <Compile Include="Models\Authentication\SecurityPrincipal.cs" />
@@ -247,7 +250,7 @@
     <Compile Include="Models\Core\AuthFailureResult.cs" />
     <Compile Include="Models\Core\IPerson.cs" />
     <Compile Include="Models\Resident\EnquiryEntity.cs" />
-    <Compile Include="Models\Resident\ScheduleEndDateEntity.cs" />
+    <Compile Include="Models\Schedules\ScheduleEndDateEntity.cs" />
     <Compile Include="Models\Resident\SocialWorker.cs" />
     <Compile Include="Models\Resident\Enquiry.cs" />
     <Compile Include="Models\Resident\Resident.cs" />

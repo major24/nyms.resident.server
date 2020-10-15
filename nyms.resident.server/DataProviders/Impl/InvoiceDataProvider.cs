@@ -28,7 +28,7 @@ namespace nyms.resident.server.DataProviders.Impl
                 string sql = @"SELECT s.[id] as id
                               ,s.[resident_id] as residentid
                               ,s.[local_authority_id] as localauthorityid
-                              ,s.[payment_from] paymentfrom
+                              ,s.[payment_provider_id] paymentproviderid
                               ,s.[payment_type_id] as paymenttypeid
                               ,s.[description] as description
                               ,s.[schedule_begin_date] as schedulebegindate
@@ -118,7 +118,7 @@ namespace nyms.resident.server.DataProviders.Impl
             return Task.FromResult(true);
         }
 
-        public Task<IEnumerable<InvoiceValidatedEntity>> GetValidatedInvoices(int localAuthorityId, int billingCycleId)
+        public Task<IEnumerable<InvoiceValidatedEntity>> GetValidatedInvoices(int billingCycleId) //int residentId, 
         {
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
@@ -133,19 +133,19 @@ namespace nyms.resident.server.DataProviders.Impl
                               ,[updated_by_id] as updatedbyid
                               ,[updated_date] as updateddate
                                FROM [dbo].[invoices_validated]
-	                           WHERE [local_authority_id] = @localauthorityid
-                               AND [billing_cycle_id] = @billingcycleid";
+                               WHERE [billing_cycle_id] = @billingcycleid";
+                //WHERE [resident_id] = @residentid
 
                 conn.Open();
                 DynamicParameters dp = new DynamicParameters();
-                dp.Add("localauthorityid", localAuthorityId, DbType.Int32, ParameterDirection.Input);
+                //dp.Add("residentid", residentId, DbType.Int32, ParameterDirection.Input);
                 dp.Add("billingcycleid", billingCycleId, DbType.Int32, ParameterDirection.Input);
                 var result = conn.QueryAsync<InvoiceValidatedEntity>(sql, dp).Result;
                 return Task.FromResult(result);
             }
         }
 
-        public Task<IEnumerable<InvoiceCommentsEntity>> GetInvoiceComments(int localAuthorityId, int billingCycleId)
+        public Task<IEnumerable<InvoiceCommentsEntity>> GetInvoiceComments(int billingCycleId) //int residentId, 
         {
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
@@ -159,12 +159,13 @@ namespace nyms.resident.server.DataProviders.Impl
                               ,[updated_by_id] as updatedbyid
                               ,[updated_date] as updateddate
                                FROM [dbo].[invoice_comments]
-	                           WHERE [local_authority_id] = @localauthorityid
-                               AND [billing_cycle_id] = @billingcycleid";
+                               WHERE [billing_cycle_id] = @billingcycleid";
+                //WHERE [local_authority_id] = @localauthorityid
+                //	                           WHERE [resident_id] = @residentid
 
                 conn.Open();
                 DynamicParameters dp = new DynamicParameters();
-                dp.Add("localauthorityid", localAuthorityId, DbType.Int32, ParameterDirection.Input);
+                // dp.Add("residentid", residentId, DbType.Int32, ParameterDirection.Input);
                 dp.Add("billingcycleid", billingCycleId, DbType.Int32, ParameterDirection.Input);
                 var result = conn.QueryAsync<InvoiceCommentsEntity>(sql, dp).Result;
                 return Task.FromResult(result);

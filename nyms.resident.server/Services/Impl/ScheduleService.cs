@@ -34,7 +34,7 @@ namespace nyms.resident.server.Services.Impl
                 {
                     return new SchedulePayment() {
                         Id = s.ScheduleId,
-                        PaymentFrom = s.PaymentFrom, 
+                        PaymentProviderId = s.PaymentProviderId, 
                         PaymentTypeId = s.PaymentTypeId,
                         Description = s.Description,
                         ScheduleBeginDate = s.ScheduleBeginDate,
@@ -68,7 +68,7 @@ namespace nyms.resident.server.Services.Impl
                 return new SchedulePayment()
                 {
                     Id = s.ScheduleId,
-                    PaymentFrom = s.PaymentFrom,
+                    PaymentProviderId = s.PaymentProviderId,
                     PaymentTypeId = s.PaymentTypeId,
                     Description = s.Description,
                     ScheduleBeginDate = s.ScheduleBeginDate,
@@ -89,7 +89,7 @@ namespace nyms.resident.server.Services.Impl
             };
         }
 
-        public void CreateSchedule(SchedulePayment schedule)
+        public void CreateSchedule(ScheduleEntity schedule)
         {
             this._scheduleDataProvider.CreateSchedule(schedule);
         }
@@ -102,6 +102,16 @@ namespace nyms.resident.server.Services.Impl
         public void InactivateSchedule(int id)
         {
             this._scheduleDataProvider.InactivateSchedule(id);
+        }
+
+        public IEnumerable<PaymentProvider> GetPaymentProviders()
+        {
+            return _scheduleDataProvider.GetPaymentProviders();
+        }
+
+        public IEnumerable<PaymentType> GetPaymentTypes()
+        {
+            return _scheduleDataProvider.GetPaymentTypes();
         }
     }
 }

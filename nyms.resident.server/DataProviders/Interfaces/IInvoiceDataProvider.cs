@@ -12,7 +12,10 @@ namespace nyms.resident.server.DataProviders.Interfaces
         Task<IEnumerable<BillingCycle>> GetBillingCycles();
         Task<bool> UpdateValidatedInvoices(IEnumerable<InvoiceValidatedEntity> InvoiceValidatedEntities);
         Task<bool> InsertInvoiceComments(InvoiceCommentsEntity invoiceCommentsEntity);
-        Task<IEnumerable<InvoiceValidatedEntity>> GetValidatedInvoices(int localAuthorityId, int billingCycleId);
-        Task<IEnumerable<InvoiceCommentsEntity>> GetInvoiceComments(int localAuthorityId, int billingCycleId);
+        //Task<IEnumerable<InvoiceValidatedEntity>> GetValidatedInvoices(int localAuthorityId, int billingCycleId);
+        Task<IEnumerable<InvoiceValidatedEntity>> GetValidatedInvoices(int billingCycleId); //int residentId, 
+
+        // Task<IEnumerable<InvoiceCommentsEntity>> GetInvoiceComments(int localAuthorityId, int billingCycleId);
+        Task<IEnumerable<InvoiceCommentsEntity>> GetInvoiceComments(int billingCycleId);
     }
 }

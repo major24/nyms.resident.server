@@ -152,7 +152,7 @@ namespace nyms.resident.server.Controllers.Invoice
 
         private string CreateDetailCsvReport(IEnumerable<InvoiceResident> invResidents, string billingBeginDate, string billingEndDate)
         {
-            string header = "Name,Payment From,Local Authority,Description,Start Date,End Date,Num.Of Days,Weekly Fee,Amount Due," + Environment.NewLine;
+            string header = "Name,Payment Provider Id,Local Authority,Description,Start Date,End Date,Num.Of Days,Weekly Fee,Amount Due," + Environment.NewLine;
 
             StringBuilder sb = new StringBuilder();
             string str = "{0},{1},{2},{3},{4},{5},{6},{7},{8},{9}";
@@ -162,7 +162,7 @@ namespace nyms.resident.server.Controllers.Invoice
                 {
                     sb.AppendFormat(str,
                         r.Name.Replace(",", ""),
-                        s.PaymentFrom,
+                        s.PaymentProviderId,
                         s.PaymentFromName?.Replace(",", ""),
                         s.Description?.Replace(",", ""),
                         billingBeginDate,
@@ -185,9 +185,9 @@ namespace nyms.resident.server.Controllers.Invoice
             string str = "{0},{1},{2},{3},{4},{5},{6},{7}";
             foreach (var r in invResidents)
             {
-                var laAmt = GetTotal(r.SchedulePayments, "LA");
-                var ccAmt = GetTotal(r.SchedulePayments, "CC");
-                var pvAmt = GetTotal(r.SchedulePayments, "PV");
+                var laAmt = GetTotal(r.SchedulePayments, 1); // LA
+                var ccAmt = GetTotal(r.SchedulePayments, 2); // CC
+                var pvAmt = GetTotal(r.SchedulePayments, 3); // PV
                 var numOfDays = r.SchedulePayments.Select(s => s.NumberOfDays).FirstOrDefault();
 
                 sb.AppendFormat(str,
@@ -204,9 +204,9 @@ namespace nyms.resident.server.Controllers.Invoice
             return header + sb.ToString();
         }
 
-        private decimal GetTotal(IEnumerable<SchedulePayment> schedules, string paymentFrom)
+        private decimal GetTotal(IEnumerable<SchedulePayment> schedules, int PaymentProviderId)
         {
-            var x = schedules.Where(s => s.PaymentFrom == paymentFrom).Select(k => k.AmountDue).Sum();
+            var x = schedules.Where(s => s.PaymentProviderId == PaymentProviderId).Select(k => k.AmountDue).Sum();
             return x;
         }
 

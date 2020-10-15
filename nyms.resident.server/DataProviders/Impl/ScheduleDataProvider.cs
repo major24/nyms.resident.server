@@ -31,7 +31,7 @@ namespace nyms.resident.server.DataProviders.Impl
                                 , r.forename as forename
                                 , r.surname as surname
                                 , s.id as scheduleid
-                                , s.payment_from as paymentfrom
+                                , s.payment_provider_id as paymentproviderid
                                 , s.payment_type_id as paymenttypeid
                                 , s.description as description
                                 , s.schedule_begin_date as schedulebegindate
@@ -64,7 +64,7 @@ namespace nyms.resident.server.DataProviders.Impl
                                 , r.forename as forename
                                 , r.surname as surname
                                 , s.id as scheduleid
-                                , s.payment_from as paymentfrom
+                                , s.payment_provider_id as paymentproviderid
                                 , s.payment_type_id as paymenttypeid
                                 , s.description as description
                                 , s.schedule_begin_date as schedulebegindate
@@ -108,14 +108,14 @@ namespace nyms.resident.server.DataProviders.Impl
             }
         }
 
-        public void CreateSchedule(SchedulePayment schedule)
+        public void CreateSchedule(ScheduleEntity schedule)
         {
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
                 string sql = @"INSERT INTO [dbo].[schedules]
                            ([resident_id]
                            ,[local_authority_id]
-                           ,[payment_from]
+                           ,[payment_provider_id]
                            ,[payment_type_id]
                            ,[description]
                            ,[schedule_begin_date]
@@ -124,7 +124,7 @@ namespace nyms.resident.server.DataProviders.Impl
                      VALUES
                            (@residentid
                            ,@localauthorityid
-                           ,@paymentfrom
+                           ,@paymentproviderid
                            ,@paymenttypeid
                            ,@description
                            ,@schedulebegindate
@@ -135,7 +135,7 @@ namespace nyms.resident.server.DataProviders.Impl
                 conn.Open();
                 dp.Add("residentid", schedule.ResidentId, DbType.Int32, ParameterDirection.Input);
                 dp.Add("localauthorityid", schedule.LocalAuthorityId, DbType.Int32, ParameterDirection.Input);
-                dp.Add("paymentfrom", schedule.PaymentFrom, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("paymentproviderid", schedule.PaymentProviderId, DbType.String, ParameterDirection.Input, 80);
                 dp.Add("paymenttypeid", schedule.PaymentTypeId, DbType.String, ParameterDirection.Input, 80);
                 dp.Add("description", schedule.Description, DbType.String, ParameterDirection.Input, 200);
                 dp.Add("schedulebegindate", schedule.ScheduleBeginDate, DbType.Date, ParameterDirection.Input, 80);
@@ -160,6 +160,36 @@ namespace nyms.resident.server.DataProviders.Impl
 
                 conn.Open();
                 var affRows = conn.Execute(sql, dp);
+            }
+        }
+
+        public IEnumerable<PaymentProvider> GetPaymentProviders()
+        {
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                string sql = @"SELECT [id] as id
+                            ,[name] as name
+                            FROM[dbo].[payment_providers]
+                            WHERE active = 'Y'";
+
+                conn.Open();
+                var result = conn.Query<PaymentProvider>(sql);
+                return result;
+            }
+        }
+
+        public IEnumerable<PaymentType> GetPaymentTypes()
+        {
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                string sql = @"SELECT [id] as id
+                                ,[name] as name
+                                FROM[dbo].[payment_types]
+                                WHERE active = 'Y'";
+
+                conn.Open();
+                var result = conn.Query<PaymentType>(sql);
+                return result;
             }
         }
     }

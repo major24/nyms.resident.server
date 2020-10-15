@@ -54,7 +54,7 @@ namespace nyms.resident.server.Controllers.Resident
 
         [HttpPost]
         [Route("api/residents/{referenceId}/schedules")]
-        public IHttpActionResult Post([FromUri]string referenceId, [FromBody]SchedulePayment schedule)
+        public IHttpActionResult Post([FromUri]string referenceId, [FromBody]ScheduleEntity schedule)
         {
             if (string.IsNullOrEmpty(referenceId)) return BadRequest(referenceId);
 
@@ -96,6 +96,33 @@ namespace nyms.resident.server.Controllers.Resident
             this._scheduleService.InactivateSchedule(id);
 
             return Ok("Updated");
+        }
+
+
+        [HttpGet]
+        [Route("api/schedules/payment-providers")]
+        public IHttpActionResult GetPaymentProviders()
+        {
+            var user = System.Threading.Thread.CurrentPrincipal as SecurityPrincipal;
+            logger.Info($"Payment providers requested by {user?.ForeName}");
+
+            var paymentProviders = this._scheduleService.GetPaymentProviders();
+            if (paymentProviders == null) return NotFound();
+
+            return Ok(paymentProviders);
+        }
+
+        [HttpGet]
+        [Route("api/schedules/payment-types")]
+        public IHttpActionResult GetPaymentTyps()
+        {
+            var user = System.Threading.Thread.CurrentPrincipal as SecurityPrincipal;
+            logger.Info($"Payment providers requested by {user?.ForeName}");
+
+            var paymentTypes = this._scheduleService.GetPaymentTypes();
+            if (paymentTypes == null) return NotFound();
+
+            return Ok(paymentTypes);
         }
 
     }

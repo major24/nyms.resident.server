@@ -12,6 +12,6 @@ namespace nyms.resident.server.Services.Interfaces
         Task<IEnumerable<BillingCycle>> GetBillingCycles();
         Task<bool> UpdateInvoicesValidated(InvoiceValidatedEntity[] invoiceValidatedEntities);
         Task<bool> InsertInvoiceComments(InvoiceCommentsEntity invoiceCommentsEntity);
-        Task<IEnumerable<InvoiceCommentsEntity>> GetInvoiceComments(int localAuthorityId, int billingCycleId);
+        // Task<IEnumerable<InvoiceCommentsEntity>> GetInvoiceComments(int localAuthorityId, int billingCycleId);
     }
 }

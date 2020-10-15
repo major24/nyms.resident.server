@@ -45,6 +45,22 @@ namespace nyms.resident.server.Invoice
             return resident;
         }
 
+        public int GetNumberOfDaysInMonth(DateTime beginDate, DateTime endDate)
+        {
+            DateTime start = new DateTime(beginDate.Year, beginDate.Month, beginDate.Day);
+            DateTime end = new DateTime(endDate.Year, endDate.Month, endDate.Day);
+
+            TimeSpan ts = end - start;
+
+            if (ts.Days < 0)
+            {
+                throw new ArgumentOutOfRangeException("End date must be higher than than start date.");
+            }
+
+            return ts.Days + 1;
+        }
+
+
         private bool IsActiveSchedule(DateTime scheduleBeginDate, DateTime scheduleEndDate, DateTime reportBeginDate, DateTime reportEndDate)
         {
             // ensure schedule is not expired
@@ -58,21 +74,6 @@ namespace nyms.resident.server.Invoice
                 return false;
             }
             return true;
-        }
-
-        private int GetNumberOfDaysInMonth(DateTime beginDate, DateTime endDate)
-        {
-            DateTime start = new DateTime(beginDate.Year, beginDate.Month, beginDate.Day);
-            DateTime end = new DateTime(endDate.Year, endDate.Month, endDate.Day);
-
-            TimeSpan ts = end - start;
-
-            if (ts.Days < 0)
-            {
-                throw new ArgumentOutOfRangeException("End date must be higher than than start date.");
-            }
-
-            return ts.Days + 1;
         }
 
         private decimal CalculateFee(decimal agreedWeeklyFee, int numberOfDays)

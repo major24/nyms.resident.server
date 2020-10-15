@@ -10,7 +10,9 @@ namespace nyms.resident.server.DataProviders.Interfaces
         IEnumerable<ResidentScheduleEntity> GetResidentSchedules();
         IEnumerable<ResidentScheduleEntity> GetResidentSchedules(Guid referenceId);
         void UpdateScheduleEndDate(int id, DateTime scheduleEndDate);
-        void CreateSchedule(SchedulePayment schedule);
+        void CreateSchedule(ScheduleEntity schedule);
         void InactivateSchedule(int id);
+        IEnumerable<PaymentProvider> GetPaymentProviders();
+        IEnumerable<PaymentType> GetPaymentTypes();
     }
 }
