@@ -38,6 +38,7 @@ namespace nyms.resident.server.DataProviders.Impl
                                 , s.schedule_end_date as scheduleenddate
                                 , s.weekly_fee as weeklyfee
                                 , s.updated_date as updateddate
+                                , s.active as active
 								, la.id as localauthorityid
 								, la.name as paymentfromname
                             FROM [dbo].[residents] r 

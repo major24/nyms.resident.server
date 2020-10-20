@@ -1,11 +1,13 @@
 ﻿using nyms.resident.server.Models.Core;
 using nyms.resident.server.Models;
 using System;
+using System.Collections.Generic;
 
 namespace nyms.resident.server.Models
 {
     public class Enquiry : ResidentBase
     {
+        public int Id { get; set; }
         public int CareHomeId { get; set; }
         public int LocalAuthorityId { get; set; }
         public Address Address { get; set; }
@@ -25,5 +27,6 @@ namespace nyms.resident.server.Models
         public DateTime? UpdatedDate { get; set; } = null;
         public string LocalAuthorityName { get; set; }
         public string CareCategoryName { get; set; }
+        public IEnumerable<EnquiryAction> EnquiryActions { get; set; }
     }
 }

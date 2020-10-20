@@ -230,6 +230,7 @@
     <Compile Include="Invoice\InvoiceResident.cs" />
     <Compile Include="Invoice\InvoiceValidatedEntity.cs" />
     <Compile Include="Invoice\InvoiceValidatedModel.cs" />
+    <Compile Include="Models\Resident\EnquiryAction.cs" />
     <Compile Include="Models\Resident\ResidentEntity.cs" />
     <Compile Include="Models\Resident\ResidentSchedule.cs" />
     <Compile Include="Models\Resident\ResidentScheduleEntity.cs" />
@@ -283,14 +284,12 @@
     <Content Include="Content\bootstrap-theme.min.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
-    <Content Include="DbScritps\1-DropTables.txt" />
-    <Content Include="DbScritps\2-CreateTables.txt" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
-    <None Include="Properties\PublishProfiles\NymsServerFolderPublish.pubxml" />
+    <None Include="Properties\PublishProfiles\FolderProfile1.pubxml" />
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.4.1.js" />
     <Content Include="Scripts\jquery-3.4.1.min.js" />

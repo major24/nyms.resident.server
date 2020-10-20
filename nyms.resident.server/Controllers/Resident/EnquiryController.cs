@@ -47,7 +47,6 @@ namespace nyms.resident.server.Controllers
         [Route("api/enquires/{referenceId}")]
         public IHttpActionResult GetEnquiryByReferenceId(string referenceId)
         {
-            // add validateon
             if (string.IsNullOrEmpty(referenceId))
             {
                 throw new ArgumentNullException(nameof(referenceId));
@@ -97,6 +96,35 @@ namespace nyms.resident.server.Controllers
 
             var updEnquiry = this._enquiryService.Update(enquiry).Result;
             return Created("", updEnquiry);
+        }
+
+        // actions
+        [HttpGet]
+        [Route("api/enquires/{referenceId}/actions")]
+        public IHttpActionResult GetEnquiryActionsByReferenceId(string referenceId)
+        {
+            if (string.IsNullOrEmpty(referenceId))
+            {
+                throw new ArgumentNullException(nameof(referenceId));
+            }
+
+            var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
+            logger.Info($"Enquiry actions requested by {loggedInUser.ForeName}");
+
+            var actions = _enquiryService.GetActions(new Guid(referenceId));
+
+            return Ok(actions);
+        }
+
+        [HttpPost]
+        [Route("api/enquires/{referenceId}/actions")]
+        public IHttpActionResult SaveEnquiryActions([FromUri] string referenceId, [FromBody] EnquiryAction[] enquiryActions)
+        {
+            if (string.IsNullOrEmpty(referenceId) || !enquiryActions.Any()) throw new ArgumentNullException("Reference Id or actions is missing");
+
+            this._enquiryService.SaveActions(new Guid(referenceId), enquiryActions);
+
+            return Ok(true);
         }
 
     }

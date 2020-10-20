@@ -12,6 +12,10 @@
         public static readonly string TOKEN_ACCESS_DENIED_NO_ROLE_FOR = "Access denied. Role is not granted for ";
         public static readonly string REQUST_ACCESS_FOR = "Requesting Access for ";
         public static readonly string REQUST_ACCESS_GRANTED_FOR = "Access granted for ";
+
+        public static readonly string ENQUIRY_ACTION_STATUS_PENDING = "pending";
+        public static readonly string ENQUIRY_ACTION_STATUS_COMPLETED = "completed";
+        public static readonly string ENQUIRY_ACTION_STATUS_COMPLETING = "_completing";
     }
 
     public enum EnquiryStatus

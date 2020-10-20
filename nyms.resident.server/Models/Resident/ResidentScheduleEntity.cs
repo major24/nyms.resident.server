@@ -17,5 +17,6 @@ namespace nyms.resident.server.Models
         public DateTime ScheduleBeginDate { get; set; }
         public DateTime ScheduleEndDate { get; set; }
         public decimal WeeklyFee { get; set; }
+        public string Active { get; set; }
     }
 }

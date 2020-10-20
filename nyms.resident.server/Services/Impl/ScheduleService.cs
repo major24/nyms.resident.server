@@ -41,7 +41,8 @@ namespace nyms.resident.server.Services.Impl
                         ScheduleEndDate = s.ScheduleEndDate,
                         WeeklyFee = s.WeeklyFee,
                         PaymentFromName = s.PaymentFromName,
-                        LocalAuthorityId = s.LocalAuthorityId
+                        LocalAuthorityId = s.LocalAuthorityId,
+                        Active = s.Active
                     };
                 });
                 return new ResidentSchedule()

@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace nyms.resident.server.DataProviders.Impl
@@ -31,7 +32,8 @@ namespace nyms.resident.server.DataProviders.Impl
                 using (IDbConnection conn = new SqlConnection(_connectionString))
                 {
                     string sql = @"SELECT
-                       e.reference_id as referenceid
+                       e.id as id
+                      ,e.reference_id as referenceid
                       ,[care_home_id] as carehomeid
                       ,[local_authority_id] as localauthorityid
                       ,[forename] as forename
@@ -82,7 +84,8 @@ namespace nyms.resident.server.DataProviders.Impl
                 using (IDbConnection conn = new SqlConnection(_connectionString))
                 {
                     string sql = @"SELECT
-                       [reference_id] as referenceid
+                       [id] as id
+                      ,[reference_id] as referenceid
                       ,[care_home_id] as carehomeid
                       ,[local_authority_id] as localauthorityid
                       ,[forename] as forename
@@ -133,7 +136,7 @@ namespace nyms.resident.server.DataProviders.Impl
         }
 
 
-        public Task<Enquiry> Create(Enquiry enquiry)
+        public Task<int> Create(Enquiry enquiry)
         {
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
@@ -204,10 +207,12 @@ namespace nyms.resident.server.DataProviders.Impl
                    ,@response
                    ,@comments
                    ,@status
-                   ,@updatedbyid)";
+                   ,@updatedbyid);
+                SELECT CAST(SCOPE_IDENTITY() as int)";
+
+
 
                 DynamicParameters dp = new DynamicParameters();
-                conn.Open();
                 dp.Add("referenceid", enquiry.ReferenceId, DbType.Guid, ParameterDirection.Input, 80);
                 dp.Add("carehomeid", enquiry.CareHomeId, DbType.Int32, ParameterDirection.Input);
                 dp.Add("localauthorityid", enquiry.LocalAuthorityId, DbType.Int32, ParameterDirection.Input);
@@ -241,10 +246,13 @@ namespace nyms.resident.server.DataProviders.Impl
                 dp.Add("comments", enquiry.Comments, DbType.String, ParameterDirection.Input, 500);
                 dp.Add("status", enquiry.Status, DbType.String, ParameterDirection.Input, 80);
                 dp.Add("updatedbyid", enquiry.UpdatedBy, DbType.Int32, ParameterDirection.Input);
-    
-                var result = conn.Execute(sql, dp, commandType: CommandType.Text);
+
+                conn.Open();
+                var result = conn.QuerySingle<int>(sql, dp, commandType: CommandType.Text);
+                return Task.FromResult(result);
+
+                // previous impl of add actions along with enquiry. see below as commented out
             }
-            return Task.FromResult(enquiry);
         }
 
         public Task<Enquiry> Update(Enquiry enquiry)
@@ -327,7 +335,115 @@ namespace nyms.resident.server.DataProviders.Impl
             }
             return Task.FromResult(enquiry);
         }
+
+        public IEnumerable<EnquiryAction> GetActions(int enquiryId)
+        {
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                string sql = @"SELECT [id] as id
+                              ,[enquiry_id] as enquiryid
+                              ,[action] as action
+                              ,[action_date] as actiondate
+                              ,[response] as response
+                              ,[status] as status
+                              ,[updated_date] as updateddate
+                              ,[created_date] as createddate
+                              FROM[dbo].[enquiry_actions]
+                              WHERE [enquiry_id] = @enquiryid";
+
+                DynamicParameters dp = new DynamicParameters();
+                dp.Add("enquiryid", enquiryId, DbType.Int32, ParameterDirection.Input);
+
+                conn.Open();
+                var results = conn.Query<EnquiryAction>(sql, dp);
+                return results;
+            }
+        }
+
+        public void SaveActions(int enquiryId, EnquiryAction[] enquiryActions)
+        {
+            string sqlActInsert = @"INSERT INTO [dbo].[enquiry_actions]
+                                   ([enquiry_id]
+                                   ,[action]
+                                   ,[action_date]
+                                   ,[response]
+                                   ,[status])
+                                VALUES
+                                   (@enquiryid
+                                   ,@action
+                                   ,@actiondate
+                                   ,@response
+                                   ,@status)";
+
+            string sqlActUpdate = @"UPDATE [dbo].[enquiry_actions]
+                                   SET [action] = @action
+                                   ,[response] = @response
+                                   ,[status] = @status
+                                   ,[updated_date] = GETDATE()
+                                    WHERE id = @id";
+
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                using (var tran = conn.BeginTransaction())
+                {
+                    foreach (var act in enquiryActions)
+                    {
+                        DynamicParameters dpAction = new DynamicParameters();
+                        string sql = sqlActUpdate;
+                        if (act.Id == 0)
+                        {
+                            dpAction.Add("enquiryid", act.EnquiryId, DbType.Int32, ParameterDirection.Input);
+                            dpAction.Add("actiondate", act.ActionDate, DbType.DateTime, ParameterDirection.Input);
+                            sql = sqlActInsert;
+                        }
+                        dpAction.Add("id", act.Id, DbType.Int32, ParameterDirection.Input);
+                        dpAction.Add("action", act.Action, DbType.String, ParameterDirection.Input);
+                        dpAction.Add("response", act.Response, DbType.String, ParameterDirection.Input);
+                        dpAction.Add("status", act.Status, DbType.String, ParameterDirection.Input);
+                        var result2 = conn.Execute(sql, dpAction, commandType: CommandType.Text, transaction: tran);
+                    }
+                    tran.Commit();
+                }
+            }
+        }
     }
 }
 
+// get by ids
+// var results = conn.Query<EnquiryAction>(sql, new { ids = residentIds });
+// return results;
+
+
+// add actions along with enquiry
+/*                string sqlAction = @"INSERT INTO [dbo].[enquiry_actions]
+                               ([enquiry_id]
+                               ,[action]
+                               ,[action_date]
+                               ,[response]
+                               ,[status])
+                            VALUES
+                               (@enquiryid
+                               ,@action
+                               ,@actiondate
+                               ,@response
+                               ,@status)";*/
+/*          
+*          using (var tran = conn.BeginTransaction())
+    {
+        var result = conn.QuerySingle<int>(sql, dp, commandType: CommandType.Text, transaction: tran);
+
+        foreach (var act in enquiry.EnquiryActions)
+        {
+            DynamicParameters dpAction = new DynamicParameters();
+            dpAction.Add("enquiryid", result, DbType.Int32, ParameterDirection.Input);
+            dpAction.Add("action", act.Action, DbType.String, ParameterDirection.Input);
+            dpAction.Add("actiondate", act.ActionDate, DbType.DateTime, ParameterDirection.Input);
+            dpAction.Add("response", act.Response, DbType.String, ParameterDirection.Input);
+            dpAction.Add("status", act.Status, DbType.String, ParameterDirection.Input);
+            var result2 = conn.Execute(sqlAction, dpAction, commandType: CommandType.Text, transaction: tran);
+        }
+        tran.Commit();
+        return Task.FromResult(result);
+    }*/
 

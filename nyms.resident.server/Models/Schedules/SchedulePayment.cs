@@ -24,15 +24,9 @@ namespace nyms.resident.server.Models
         public decimal WeeklyFee { get; set; }
         public decimal AmountDue { get; set; }
         public int NumberOfDays { get; set; }
-        /*public InvoiceValidatedEntity InvoiceValidatedEntity { get; set; }*/
         public InvoiceValidatedModel InvoiceValidatedModel { get; set; }
         public string[] Comments { get; set; }
+        public string Active { get; set; } 
 
-/*        public string Validated { get; set; }
-        public decimal ValidatedAmount { get; set; }
-        public string ValidatedBy { get; set; }
-        public decimal TransactionAmount { get; set; }
-        public string Comments { get; set; } 
-        public DateTime UpdatedDate { get; set; }*/
     }
 }
