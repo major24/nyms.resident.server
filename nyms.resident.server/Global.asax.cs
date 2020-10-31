@@ -1,4 +1,8 @@
 ﻿using Newtonsoft.Json.Serialization;
+using NLog;
+using NLog.Config;
+using NLog.Targets;
+using nyms.resident.server.Services.Core;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -18,7 +22,8 @@ namespace nyms.resident.server
         {
             AreaRegistration.RegisterAllAreas();
             // encrypted conn string
-            string connStr = DecryptString(ConfigurationManager.AppSettings["connectionString_nyms24"]);
+            // string connStr = DecryptString(ConfigurationManager.AppSettings["connectionString_nyms24"]);
+            string connStr = Util.DecryptString(ConfigurationManager.AppSettings["connectionString_nyms24"]);
             UnityConfig.RegisterComponents(connStr);
             GlobalConfiguration.Configure(WebApiConfig.Register);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
@@ -28,22 +33,6 @@ namespace nyms.resident.server
             HttpConfiguration config = GlobalConfiguration.Configuration;
             config.Formatters.JsonFormatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
             config.Formatters.JsonFormatter.UseDataContractJsonSerializer = false;
-        }
-
-        private string DecryptString(string encrString)
-        {
-            byte[] b;
-            string decrypted;
-            try
-            {
-                b = Convert.FromBase64String(encrString);
-                decrypted = ASCIIEncoding.ASCII.GetString(b);
-            }
-            catch (FormatException fe)
-            {
-                throw new Exception("Error in decrypting dbstring");
-            }
-            return decrypted;
         }
     }
 }

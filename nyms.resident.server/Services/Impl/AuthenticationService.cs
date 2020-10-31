@@ -14,7 +14,7 @@ namespace nyms.resident.server.Services.Impl
     {
         private readonly IJwtService _jwtService;
         private readonly IUserService _userService;
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private static Logger logger = Nlogger2.GetLogger();
 
         public AuthenticationService(IJwtService jwtService, IUserService userService)
         {

@@ -35,6 +35,7 @@ namespace nyms.resident.server.DataProviders.Impl
                        e.id as id
                       ,e.reference_id as referenceid
                       ,[care_home_id] as carehomeid
+                      ,[referral_agency_id] as referralagencyid
                       ,[local_authority_id] as localauthorityid
                       ,[forename] as forename
                       ,[surname] as surname
@@ -57,7 +58,7 @@ namespace nyms.resident.server.DataProviders.Impl
 					  ,cc.name as carecategoryname
 					  ,la.name as localauthorityname
                         FROM [dbo].[enquires] e
-						INNER JOIN [dbo].[local_authorities] la
+						LEFT JOIN [dbo].[local_authorities] la
 						ON e.local_authority_id = la.id
 						LEFT JOIN [dbo].[care_categories] cc
 						ON e.care_category_id = cc.id
@@ -87,6 +88,7 @@ namespace nyms.resident.server.DataProviders.Impl
                        [id] as id
                       ,[reference_id] as referenceid
                       ,[care_home_id] as carehomeid
+                      ,[referral_agency_id] as referralagencyid
                       ,[local_authority_id] as localauthorityid
                       ,[forename] as forename
                       ,[surname] as surname
@@ -105,16 +107,6 @@ namespace nyms.resident.server.DataProviders.Impl
                       ,[family_home_visit_date] as familyhomevisitdate
                       ,[reserved_room_location] as reservedroomlocation
                       ,[reserved_room_number] as reservedroomnumber
-                      ,[street] as street
-                      ,[city] as city
-                      ,[county] as county
-                      ,[postcode] as postcode
-                      ,[nok_forename] as nok_forename
-                      ,[nok_surname] as nok_surname
-                      ,[nok_email_address] as nok_email_address
-                      ,[nok_phone_number] as nok_phone_number
-                      ,[response_date] as responsedate
-                      ,[response] as response
                       ,[comments] as comments
                       ,[status] as status
                       ,[updated_date] as updateddate
@@ -143,6 +135,7 @@ namespace nyms.resident.server.DataProviders.Impl
                 string sql = @"INSERT INTO [dbo].[enquires]
                    ([reference_id]
                    ,[care_home_id]
+                   ,[referral_agency_id]
                    ,[local_authority_id]
                    ,[forename]
                    ,[surname]
@@ -161,22 +154,13 @@ namespace nyms.resident.server.DataProviders.Impl
                    ,[family_home_visit_date]
                    ,[reserved_room_location]
                    ,[reserved_room_number]
-                   ,[street]
-                   ,[city]
-                   ,[county]
-                   ,[postcode]
-                   ,[nok_forename]
-                   ,[nok_surname]
-                   ,[nok_email_address]
-                   ,[nok_phone_number]
-                   ,[response_date]
-                   ,[response]
                    ,[comments]
                    ,[status]
                    ,[updated_by_id])
                 VALUES
                    (@referenceid
                    ,@carehomeid
+                   ,@referralagencyid
                    ,@localauthorityid
                    ,@forename
                    ,@surname
@@ -195,16 +179,6 @@ namespace nyms.resident.server.DataProviders.Impl
                    ,@familyhomevisitdate
                    ,@reservedroomlocation
                    ,@reservedroomnumber
-                   ,@street
-                   ,@city
-                   ,@county
-                   ,@postcode
-                   ,@nokforename
-                   ,@noksurname
-                   ,@nokemailaddress
-                   ,@nokphonenumber
-                   ,@responsedate
-                   ,@response
                    ,@comments
                    ,@status
                    ,@updatedbyid);
@@ -215,6 +189,7 @@ namespace nyms.resident.server.DataProviders.Impl
                 DynamicParameters dp = new DynamicParameters();
                 dp.Add("referenceid", enquiry.ReferenceId, DbType.Guid, ParameterDirection.Input, 80);
                 dp.Add("carehomeid", enquiry.CareHomeId, DbType.Int32, ParameterDirection.Input);
+                dp.Add("referralagencyid", enquiry.ReferralAgencyId, DbType.Int32, ParameterDirection.Input);
                 dp.Add("localauthorityid", enquiry.LocalAuthorityId, DbType.Int32, ParameterDirection.Input);
                 dp.Add("forename", enquiry.ForeName, DbType.String, ParameterDirection.Input, 80);
                 dp.Add("surname", enquiry.SurName, DbType.String, ParameterDirection.Input, 80);
@@ -233,7 +208,7 @@ namespace nyms.resident.server.DataProviders.Impl
                 dp.Add("familyhomevisitdate", enquiry.FamilyHomeVisitDate, DbType.Date, ParameterDirection.Input, 80);
                 dp.Add("reservedroomlocation", enquiry.ReservedRoomLocation, DbType.Int32, ParameterDirection.Input, 80);
                 dp.Add("reservedroomnumber", enquiry.ReservedRoomNumber, DbType.Int32, ParameterDirection.Input, 80);
-                dp.Add("street", enquiry.Address.Street1, DbType.String, ParameterDirection.Input, 100);
+/*                dp.Add("street", enquiry.Address.Street1, DbType.String, ParameterDirection.Input, 100);
                 dp.Add("city", enquiry.Address.City, DbType.String, ParameterDirection.Input, 60);
                 dp.Add("county", enquiry.Address.County, DbType.String, ParameterDirection.Input, 30);
                 dp.Add("postcode", enquiry.Address.PostCode, DbType.String, ParameterDirection.Input, 20);
@@ -242,7 +217,7 @@ namespace nyms.resident.server.DataProviders.Impl
                 dp.Add("nokemailaddress", "", DbType.String, ParameterDirection.Input, 60);
                 dp.Add("nokphonenumber", "", DbType.String, ParameterDirection.Input, 20);
                 dp.Add("responsedate", enquiry.ResponseDate, DbType.Date, ParameterDirection.Input, 80);
-                dp.Add("response", enquiry.Response, DbType.String, ParameterDirection.Input, 100);
+                dp.Add("response", enquiry.Response, DbType.String, ParameterDirection.Input, 100);*/
                 dp.Add("comments", enquiry.Comments, DbType.String, ParameterDirection.Input, 500);
                 dp.Add("status", enquiry.Status, DbType.String, ParameterDirection.Input, 80);
                 dp.Add("updatedbyid", enquiry.UpdatedBy, DbType.Int32, ParameterDirection.Input);
@@ -261,6 +236,7 @@ namespace nyms.resident.server.DataProviders.Impl
             {
                 string sql = @"UPDATE [dbo].[enquires]
                 SET [care_home_id] = @carehomeid
+                   ,[referral_agency_id] = @referralagencyid
                    ,[local_authority_id] = @localauthorityid
                    ,[forename] = @forename
                    ,[surname] = @surname
@@ -299,6 +275,7 @@ namespace nyms.resident.server.DataProviders.Impl
                 conn.Open();
                 dp.Add("referenceid", enquiry.ReferenceId, DbType.Guid, ParameterDirection.Input, 80);
                 dp.Add("carehomeid", enquiry.CareHomeId, DbType.Int32, ParameterDirection.Input);
+                dp.Add("referralagencyid", enquiry.ReferralAgencyId, DbType.Int32, ParameterDirection.Input);
                 dp.Add("localauthorityid", enquiry.LocalAuthorityId, DbType.Int32, ParameterDirection.Input);
                 dp.Add("forename", enquiry.ForeName, DbType.String, ParameterDirection.Input, 80);
                 dp.Add("surname", enquiry.SurName, DbType.String, ParameterDirection.Input, 80);
@@ -317,7 +294,7 @@ namespace nyms.resident.server.DataProviders.Impl
                 dp.Add("familyhomevisitdate", enquiry.FamilyHomeVisitDate, DbType.Date, ParameterDirection.Input, 80);
                 dp.Add("reservedroomlocation", enquiry.ReservedRoomLocation, DbType.Int32, ParameterDirection.Input, 80);
                 dp.Add("reservedroomnumber", enquiry.ReservedRoomNumber, DbType.Int32, ParameterDirection.Input, 80);
-                dp.Add("street", enquiry.Address.Street1, DbType.String, ParameterDirection.Input, 100);
+/*                dp.Add("street", enquiry.Address.Street1, DbType.String, ParameterDirection.Input, 100);
                 dp.Add("city", enquiry.Address.City, DbType.String, ParameterDirection.Input, 60);
                 dp.Add("county", enquiry.Address.County, DbType.String, ParameterDirection.Input, 30);
                 dp.Add("postcode", enquiry.Address.PostCode, DbType.String, ParameterDirection.Input, 20);
@@ -326,7 +303,7 @@ namespace nyms.resident.server.DataProviders.Impl
                 dp.Add("nokemailaddress", "", DbType.String, ParameterDirection.Input, 60);
                 dp.Add("nokphonenumber", "", DbType.String, ParameterDirection.Input, 20);
                 dp.Add("responsedate", enquiry.ResponseDate, DbType.Date, ParameterDirection.Input, 80);
-                dp.Add("response", enquiry.Response, DbType.String, ParameterDirection.Input, 100);
+                dp.Add("response", enquiry.Response, DbType.String, ParameterDirection.Input, 100);*/
                 dp.Add("comments", enquiry.Comments, DbType.String, ParameterDirection.Input, 500);
                 dp.Add("status", enquiry.Status, DbType.String, ParameterDirection.Input, 80);
                 dp.Add("updatedbyid", enquiry.UpdatedBy, DbType.Int32, ParameterDirection.Input);

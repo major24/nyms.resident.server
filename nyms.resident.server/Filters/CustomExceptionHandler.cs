@@ -1,4 +1,5 @@
 ﻿using NLog;
+using nyms.resident.server.Services.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace nyms.resident.server.Filters
 {
     public class CustomExceptionHandler: ExceptionFilterAttribute
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private static Logger logger = Nlogger2.GetLogger();
         public override void OnException(HttpActionExecutedContext actionExecutedContext)
         {
             string errorMessage = string.Empty;

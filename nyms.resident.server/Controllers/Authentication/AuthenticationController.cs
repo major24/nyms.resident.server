@@ -1,5 +1,6 @@
 ﻿using NLog;
 using nyms.resident.server.Models;
+using nyms.resident.server.Services.Core;
 using nyms.resident.server.Services.Interfaces;
 using System;
 using System.Web.Http;
@@ -9,7 +10,7 @@ namespace nyms.resident.server.Controllers
 {
     public class AuthenticationController : ApiController
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private static Logger logger = Nlogger2.GetLogger();
         private readonly IUserService _userService;
         private readonly IAuthenticationService _authenticationService;
 
