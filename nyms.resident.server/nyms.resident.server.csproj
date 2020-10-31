@@ -205,11 +205,13 @@
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="Core\Constants.cs" />
     <Compile Include="DataProviders\Impl\CareHomeDataProvider.cs" />
+    <Compile Include="DataProviders\Impl\DatabaseSetupProvider.cs" />
     <Compile Include="DataProviders\Impl\EnquiryDataProvider.cs" />
     <Compile Include="DataProviders\Impl\InvoiceDataProvider.cs" />
     <Compile Include="DataProviders\Impl\ResidentDataProvider.cs" />
     <Compile Include="DataProviders\Impl\ScheduleDataProvider.cs" />
     <Compile Include="DataProviders\Impl\UserDataProvider.cs" />
+    <Compile Include="DataProviders\Interfaces\IDatabaseSetupProvider.cs" />
     <Compile Include="DataProviders\Interfaces\IEnquiryDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\ICareHomeDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\IInvoiceDataProvider.cs" />
@@ -264,6 +266,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\Core\IJwtService.cs" />
     <Compile Include="Services\Core\JwtService.cs" />
+    <Compile Include="Services\Core\Nlogger2.cs" />
+    <Compile Include="Services\Core\Util.cs" />
     <Compile Include="Services\Impl\AuthenticationService.cs" />
     <Compile Include="Services\Impl\CareHomeService.cs" />
     <Compile Include="Services\Impl\EnquiryService.cs" />

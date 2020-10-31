@@ -2,6 +2,7 @@
 using nyms.resident.server.Filters;
 using nyms.resident.server.Models;
 using nyms.resident.server.Models.Authentication;
+using nyms.resident.server.Services.Core;
 using nyms.resident.server.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,7 @@ namespace nyms.resident.server.Controllers
     [UserAuthenticationFilter]
     public class ResidentsController : ApiController
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private static Logger logger = Nlogger2.GetLogger();
         private readonly IUserService _userService;
         private readonly IResidentService _residentService;
 
@@ -46,12 +47,11 @@ namespace nyms.resident.server.Controllers
             return Ok(residents.ToArray());
         }
 
-        [HttpPut]
+        [HttpPost]
         [Route("api/residents/{referenceId}/exit-date")]
         public IHttpActionResult UpdateExitDate(string referenceId, Models.Resident resident)
         {
             var user = HttpContext.Current.User as SecurityPrincipal;
-            var curUser = System.Threading.Thread.CurrentPrincipal;
             logger.Info($"Exit date updated by {user.ForeName}");
 
             var success = _residentService.UpdateExitDate(new Guid(referenceId), (DateTime)resident.ExitDate);
@@ -64,11 +64,6 @@ namespace nyms.resident.server.Controllers
             return Ok(false);
         }
 
-
-        // POST: api/Residents
-        public void Post([FromBody]string value)
-        {
-        }
 
         // PUT: api/Residents/5
         public void Put(int id, [FromBody]string value)

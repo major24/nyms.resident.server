@@ -1,6 +1,7 @@
 ﻿using NLog;
 using nyms.resident.server.Filters;
 using nyms.resident.server.Models.Authentication;
+using nyms.resident.server.Services.Core;
 using nyms.resident.server.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace nyms.resident.server.Controllers.Admin
     [AdminAuthenticationFilter]
     public class AdminController : ApiController
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private static Logger logger = Nlogger2.GetLogger();
         private readonly IUserService _userService;
 
         public AdminController(IUserService userService)
@@ -21,7 +22,7 @@ namespace nyms.resident.server.Controllers.Admin
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         }
 
-        [HttpPut]
+        [HttpPost]
         [Route("api/admin/user/setpassword")]
         public IHttpActionResult SetPassword([FromBody] Models.User user)
         {

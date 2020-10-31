@@ -1,6 +1,7 @@
 ﻿using NLog;
 using nyms.resident.server.Models.Authentication;
 using nyms.resident.server.Models.Core;
+using nyms.resident.server.Services.Core;
 using nyms.resident.server.Services.Interfaces;
 using System;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace nyms.resident.server.Filters
 {
     public class UserAuthenticationFilter : ActionFilterAttribute, IAuthenticationFilter
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private static Logger logger = Nlogger2.GetLogger();
         public string Realm { get; set; }
         public bool AllowMultiple => false;
 

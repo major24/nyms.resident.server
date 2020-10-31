@@ -56,7 +56,8 @@ namespace nyms.resident.server.Services.Impl
             if (billingCycle == null) throw new ArgumentNullException(nameof(billingCycle));
 
             var invoiceResidents = this.GetInvoiceResidentData(billingCycle.PeriodStart, billingCycle.PeriodEnd);
-            if (invoiceResidents == null || !invoiceResidents.Any()) throw new ArgumentNullException(nameof(invoiceResidents));
+            // if (invoiceResidents == null || !invoiceResidents.Any()) throw new ArgumentNullException(nameof(invoiceResidents));
+            if (invoiceResidents == null || !invoiceResidents.Any()) return null;
 
             var invoiceDataByLa = invoiceResidents.Where(d => d.LocalAuthorityId == localAuthorityId);
             var numOfDays = _feeCalculatorService.GetNumberOfDaysInMonth(billingCycle.PeriodStart, billingCycle.PeriodEnd);  //invoiceResidents.Select(d => d.SchedulePayments.Select(sp => sp.NumberOfDays)).FirstOrDefault().FirstOrDefault();

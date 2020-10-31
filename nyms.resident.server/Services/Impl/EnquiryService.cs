@@ -37,11 +37,12 @@ namespace nyms.resident.server.Services.Impl
                 var actions = _enquiryDataProvider.GetActions(entity.Id);
 
                 SocialWorker sw = new SocialWorker() { ForeName = entity.SwForeName, SurName = entity.SwSurName, Email = entity.SwEmailAddress, PhoneNumber = entity.SwPhoneNumber };
-                Address address = new Address() { Street1 = entity.Street, City = entity.City, County = entity.County, PostCode = entity.Postcode };
+                // Address address = new Address() { Street1 = entity.Street, City = entity.City, County = entity.County, PostCode = entity.Postcode };
                 enquiry = new Enquiry()
                 {
                     ReferenceId = entity.ReferenceId,
                     CareHomeId = entity.CareHomeId,
+                    ReferralAgencyId = entity.ReferralAgencyId,
                     LocalAuthorityId = entity.LocalAuthorityId,
                     ForeName = entity.ForeName,
                     SurName = entity.SurName,
@@ -57,13 +58,13 @@ namespace nyms.resident.server.Services.Impl
                     FamilyHomeVisitDate = entity.FamilyHomeVisitDate,
                     ReservedRoomLocation = entity.ReservedRoomLocation,
                     ReservedRoomNumber = entity.ReservedRoomNumber,
-                    ResponseDate = entity.ResponseDate,
-                    Response = entity.Response,
+/*                    ResponseDate = entity.ResponseDate,
+                    Response = entity.Response,*/
                     Comments = entity.Comments,
                     Status = entity.Status,
                     UpdatedBy = entity.UpdatedBy,
                     UpdatedDate = entity.UpdatedDate,
-                    Address = address,
+                    // Address = address,
                     EnquiryActions = actions
                 };
             }
@@ -88,11 +89,13 @@ namespace nyms.resident.server.Services.Impl
             if (enquiry.Status == EnquiryStatus.admit.ToString())
             {
                 enquiry.UpdatedBy = enquiry.UpdatedBy;
-                _residentService.ConvertEnquiryToResident(enquiry);
+                var result = _residentService.Create(enquiry).Result;
                 
                 // update enquiry status to [admit] as well
-                this._enquiryDataProvider.Update(enquiry);
-
+                if (result != null && result.ReferenceId != null)
+                {
+                    this._enquiryDataProvider.Update(enquiry);
+                }
                 return Task.FromResult(enquiry);
             }
             else

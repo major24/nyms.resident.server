@@ -1,5 +1,6 @@
 ﻿using NLog;
 using nyms.resident.server.Filters;
+using nyms.resident.server.Services.Core;
 using nyms.resident.server.Services.Interfaces;
 using System;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace nyms.resident.server.Controllers
     [UserAuthenticationFilter]
     public class CareHomeController : ApiController
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private static Logger logger = Nlogger2.GetLogger();
         private readonly ICareHomeService _careHomeService;
 
         public CareHomeController(ICareHomeService careHomeService)

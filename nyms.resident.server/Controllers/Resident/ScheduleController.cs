@@ -2,6 +2,7 @@
 using nyms.resident.server.Filters;
 using nyms.resident.server.Models;
 using nyms.resident.server.Models.Authentication;
+using nyms.resident.server.Services.Core;
 using nyms.resident.server.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,7 @@ namespace nyms.resident.server.Controllers.Resident
     [AdminAuthenticationFilter]
     public class ScheduleController : ApiController
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private static Logger logger = Nlogger2.GetLogger();
         private readonly IScheduleService _scheduleService;
         private readonly IResidentService _residentService;
 
@@ -74,7 +75,7 @@ namespace nyms.resident.server.Controllers.Resident
             return Created("", "Saved");
         }
 
-        [HttpPut]
+        [HttpPost]
         [Route("api/residents/schedules/{id}/end-date")]
         public IHttpActionResult Put([FromUri]int id, [FromBody]ScheduleEndDateEntity scheduleEndDateEntity)
         {
@@ -86,7 +87,7 @@ namespace nyms.resident.server.Controllers.Resident
             return Ok("Updated");
         }
 
-        [HttpPut]
+        [HttpPost]
         [Route("api/residents/schedules/{id}/inactivate")]
         public IHttpActionResult InactivteSchedule([FromUri]int id)
         {

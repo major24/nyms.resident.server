@@ -3,6 +3,7 @@ using nyms.resident.server.Filters;
 using nyms.resident.server.Invoice;
 using nyms.resident.server.Models;
 using nyms.resident.server.Models.Authentication;
+using nyms.resident.server.Services.Core;
 using nyms.resident.server.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -20,7 +21,7 @@ namespace nyms.resident.server.Controllers.Invoice
     [AdminAuthenticationFilter]
     public class InvoicesController : ApiController
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private static Logger logger = Nlogger2.GetLogger();
         private readonly IInvoiceService _invoiceService;
 
         public InvoicesController(IInvoiceService invoiceService)
