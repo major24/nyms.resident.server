@@ -1,4 +1,5 @@
 ﻿using NLog;
+using nyms.resident.server.Core;
 using nyms.resident.server.Filters;
 using nyms.resident.server.Services.Core;
 using nyms.resident.server.Services.Interfaces;
@@ -14,19 +15,38 @@ namespace nyms.resident.server.Controllers
     {
         private static Logger logger = Nlogger2.GetLogger();
         private readonly ICareHomeService _careHomeService;
+        private readonly IEnquiryService _enquiryService;
+        private readonly IResidentService _residentService;
 
-        public CareHomeController(ICareHomeService careHomeService)
+        public CareHomeController(ICareHomeService careHomeService, IEnquiryService enquiryService, IResidentService residentService)
         {
             _careHomeService = careHomeService ?? throw new ArgumentNullException(nameof(careHomeService));
+            _enquiryService = enquiryService ?? throw new ArgumentNullException(nameof(enquiryService));
+            _residentService = residentService ?? throw new ArgumentNullException(nameof(residentService));
+        }
+
+        [HttpGet]
+        [Route("api/carehomes")]
+        public IHttpActionResult GetCareHomes()
+        {
+            var careHomes = _careHomeService.GetCareHomes();
+
+            if (careHomes == null || !careHomes.Any())
+            {
+                logger.Error($"No carehome details found.");
+                return NotFound();
+            }
+
+            return Ok(careHomes.ToArray());
         }
 
         [HttpGet]
         [Route("api/carehomes/details")]
-        public IHttpActionResult GetCareHomesDetails()   // IEnumerable<CareHome> 
+        public IHttpActionResult GetCareHomesDetails()
         {
             var careHomes = _careHomeService.GetCareHomesDetails();
 
-            if (careHomes == null)
+            if (careHomes == null || !careHomes.Any())
             {
                 logger.Error($"No carehome details found.");
                 return NotFound();
@@ -36,27 +56,44 @@ namespace nyms.resident.server.Controllers
         }
 
 
+        [HttpGet]
+        [Route("api/enquires/{referenceId}/carehome/details")]
+        public IHttpActionResult GetCareHomesDetailsByEnquiryRefId(string referenceId)
+        {
+            if (string.IsNullOrEmpty(referenceId))
+            {
+                throw new ArgumentNullException(nameof(referenceId));
+            }
+
+            var enquiry = _enquiryService.GetByReferenceId(GuidConverter.Convert(referenceId)).Result;
+            if (enquiry == null)
+            {
+                return BadRequest("Cannot find enquiry. Please contact admin.");
+            }
+
+            var careHomeDetail = _careHomeService.GetCareHomesDetails(enquiry.CareHomeId);
+            return Ok(careHomeDetail);
+        }
+
+        [HttpGet]
+        [Route("api/residents/{referenceId}/carehome/details")]
+        public IHttpActionResult GetCareHomesDetailsByResidentRefId(string referenceId)
+        {
+            if (string.IsNullOrEmpty(referenceId))
+            {
+                throw new ArgumentNullException(nameof(referenceId));
+            }
+
+            var resident = _residentService.GetResident(GuidConverter.Convert(referenceId));
+            if (resident == null)
+            {
+                return BadRequest("Cannot find resident. Please contact admin.");
+            }
+
+            var careHomeDetail = _careHomeService.GetCareHomesDetails(resident.CareHomeId);
+            return Ok(careHomeDetail);
+        }
+
     }
 }
 
-
-
-
-
-
-/*        [HttpGet("api/carehomes/{referenceId}/details")]
-        public ActionResult<CareHome> GetByUserAndRolesByReferenceId(string referenceId)
-        {
-            if (referenceId == null || referenceId == "")
-            {
-                return BadRequest($"Must provide a user reference id");
-            }
-
-            Guid _referenceId = new Guid(referenceId);
-            var careHome = _careHomeService.GetCareHomeByReferenceId(_referenceId);
-
-            if (careHome == null)
-                return NotFound($"CareHome not found for the provided id {referenceId}");
-
-            return careHome;
-        }*/

@@ -22,21 +22,6 @@ namespace nyms.resident.server.Services.Impl
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         }
 
-/*        public string GenerateJWTToken(string name, string referenceId, int expire_in_Minutes = 30)
-        {
-            logger.Info($"Generating token for {name}");
-            try
-            {
-                return _jwtService.GenerateJWTToken(name, referenceId, expire_in_Minutes);
-            }
-            catch(Exception ex)
-            {
-                logger.Error($"Faild to generate token for {name}, {ex.Message}");
-                throw;
-            }
-            
-        }*/
-
         public AuthenticationResponse Authenticate(AuthenticationRequest authenticationRequest)
         {
             // get user with user name pwd

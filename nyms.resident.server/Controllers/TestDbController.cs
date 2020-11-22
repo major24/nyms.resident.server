@@ -1,4 +1,5 @@
-﻿using nyms.resident.server.DataProviders.Interfaces;
+﻿using nyms.resident.server.Core;
+using nyms.resident.server.DataProviders.Interfaces;
 using nyms.resident.server.Models.Authentication;
 using nyms.resident.server.Services.Interfaces;
 using System;
@@ -58,15 +59,14 @@ namespace nyms.resident.server.Controllers
 
         [HttpPost]
         [Route("api/database/residents/{resident}")]
-        public IHttpActionResult Create([FromBody] Models.Resident resident)
+        public IHttpActionResult Create([FromBody] Models.ResidentRequest resident)
         {
-            // var user = HttpContext.Current.User as SecurityPrincipal;
+            // for test database
             var user = _userService.GetUsers().Where(u => u.ForeName == "Major").FirstOrDefault();
             resident.UpdatedBy = user.Id;
 
-            var result = _residentService.Create(resident);
-            return Created("", result);
-            //return Ok("almost");
+            _residentService.AdmitEnquiry(resident);
+            return Created("", "test resident created");
         }
 
 

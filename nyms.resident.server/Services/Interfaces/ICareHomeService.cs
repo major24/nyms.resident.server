@@ -6,7 +6,8 @@ namespace nyms.resident.server.Services.Interfaces
 {
     public interface ICareHomeService
     {
+        IEnumerable<CareHome> GetCareHomes();
         IEnumerable<CareHome> GetCareHomesDetails();
-        CareHome GetCareHomeByReferenceId(Guid referenceId);
+        CareHome GetCareHomesDetails(int id);
     }
 }

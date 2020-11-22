@@ -6,6 +6,7 @@ namespace nyms.resident.server.DataProviders.Interfaces
 {
     public interface ICareHomeDataProvider
     {
+        IEnumerable<CareHome> GetCareHomes();
         IEnumerable<CareHome> GetCareHomesDetails();
         CareHome GetCareHomeByReferenceId(Guid referenceId);
         IEnumerable<LocalAuthority> GetLocalAuthorities();

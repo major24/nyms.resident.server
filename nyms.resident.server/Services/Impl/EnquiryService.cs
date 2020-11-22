@@ -1,12 +1,10 @@
 ﻿using Microsoft.Ajax.Utilities;
 using nyms.resident.server.DataProviders.Interfaces;
 using nyms.resident.server.Models;
-using nyms.resident.server.Models.Core;
 using nyms.resident.server.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.ServiceModel;
 using System.Threading.Tasks;
 
 namespace nyms.resident.server.Services.Impl
@@ -30,14 +28,15 @@ namespace nyms.resident.server.Services.Impl
         public Task<Enquiry> GetByReferenceId(Guid referenceId)
         {
             var entity = _enquiryDataProvider.GetByReferenceId(referenceId).Result;
+            if (entity == null) return null;
+
+            // else, convert db entity to web enquiry
             Enquiry enquiry = null;
-            // convert db entity to web enquiry
             if (entity != null)
             {
                 var actions = _enquiryDataProvider.GetActions(entity.Id);
 
-                SocialWorker sw = new SocialWorker() { ForeName = entity.SwForeName, SurName = entity.SwSurName, Email = entity.SwEmailAddress, PhoneNumber = entity.SwPhoneNumber };
-                // Address address = new Address() { Street1 = entity.Street, City = entity.City, County = entity.County, PostCode = entity.Postcode };
+                SocialWorker sw = new SocialWorker() { ForeName = entity.SwForeName, SurName = entity.SwSurName, EmailAddress = entity.SwEmailAddress, PhoneNumber = entity.SwPhoneNumber };
                 enquiry = new Enquiry()
                 {
                     ReferenceId = entity.ReferenceId,
@@ -56,15 +55,12 @@ namespace nyms.resident.server.Services.Impl
                     StayType = entity.StayType,
                     MoveInDate = entity.MoveInDate,
                     FamilyHomeVisitDate = entity.FamilyHomeVisitDate,
-                    ReservedRoomLocation = entity.ReservedRoomLocation,
-                    ReservedRoomNumber = entity.ReservedRoomNumber,
-/*                    ResponseDate = entity.ResponseDate,
-                    Response = entity.Response,*/
+                    RoomLocation = entity.RoomLocation,
+                    RoomNumber = entity.RoomNumber,
                     Comments = entity.Comments,
                     Status = entity.Status,
                     UpdatedBy = entity.UpdatedBy,
                     UpdatedDate = entity.UpdatedDate,
-                    // Address = address,
                     EnquiryActions = actions
                 };
             }
@@ -76,7 +72,7 @@ namespace nyms.resident.server.Services.Impl
         {
             // assign guid and necessary values
             enquiry.ReferenceId = Guid.NewGuid();
-            enquiry.Status = EnquiryStatus.active.ToString();
+            enquiry.Status = ENQUIRY_STATUS.active.ToString();
 
             var result = this._enquiryDataProvider.Create(enquiry);
             return Task.FromResult(enquiry);
@@ -84,24 +80,8 @@ namespace nyms.resident.server.Services.Impl
 
         public Task<Enquiry> Update(Enquiry enquiry)
         {
-            // TODO: Q: do we want to save first and let resident edit?
-            // OR from UI, show both go to res edit and save??????? for now just update
-            if (enquiry.Status == EnquiryStatus.admit.ToString())
-            {
-                enquiry.UpdatedBy = enquiry.UpdatedBy;
-                var result = _residentService.Create(enquiry).Result;
-                
-                // update enquiry status to [admit] as well
-                if (result != null && result.ReferenceId != null)
-                {
-                    this._enquiryDataProvider.Update(enquiry);
-                }
-                return Task.FromResult(enquiry);
-            }
-            else
-            {
-                return this._enquiryDataProvider.Update(enquiry);
-            }
+            _enquiryDataProvider.Update(enquiry);
+            return Task.FromResult(enquiry);
         }
 
         public IEnumerable<EnquiryAction> GetActions(Guid referenceId)

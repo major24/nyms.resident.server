@@ -134,11 +134,9 @@ namespace nyms.resident.server.DataProviders.Impl
                               ,[updated_date] as updateddate
                                FROM [dbo].[invoices_validated]
                                WHERE [billing_cycle_id] = @billingcycleid";
-                //WHERE [resident_id] = @residentid
 
                 conn.Open();
                 DynamicParameters dp = new DynamicParameters();
-                //dp.Add("residentid", residentId, DbType.Int32, ParameterDirection.Input);
                 dp.Add("billingcycleid", billingCycleId, DbType.Int32, ParameterDirection.Input);
                 var result = conn.QueryAsync<InvoiceValidatedEntity>(sql, dp).Result;
                 return Task.FromResult(result);
@@ -160,18 +158,14 @@ namespace nyms.resident.server.DataProviders.Impl
                               ,[updated_date] as updateddate
                                FROM [dbo].[invoice_comments]
                                WHERE [billing_cycle_id] = @billingcycleid";
-                //WHERE [local_authority_id] = @localauthorityid
-                //	                           WHERE [resident_id] = @residentid
 
                 conn.Open();
                 DynamicParameters dp = new DynamicParameters();
-                // dp.Add("residentid", residentId, DbType.Int32, ParameterDirection.Input);
                 dp.Add("billingcycleid", billingCycleId, DbType.Int32, ParameterDirection.Input);
                 var result = conn.QueryAsync<InvoiceCommentsEntity>(sql, dp).Result;
                 return Task.FromResult(result);
             }
         }
-
 
         public Task<bool> InsertInvoiceComments(InvoiceCommentsEntity invoiceCommentsEntity)
         {
@@ -207,8 +201,6 @@ namespace nyms.resident.server.DataProviders.Impl
                 var result = conn.Execute(sql, dp, commandType: CommandType.Text);
             }
             return Task.FromResult(true);
-
-            
         }
 
 

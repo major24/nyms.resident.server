@@ -1,13 +1,11 @@
 ﻿using nyms.resident.server.Models.Core;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace nyms.resident.server.Models
 {
-    public class Resident : ResidentBase
+    public class ResidentRequest : ResidentBase
     {
-        public int Id { get; }
         public int CareHomeId { get; set; }
         public int LocalAuthorityId { get; set; }
         public string NhsNumber { get; set; }
@@ -24,17 +22,13 @@ namespace nyms.resident.server.Models
         public int RoomNumber { get; set; }
         public DateTime? FamilyHomeVisitDate { get; set; } = null;
         public string Status { get; set; }
-        public DateTime? UpdatedDate { get; set; } = null;
-        public DateTime? CreatedDate { get; } = null;
         public string Comments { get; set; }
-        public int UpdatedBy { get; set; }
-        public Guid EnquiryReferenceId { get; set; }
-
         public SocialWorker SocialWorker { get; set; }
         public Address Address { get; set; }
-        // public IEnumerable<ContactInfo> ContactInfos { get; set; }
         public string EmailAddress { get; set; }
         public string PhoneNumber { get; set; }
         public IEnumerable<NextOfKin> NextOfKins { get; set; }
+        public Guid EnquiryReferenceId { get; set; }
+        public int UpdatedBy { get; set; }
     }
 }

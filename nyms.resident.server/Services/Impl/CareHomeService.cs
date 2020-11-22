@@ -3,6 +3,7 @@ using nyms.resident.server.Models;
 using nyms.resident.server.Services.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace nyms.resident.server.Services.Impl
 {
@@ -14,22 +15,20 @@ namespace nyms.resident.server.Services.Impl
             _careHomeDataProvider = careHomeDataProvider ?? throw new ArgumentException(nameof(careHomeDataProvider));
         }
 
-        public CareHome GetCareHomeByReferenceId(Guid referenceId)
+        public IEnumerable<CareHome> GetCareHomes()
         {
-            throw new NotImplementedException();
+            return _careHomeDataProvider.GetCareHomes();
         }
 
         public IEnumerable<CareHome> GetCareHomesDetails()
         {
-            try
-            {
-                return _careHomeDataProvider.GetCareHomesDetails();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error getting care homes with room details. " + ex.Message);
-            }
+            return _careHomeDataProvider.GetCareHomesDetails();
+        }
 
+        public CareHome GetCareHomesDetails(int id)
+        {
+            var careHomeDetails = this.GetCareHomesDetails();
+            return careHomeDetails.Where(ch => ch.Id == id).FirstOrDefault();
         }
     }
 }

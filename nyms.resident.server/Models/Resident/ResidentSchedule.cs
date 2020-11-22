@@ -8,6 +8,7 @@ namespace nyms.resident.server.Models
 {
     public class ResidentSchedule : IPerson
     {
+        public Guid ReferenceId { get; set; }
         public int ResidentId { get; set; }
         public int LocalAuthorityId { get; set; }
         public string PaymentFromName { get; set; }

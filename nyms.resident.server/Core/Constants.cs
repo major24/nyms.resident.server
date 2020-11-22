@@ -18,10 +18,26 @@
         public static readonly string ENQUIRY_ACTION_STATUS_COMPLETING = "_completing";
     }
 
-    public enum EnquiryStatus
+    public enum ENQUIRY_STATUS
     {
         active,
         closed,
         admit
     }
+    public enum REF_TYPE
+    {
+        resident,
+        nok
+    }
+    public enum CONTACT_TYPE
+    {
+        email,
+        phone
+    }
+    public enum ADDRESS_TYPE
+    {
+       home
+    }
+
+
 }

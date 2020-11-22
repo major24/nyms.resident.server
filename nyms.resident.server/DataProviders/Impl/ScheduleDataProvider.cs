@@ -18,7 +18,6 @@ namespace nyms.resident.server.DataProviders.Impl
         public ScheduleDataProvider(string connectionString)
         {
             _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
-
         }
 
         public IEnumerable<ResidentScheduleEntity> GetResidentSchedules()

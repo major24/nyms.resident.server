@@ -27,8 +27,8 @@ namespace nyms.resident.server.Models
         public string StayType { get; set; }
         public DateTime? MoveInDate { get; set; } = null;
         public DateTime? FamilyHomeVisitDate { get; set; } = null;
-        public int ReservedRoomLocation { get; set; }
-        public int ReservedRoomNumber { get; set; }
+        public int RoomLocation { get; set; }
+        public int RoomNumber { get; set; }
 /*        public string Street { get; set; }
         public string City { get; set; }
         public string County { get; set; }

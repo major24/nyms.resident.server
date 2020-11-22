@@ -1,9 +1,6 @@
-﻿using nyms.resident.server.Invoice;
-using nyms.resident.server.Models;
+﻿using nyms.resident.server.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace nyms.resident.server.DataProviders.Interfaces
@@ -14,7 +11,7 @@ namespace nyms.resident.server.DataProviders.Interfaces
         Resident GetResident(Guid referenceId);
         IEnumerable<Resident> GetResidentsForInvoice(DateTime billingStart, DateTime billingEnd);
         bool UpdateExitDate(Guid referenceId, DateTime exitDate);
-        Task<ResidentEntity> Create(ResidentEntity resident);
+        Task<ResidentEntity> Create(ResidentEntity resident, EnquiryEntity enquiry);
         Task<ResidentEntity> Update(ResidentEntity resident);
     }
 }

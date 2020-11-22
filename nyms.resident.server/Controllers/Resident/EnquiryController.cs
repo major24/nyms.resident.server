@@ -1,4 +1,5 @@
 ﻿using NLog;
+using nyms.resident.server.Core;
 using nyms.resident.server.Filters;
 using nyms.resident.server.Models;
 using nyms.resident.server.Models.Authentication;
@@ -8,22 +9,20 @@ using System;
 using System.Linq;
 using System.Web;
 using System.Web.Http;
-using System.Web.Http.Cors;
-using WebGrease.Css.Extensions;
 
 namespace nyms.resident.server.Controllers
 {
     [UserAuthenticationFilter]
     public class EnquiryController : ApiController
     {
-        private static Logger logger = Nlogger2.GetLogger();
-        private readonly IUserService _userService;
+        private static readonly Logger logger = Nlogger2.GetLogger();
         private readonly IEnquiryService _enquiryService;
+        private readonly IResidentService _residentService;
 
-        public EnquiryController(IUserService userService, IEnquiryService enquiryService)
+        public EnquiryController(IUserService userService, IEnquiryService enquiryService, IResidentService residentService)
         {
-            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _enquiryService = enquiryService ?? throw new ArgumentNullException(nameof(enquiryService));
+            _residentService = residentService ?? throw new ArgumentNullException(nameof(residentService));
         }
 
         [HttpGet]
@@ -40,8 +39,10 @@ namespace nyms.resident.server.Controllers
                 logger.Warn($"No enquires found");
                 return NotFound();
             }
+
+            var enquiryListRespList = enquires.Select(e =>  e.ToEnquiryListType());
             
-            return Ok(enquires.ToArray());
+            return Ok(enquiryListRespList.ToArray());
         }
 
         [HttpGet]
@@ -64,7 +65,8 @@ namespace nyms.resident.server.Controllers
                 return NotFound();
             }
 
-            return Ok(enquiry);
+            var enquiryResponse = enquiry.ToEnquiryType();
+            return Ok(enquiryResponse);
         }
 
         // POST: api/Enquiry
@@ -73,7 +75,8 @@ namespace nyms.resident.server.Controllers
         public IHttpActionResult SaveEnquiry([FromUri] int careHomeId, [FromBody] Enquiry enquiry)
         {
             if (enquiry == null) return BadRequest(nameof(enquiry));
-            if (careHomeId <= 0 && enquiry.CareCategoryId <= 0) return BadRequest("CareHomeId is required");
+            if (enquiry.CareHomeId <= 0 || string.IsNullOrEmpty(enquiry.ForeName) || string.IsNullOrEmpty(enquiry.SurName))
+                return BadRequest("Mising required fields");
 
             var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
             logger.Info($"Enquiry created by {loggedInUser.ForeName}");
@@ -88,15 +91,39 @@ namespace nyms.resident.server.Controllers
         [Route("api/enquires/{referenceId}")]
         public IHttpActionResult UpdateEnquiry(string referenceId, [FromBody] Enquiry enquiry)
         {
-            if (enquiry == null) return BadRequest(nameof(enquiry));
-            if (string.IsNullOrEmpty(referenceId)) return BadRequest(nameof(referenceId));
+            if (enquiry == null || string.IsNullOrEmpty(referenceId)) return BadRequest("Missing enquiry data or reference id");
+            if (!GuidConverter.IsValid(enquiry.ReferenceId.ToString()))
+                return BadRequest("Connot convert refence id");
 
             var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
             logger.Info($"Enquiry updated by {loggedInUser.ForeName}");
             enquiry.UpdatedBy = loggedInUser.Id;
 
             var updEnquiry = this._enquiryService.Update(enquiry).Result;
-            return Created("", updEnquiry);
+            return Ok(updEnquiry);
+        }
+
+        // PUT: api/Enquiry/5
+        [HttpPost]
+        [Route("api/enquires/{referenceId}/admit")]
+        public IHttpActionResult AdmitEnquiry(string referenceId, [FromBody] ResidentRequest resident)
+        {
+            if (resident == null || string.IsNullOrEmpty(referenceId)) return BadRequest("Missing resident data or reference id");
+            if (!GuidConverter.IsValid(resident.EnquiryReferenceId.ToString()))
+                return BadRequest("Connot convert enquiry refence id");
+            if (resident.MoveInDate == null || resident.MoveInDate.ToString() == "")
+                return BadRequest("Missing Move In Date");
+
+            // ensure enquiry exists?
+            var enqExists = _enquiryService.GetByReferenceId(resident.EnquiryReferenceId);
+            if (enqExists == null) return BadRequest("Cannot locate enquiry in database. Please verify data");
+
+            var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
+            logger.Info($"Admit an enquiry by {loggedInUser.ForeName}");
+            resident.UpdatedBy = loggedInUser.Id;
+
+            var updEnquiry = _residentService.AdmitEnquiry(resident); //this._enquiryService.Admit(resident).Result;
+            return Ok(updEnquiry);
         }
 
         // actions

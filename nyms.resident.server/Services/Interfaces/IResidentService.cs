@@ -12,8 +12,7 @@ namespace nyms.resident.server.Services.Interfaces
         IEnumerable<Resident> GetResidentsByCareHomeId(int careHomeId);
         Resident GetResident(Guid referenceId);
         bool UpdateExitDate(Guid referenceId, DateTime exitDate);
-        Task<Resident> Create(Resident resident);
-        Task<Resident> Create(Enquiry enquiry);
         Task<Resident> Update(Resident resident);
+        Task<Resident> AdmitEnquiry(ResidentRequest resident);
     }
 }

@@ -1,15 +1,12 @@
 ﻿using Microsoft.Ajax.Utilities;
 using nyms.resident.server.DataProviders.Interfaces;
 using nyms.resident.server.Invoice;
-using nyms.resident.server.Models;
 using nyms.resident.server.Models.Authentication;
 using nyms.resident.server.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.ServiceModel;
 using System.Threading.Tasks;
-using System.Web.UI.WebControls;
 
 namespace nyms.resident.server.Services.Impl
 {
@@ -56,7 +53,6 @@ namespace nyms.resident.server.Services.Impl
             if (billingCycle == null) throw new ArgumentNullException(nameof(billingCycle));
 
             var invoiceResidents = this.GetInvoiceResidentData(billingCycle.PeriodStart, billingCycle.PeriodEnd);
-            // if (invoiceResidents == null || !invoiceResidents.Any()) throw new ArgumentNullException(nameof(invoiceResidents));
             if (invoiceResidents == null || !invoiceResidents.Any()) return null;
 
             var invoiceDataByLa = invoiceResidents.Where(d => d.LocalAuthorityId == localAuthorityId);
@@ -71,9 +67,6 @@ namespace nyms.resident.server.Services.Impl
 
             invoiceDataByLa.ForEach(d =>
             {
-/*                var validatedInvoiceData = _invoiceDataProvider.GetValidatedInvoices(d.Id, billingCycleId).Result;
-                var comments = _invoiceDataProvider.GetInvoiceComments(d.Id, billingCycleId).Result;*/
-
                 d.SchedulePayments.ForEach(sp =>
                 {
                     var invoiceValidatedEntity = validatedInvoiceData.Where(ed => ed.LocalAuthorityId == sp.LocalAuthorityId && ed.PaymentTypeId == sp.PaymentTypeId && ed.ResidentId == sp.ResidentId).FirstOrDefault();
@@ -138,14 +131,6 @@ namespace nyms.resident.server.Services.Impl
             return _invoiceDataProvider.InsertInvoiceComments(invoiceCommentsEntity);
         }
 
-/*        public Task<IEnumerable<InvoiceCommentsEntity>> GetInvoiceComments(int localAuthorityId, int billingCycleId)
-        {
-            return this._invoiceDataProvider.GetInvoiceComments(localAuthorityId, billingCycleId);
-        }*/
-
-
-
-
 
         private IEnumerable<InvoiceResident> GetInvoiceResidentData(DateTime startDate, DateTime endDate)
         {
@@ -195,45 +180,3 @@ namespace nyms.resident.server.Services.Impl
     }
 }
 
-
-
-
-/*
-public Task<bool> UpdateInvoicesValidated(InvoiceData invoiceData)
-{
-    if (invoiceData == null) throw new ArgumentNullException(nameof(invoiceData));
-
-    var user = System.Threading.Thread.CurrentPrincipal as SecurityPrincipal;
-    var laId = invoiceData.InvoiceResidents.FirstOrDefault().LocalAuthorityId;
-    var billingCycleId = invoiceData.BillingCycleId;
-    var updatedById = user.Id;
-
-    var existingData = _invoiceDataProvider.GetValidatedInvoices((int)laId, billingCycleId).Result;
-    var schedulePayments = invoiceData.InvoiceResidents.SelectMany(i => i.SchedulePayments);
-
-    var validatedSchedulePayments = schedulePayments.Where(s => (s.Validated == "Y")).ToArray();
-    List<InvoiceValidatedEntity> newRecs = new List<InvoiceValidatedEntity>();
-
-    foreach (var s in validatedSchedulePayments)
-    {
-        var exists = existingData.Where(ed => ed.BillingCycleId == billingCycleId && ed.ResidentId == s.ResidentId && ed.PaymentTypeId == s.PaymentTypeId).FirstOrDefault();
-        if (exists == null)
-        {
-            newRecs.Add(new InvoiceValidatedEntity()
-            {
-                LocalAuthorityId = (int)s.LocalAuthorityId,
-                BillingCycleId = billingCycleId,
-                ResidentId = s.ResidentId,
-                PaymentTypeId = s.PaymentTypeId,
-                AmountDue = s.AmountDue,
-                Validated = s.Validated,
-                ValidatedAmount = s.AmountDue,
-                UpdatedById = updatedById
-            }
-            );
-        }
-    }
-
-    return _invoiceDataProvider.UpdateValidatedInvoices(newRecs);
-}
-*/

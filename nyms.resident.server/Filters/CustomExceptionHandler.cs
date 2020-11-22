@@ -15,21 +15,39 @@ namespace nyms.resident.server.Filters
         private static Logger logger = Nlogger2.GetLogger();
         public override void OnException(HttpActionExecutedContext actionExecutedContext)
         {
-            string errorMessage = string.Empty;
-            if (actionExecutedContext.Exception.InnerException == null)
+            string errorMessage = actionExecutedContext.Exception.Message;
+
+            if (actionExecutedContext.Exception.InnerException != null)
             {
-                errorMessage = actionExecutedContext.Exception.Message;
+                errorMessage += actionExecutedContext.Exception.InnerException.Message;
+            }
+            // take first 100 chars from stacktrace
+            errorMessage += "::" + actionExecutedContext.Exception.StackTrace.ToString().Substring(0, 100);
+            logger.Error($"Error: {errorMessage}");
+
+            var response = new HttpResponseMessage();
+            if (errorMessage.ToUpper().Contains("UNIQUE"))
+            {
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.ReasonPhrase = "Data already exists in the database. Please verify and submit";
+            }
+            else if (errorMessage.ToUpper().Contains("CANNOT INSERT"))
+            {
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.ReasonPhrase = "Cannot insert values to table. Please verify and submit";
+            }
+            else if (errorMessage.ToUpper().Contains("FOREIGN"))
+            {
+                response.StatusCode = HttpStatusCode.InternalServerError;
+                response.ReasonPhrase = "Database foreign key error. Please contact admin";
             }
             else
             {
-                errorMessage = actionExecutedContext.Exception.InnerException.Message;
+                response.StatusCode = HttpStatusCode.InternalServerError;
+                response.ReasonPhrase = "Internal Server Error. Please contact admin.";
             }
-            logger.Error($"Error: {errorMessage}");
-            var response = new HttpResponseMessage(HttpStatusCode.InternalServerError)
-            {
-                Content = new StringContent("An unhandled exception was thrown by service"),
-                ReasonPhrase = "Internal Server Error. Please contact admin."
-            };
+
+            response.Content = new StringContent("An exception was thrown by service");
             actionExecutedContext.Response = response;
         }
     }

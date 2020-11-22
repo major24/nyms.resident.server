@@ -8,7 +8,7 @@ namespace nyms.resident.server.Models
 {
     public class SocialWorker : IPerson
     {
-        public string Email { get; set; }
+        public string EmailAddress { get; set; }
         public string PhoneNumber { get; set; }
     }
 }
