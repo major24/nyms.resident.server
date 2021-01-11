@@ -132,7 +132,15 @@ namespace nyms.resident.server.Controllers
             schedule.ResidentId = resident.Id;
             schedule.LocalAuthorityId = resident.LocalAuthorityId;
 
-            this._scheduleService.CreateSchedule(schedule);
+            if (schedule.Id > 0)
+            {
+                _scheduleService.UpdateSchedule(schedule);
+            } 
+            else
+            {
+                this._scheduleService.CreateSchedule(schedule);
+            }
+           
 
             return Created("", "Saved");
         }

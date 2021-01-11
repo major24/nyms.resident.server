@@ -146,6 +146,37 @@ namespace nyms.resident.server.DataProviders.Impl
             }
         }
 
+        public void UpdateSchedule(ScheduleEntity schedule)
+        {
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                string sql = @"UPDATE [dbo].[schedules] 
+                            SET
+                            [local_authority_id] = @localauthorityid
+                           ,[payment_provider_id] = @paymentproviderid
+                           ,[payment_type_id] = @paymenttypeid
+                           ,[description] = @description
+                           ,[schedule_begin_date] = @schedulebegindate
+                           ,[schedule_end_date] = @scheduleenddate
+                           ,[weekly_fee] = @weeklyfee
+                           ,[updated_date] = GETDATE()
+                            WHERE id = @id";
+
+                DynamicParameters dp = new DynamicParameters();
+                conn.Open();
+                dp.Add("id", schedule.Id, DbType.Int32, ParameterDirection.Input);
+                dp.Add("localauthorityid", schedule.LocalAuthorityId, DbType.Int32, ParameterDirection.Input);
+                dp.Add("paymentproviderid", schedule.PaymentProviderId, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("paymenttypeid", schedule.PaymentTypeId, DbType.String, ParameterDirection.Input, 80);
+                dp.Add("description", schedule.Description, DbType.String, ParameterDirection.Input, 200);
+                dp.Add("schedulebegindate", schedule.ScheduleBeginDate, DbType.Date, ParameterDirection.Input, 80);
+                dp.Add("scheduleenddate", schedule.ScheduleEndDate, DbType.Date, ParameterDirection.Input, 80);
+                dp.Add("weeklyfee", schedule.WeeklyFee, DbType.Decimal, ParameterDirection.Input, 80);
+
+                var result = conn.Execute(sql, dp, commandType: CommandType.Text);
+            }
+        }
+
         public void InactivateSchedule(int id)
         {
             using (IDbConnection conn = new SqlConnection(_connectionString))

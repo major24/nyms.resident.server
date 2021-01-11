@@ -95,6 +95,11 @@ namespace nyms.resident.server.Services.Impl
             this._scheduleDataProvider.CreateSchedule(schedule);
         }
 
+        public void UpdateSchedule(ScheduleEntity schedule)
+        {
+            this._scheduleDataProvider.UpdateSchedule(schedule);
+        }
+
         public void UpdateScheduleEndDate(int id, DateTime scheduleEndDate)
         {
             this._scheduleDataProvider.UpdateScheduleEndDate(id, scheduleEndDate);
