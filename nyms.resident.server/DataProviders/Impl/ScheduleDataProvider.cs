@@ -181,10 +181,7 @@ namespace nyms.resident.server.DataProviders.Impl
         {
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
-                string sql = @"UPDATE [dbo].[schedules] 
-                            SET active = 'N',
-                            updated_date = GETDATE()
-                            WHERE id = @id";
+                string sql = @"DELETE FROM [dbo].[schedules] WHERE id = @id";
 
                 DynamicParameters dp = new DynamicParameters();
                 dp.Add("id", id, DbType.Int32, ParameterDirection.Input);
