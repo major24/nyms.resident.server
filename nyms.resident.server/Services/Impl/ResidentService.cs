@@ -79,7 +79,7 @@ namespace nyms.resident.server.Services.Impl
                 StayType = resident.StayType,
                 RoomLocation = resident.RoomLocation,
                 RoomNumber = resident.RoomNumber,
-                AdmissionDate = (DateTime)resident.MoveInDate,
+                AdmissionDate = (DateTime)resident.AdmissionDate,
                 Comments = resident.Comments,
                 UpdatedById = resident.UpdatedBy,
                 ExitDate = Convert.ToDateTime("9999-12-31"),

@@ -80,7 +80,14 @@ namespace nyms.resident.server.DataProviders.Impl
 
             // assign resident address, email and phone
             if (addresses.Any())
+            {
                 resident.Address = addresses.Where(a => a.ResidentId == residentId).FirstOrDefault();
+            }
+            else
+            {
+                resident.Address = new Address();
+            }
+                
 
             if (contacts.Any())
             {
@@ -159,7 +166,7 @@ namespace nyms.resident.server.DataProviders.Impl
                               ,[stay_type] as staytype
                               ,[room_location] as roomlocation
                               ,[room_number] as roomnumber
-                              ,[admission_date] as moveInDate
+                              ,[admission_date] as admissiondate
                               ,[exit_date] as exitdate
                               ,[exit_reason] as exitreason
                               ,[comments] as comments

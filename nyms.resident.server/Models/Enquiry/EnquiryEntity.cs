@@ -29,16 +29,6 @@ namespace nyms.resident.server.Models
         public DateTime? FamilyHomeVisitDate { get; set; } = null;
         public int RoomLocation { get; set; }
         public int RoomNumber { get; set; }
-/*        public string Street { get; set; }
-        public string City { get; set; }
-        public string County { get; set; }
-        public string Postcode { get; set; }
-        public string NokForeName { get; set; }
-        public string NokSurName { get; set; }
-        public string NokEmailAddress { get; set; }
-        public string NokPhoneNumber { get; set; }
-        public DateTime? ResponseDate { get; set; } = null;
-        public string Response { get; set; }*/
         public string Comments { get; set; }
         public string Status { get; set; }
         public int UpdatedBy { get; set; }

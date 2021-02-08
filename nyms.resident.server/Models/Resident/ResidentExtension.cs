@@ -21,7 +21,7 @@ namespace nyms.resident.server.Models
                 LaId = resident.LaId,
                 CareNeed = resident.CareNeed,
                 StayType = resident.StayType,
-                MoveInDate = resident.MoveInDate
+                AdmissionDate = resident.AdmissionDate // .MoveInDate
             };
         }
 
@@ -42,7 +42,8 @@ namespace nyms.resident.server.Models
                 PoNumber = resident.PoNumber,
                 CareNeed = resident.CareNeed,
                 StayType = resident.StayType,
-                MoveInDate = resident.MoveInDate,
+                AdmissionDate = resident.AdmissionDate,
+                // MoveInDate = resident.MoveInDate,
                 CareCategoryId = resident.CareCategoryId,
                 Status = resident.Status,
                 FamilyHomeVisitDate = resident.FamilyHomeVisitDate,

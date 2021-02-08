@@ -111,8 +111,8 @@ namespace nyms.resident.server.Controllers
             if (resident == null || string.IsNullOrEmpty(referenceId)) return BadRequest("Missing resident data or reference id");
             if (!GuidConverter.IsValid(resident.EnquiryReferenceId.ToString()))
                 return BadRequest("Connot convert enquiry refence id");
-            if (resident.MoveInDate == null || resident.MoveInDate.ToString() == "")
-                return BadRequest("Missing Move In Date");
+            if (resident.AdmissionDate == null || resident.AdmissionDate.ToString() == "") // .MoveInDate == null || resident.MoveInDate.ToString() == "")
+                return BadRequest("Missing admission date");
 
             // ensure enquiry exists?
             var enqExists = _enquiryService.GetByReferenceId(resident.EnquiryReferenceId);

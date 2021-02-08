@@ -16,7 +16,8 @@ namespace nyms.resident.server.Models
         public string NymsId { get; set; }
         public int CareCategoryId { get; set; }
         public string CareCategory { get; set; }
-        public DateTime MoveInDate { get; set; } //AdmissionDate { get; set; }
+        // public DateTime MoveInDate { get; set; } // ?? Remove later
+        public DateTime AdmissionDate { get; set; }
         public DateTime? ExitDate { get; set; } = null;
         public string StayType { get; set; }
         public string CareNeed { get; set; }

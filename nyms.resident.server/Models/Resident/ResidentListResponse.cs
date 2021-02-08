@@ -12,6 +12,7 @@ namespace nyms.resident.server.Models
         public string LaId { get; set; }
         public string CareNeed { get; set; }
         public string StayType { get; set; }
-        public DateTime? MoveInDate { get; set; } = null;
+        public DateTime AdmissionDate { get; set; }
+        // public DateTime? MoveInDate { get; set; } = null;
     }
 }
