@@ -76,7 +76,8 @@ namespace nyms.resident.server.DataProviders.Impl
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
                 string sqlInsert = @"INSERT INTO [dbo].[invoices_validated]
-                               ([local_authority_id]
+                               ([schedule_id]
+                               ,[local_authority_id]
                                ,[billing_cycle_id]
                                ,[resident_id]
                                ,[payment_type_id]
@@ -85,7 +86,8 @@ namespace nyms.resident.server.DataProviders.Impl
                                ,[validated_amount]
                                ,[updated_by_id])
                             VALUES
-                                (@localauthorityid
+                                (@scheduleid
+                                ,@localauthorityid
                                 ,@billingcycleid
                                 ,@residentid
                                 ,@paymenttypeid
@@ -100,6 +102,7 @@ namespace nyms.resident.server.DataProviders.Impl
                     foreach(var inv in InvoiceValidatedEntities)
                     {
                         DynamicParameters dp = new DynamicParameters();
+                        dp.Add("scheduleid", inv.ScheduleId, DbType.Int32, ParameterDirection.Input);
                         dp.Add("localauthorityid", inv.LocalAuthorityId, DbType.Int32, ParameterDirection.Input);
                         dp.Add("billingcycleid", inv.BillingCycleId, DbType.Int32, ParameterDirection.Input);
                         dp.Add("residentid", inv.ResidentId, DbType.Int32, ParameterDirection.Input);
@@ -123,6 +126,7 @@ namespace nyms.resident.server.DataProviders.Impl
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
                 string sql = @"SELECT [id] as id
+                              ,[schedule_id] as [scheduleid]
                               ,[local_authority_id] as localauthorityid
                               ,[billing_cycle_id] as billingcycleid
                               ,[resident_id] as residentid

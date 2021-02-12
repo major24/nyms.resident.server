@@ -46,13 +46,13 @@ namespace nyms.resident.server.Controllers
         }
 
         [HttpPost]
-        [Route("api/residents/{referenceId}/exit-date")]
-        public IHttpActionResult UpdateExitDate(string referenceId, Models.Resident resident)
+        [Route("api/residents/{referenceId}/discharge")]
+        public IHttpActionResult DischargeResident(string referenceId, Models.Resident resident)
         {
             var user = HttpContext.Current.User as SecurityPrincipal;
             logger.Info($"Exit date updated by {user.ForeName}");
 
-            var success = _residentService.UpdateExitDate(new Guid(referenceId), (DateTime)resident.ExitDate);
+            var success = _residentService.DischargeResident(new Guid(referenceId), (DateTime)resident.ExitDate);
 
             if (!success)
             {
@@ -130,8 +130,11 @@ namespace nyms.resident.server.Controllers
                 return BadRequest("Resident not found");
             }
             schedule.ResidentId = resident.Id;
-            schedule.LocalAuthorityId = resident.LocalAuthorityId;
-
+            if (schedule.LocalAuthorityId == 0)
+            {
+                schedule.LocalAuthorityId = resident.LocalAuthorityId;
+            }
+            
             if (schedule.Id > 0)
             {
                 _scheduleService.UpdateSchedule(schedule);

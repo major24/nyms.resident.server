@@ -8,6 +8,7 @@ namespace nyms.resident.server.Invoice
     public class InvoiceValidatedEntity
     {
         public int Id { get; set; }
+        public int ScheduleId { get; set; }
         public int LocalAuthorityId { get; set; }
         public int BillingCycleId { get; set; }
         public int ResidentId { get; set; }

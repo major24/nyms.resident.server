@@ -198,9 +198,9 @@ namespace nyms.resident.server.DataProviders.Impl
                             ,[created_date] as createddate
                         FROM [dbo].[residents]
                         WHERE [exit_date] >= @billingstart             
-                        AND admission_date <= @billingend
-                        AND active = 'Y'";
-  
+                        AND admission_date <= @billingend";
+                // AND active = 'Y'";
+
                 DynamicParameters dp = new DynamicParameters();
                 dp.Add("billingstart", billingStart.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input);
                 dp.Add("billingend", billingEnd.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input);
@@ -210,12 +210,13 @@ namespace nyms.resident.server.DataProviders.Impl
             }
         }
 
-        public bool UpdateExitDate(Guid referenceId, DateTime exitDate)
+        public bool DischargeResident(Guid referenceId, DateTime exitDate)
         {
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
                 string sql = @"UPDATE [dbo].[residents] 
                                 SET exit_date = @exitdate,
+                                    active = 'N',
                                     updated_date = GETDATE()
                         WHERE [reference_id] = @referenceId";
 
@@ -223,7 +224,8 @@ namespace nyms.resident.server.DataProviders.Impl
                             SET schedule_end_date = @exitdate,
                             updated_date = GETDATE()
                             WHERE resident_id = (SELECT id FROM [dbo].[residents]
-                                                WHERE reference_id = @referenceid)";
+                                                WHERE reference_id = @referenceid)
+                                  AND (schedule_end_date between '9999-12-31' AND '9999-12-31 23:59:59')";
 
                 DynamicParameters dp = new DynamicParameters();
                 dp.Add("exitdate", exitDate.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input);

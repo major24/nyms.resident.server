@@ -69,7 +69,11 @@ namespace nyms.resident.server.Services.Impl
             {
                 d.SchedulePayments.ForEach(sp =>
                 {
-                    var invoiceValidatedEntity = validatedInvoiceData.Where(ed => ed.LocalAuthorityId == sp.LocalAuthorityId && ed.PaymentTypeId == sp.PaymentTypeId && ed.ResidentId == sp.ResidentId).FirstOrDefault();
+                    var invoiceValidatedEntity = validatedInvoiceData.Where(ed => 
+                        ed.LocalAuthorityId == sp.LocalAuthorityId && 
+                        ed.PaymentTypeId == sp.PaymentTypeId && 
+                        ed.ResidentId == sp.ResidentId &&
+                        ed.ScheduleId == sp.Id).FirstOrDefault();
                     sp.InvoiceValidatedModel = new InvoiceValidatedModel();
                     if (invoiceValidatedEntity != null)
                     {

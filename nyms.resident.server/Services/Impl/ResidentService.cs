@@ -29,9 +29,9 @@ namespace nyms.resident.server.Services.Impl
         {
             return this._residentDataProvider.GetResident(referenceId);
         }
-        public bool UpdateExitDate(Guid referenceId, DateTime exitDate)
+        public bool DischargeResident(Guid referenceId, DateTime exitDate)
         {
-            return this._residentDataProvider.UpdateExitDate(referenceId, exitDate);
+            return this._residentDataProvider.DischargeResident(referenceId, exitDate);
         }
 
         public Task<Resident> AdmitEnquiry(ResidentRequest resident)

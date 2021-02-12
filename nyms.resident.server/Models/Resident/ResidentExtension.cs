@@ -21,7 +21,8 @@ namespace nyms.resident.server.Models
                 LaId = resident.LaId,
                 CareNeed = resident.CareNeed,
                 StayType = resident.StayType,
-                AdmissionDate = resident.AdmissionDate // .MoveInDate
+                AdmissionDate = resident.AdmissionDate, // .MoveInDate
+                ExitDate = resident.ExitDate
             };
         }
 
