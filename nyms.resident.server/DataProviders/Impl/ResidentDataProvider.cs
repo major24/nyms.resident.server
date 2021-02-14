@@ -21,7 +21,18 @@ namespace nyms.resident.server.DataProviders.Impl
             _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
         }
 
-        public IEnumerable<Resident> GetResidentsByCareHomeId(int carehomeId)
+        public IEnumerable<Resident> GetAllResidentsByCareHomeId(int careHomeId)
+        {
+            return GetResidentsByCareHomeId(careHomeId, false);
+        }
+
+        public IEnumerable<Resident> GetActiveResidentsByCareHomeId(int careHomeId)
+        {
+            return GetResidentsByCareHomeId(careHomeId, true);
+        }
+
+
+        private IEnumerable<Resident> GetResidentsByCareHomeId(int carehomeId, bool isActive = true)
         {
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
@@ -53,9 +64,16 @@ namespace nyms.resident.server.DataProviders.Impl
                               ,[updated_by_id] as updatedbyid
                               ,[updated_date] as updateddate
                         FROM [dbo].[residents]
-                        WHERE care_home_id = @carehomeid
-                        AND active = 'Y'
-                        ORDER BY forename";
+                        WHERE care_home_id = @carehomeid";
+
+                if (isActive)
+                {
+                    sql += " AND active = 'Y' ORDER BY forename";
+                }
+                else
+                {
+                    sql += " ORDER BY forename";
+                }
 
                 DynamicParameters dp = new DynamicParameters();
                 dp.Add("carehomeid", carehomeId, DbType.Int32, ParameterDirection.Input);
@@ -245,6 +263,26 @@ namespace nyms.resident.server.DataProviders.Impl
                 }
             }
         }
+
+        public bool ActivateResident(Guid referenceId)
+        {
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                string sql = @"UPDATE [dbo].[residents] 
+                                SET exit_date = '9999-12-31',
+                                    active = 'Y',
+                                    updated_date = GETDATE()
+                        WHERE [reference_id] = @referenceid";
+
+                DynamicParameters dp = new DynamicParameters();
+                dp.Add("referenceid", referenceId, DbType.Guid, ParameterDirection.Input, 60);
+
+                conn.Open();
+                var affRows = conn.Execute(sql, dp);
+                return true;
+            }
+        }
+                
         public Task<ResidentEntity> Create(ResidentEntity residentEntity, EnquiryEntity enquiryEntity)
         {
             if (residentEntity == null || enquiryEntity == null) 
@@ -611,6 +649,7 @@ namespace nyms.resident.server.DataProviders.Impl
             }
 
         }
+
 
     }
 }

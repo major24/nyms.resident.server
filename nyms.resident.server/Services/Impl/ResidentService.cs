@@ -20,9 +20,14 @@ namespace nyms.resident.server.Services.Impl
             _residentDataProvider = residentDataProvider ?? throw new ArgumentException(nameof(residentDataProvider));
         }
 
-        public IEnumerable<Resident> GetResidentsByCareHomeId(int careHomeId)
+        public IEnumerable<Resident> GetAllResidentsByCareHomeId(int careHomeId)
         {
-            return this._residentDataProvider.GetResidentsByCareHomeId(careHomeId);
+            return this._residentDataProvider.GetAllResidentsByCareHomeId(careHomeId);
+        }
+
+        public IEnumerable<Resident> GetActiveResidentsByCareHomeId(int careHomeId)
+        {
+            return this._residentDataProvider.GetActiveResidentsByCareHomeId(careHomeId);
         }
 
         public Resident GetResident(Guid referenceId)
@@ -34,6 +39,10 @@ namespace nyms.resident.server.Services.Impl
             return this._residentDataProvider.DischargeResident(referenceId, exitDate);
         }
 
+        public bool ActivateResident(Guid referenceId)
+        {
+            return this._residentDataProvider.ActivateResident(referenceId);
+        }
         public Task<Resident> AdmitEnquiry(ResidentRequest resident)
         {
             var residentEntity = ConvertToResidentEntity(resident);

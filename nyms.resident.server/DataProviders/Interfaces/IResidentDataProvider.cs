@@ -7,10 +7,12 @@ namespace nyms.resident.server.DataProviders.Interfaces
 {
     public interface IResidentDataProvider
     {
-        IEnumerable<Resident> GetResidentsByCareHomeId(int careHomeId);
+        IEnumerable<Resident> GetAllResidentsByCareHomeId(int careHomeId);
+        IEnumerable<Resident> GetActiveResidentsByCareHomeId(int careHomeId);
         Resident GetResident(Guid referenceId);
         IEnumerable<Resident> GetResidentsForInvoice(DateTime billingStart, DateTime billingEnd);
         bool DischargeResident(Guid referenceId, DateTime exitDate);
+        bool ActivateResident(Guid referenceId);
         Task<ResidentEntity> Create(ResidentEntity resident, EnquiryEntity enquiry);
         Task<ResidentEntity> Update(ResidentEntity resident);
     }

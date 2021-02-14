@@ -16,7 +16,6 @@ namespace nyms.resident.server.Models
         public string NymsId { get; set; }
         public int CareCategoryId { get; set; }
         public string CareCategory { get; set; }
-        // public DateTime MoveInDate { get; set; } // ?? Remove later
         public DateTime AdmissionDate { get; set; }
         public DateTime? ExitDate { get; set; } = null;
         public string StayType { get; set; }
@@ -30,10 +29,9 @@ namespace nyms.resident.server.Models
         public string Comments { get; set; }
         public int UpdatedBy { get; set; }
         public Guid EnquiryReferenceId { get; set; }
-
+        public string Active { get; set; }
         public SocialWorker SocialWorker { get; set; }
         public Address Address { get; set; }
-        // public IEnumerable<ContactInfo> ContactInfos { get; set; }
         public string EmailAddress { get; set; }
         public string PhoneNumber { get; set; }
         public IEnumerable<NextOfKin> NextOfKins { get; set; }

@@ -127,7 +127,7 @@ namespace nyms.resident.server.Controllers.Invoice
         ///api/invoices/validations
         [HttpPost]
         [Route("api/invoices/validations")]
-        public IHttpActionResult UpdateValidatedInvoices([FromBody] InvoiceValidatedEntity[] invoiceValidatedEntities) //InvoiceData invoiceData)
+        public IHttpActionResult UpdateValidatedInvoices([FromBody] InvoiceValidatedEntity[] invoiceValidatedEntities)
         {
             var user = System.Threading.Thread.CurrentPrincipal as SecurityPrincipal;
             logger.Info($"Invoice is validated by {user?.ForeName}");

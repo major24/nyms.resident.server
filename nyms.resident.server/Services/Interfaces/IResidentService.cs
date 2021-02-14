@@ -9,9 +9,11 @@ namespace nyms.resident.server.Services.Interfaces
 {
     public interface IResidentService
     {
-        IEnumerable<Resident> GetResidentsByCareHomeId(int careHomeId);
+        IEnumerable<Resident> GetAllResidentsByCareHomeId(int careHomeId);
+        IEnumerable<Resident> GetActiveResidentsByCareHomeId(int careHomeId);
         Resident GetResident(Guid referenceId);
         bool DischargeResident(Guid referenceId, DateTime exitDate);
+        bool ActivateResident(Guid referenceId);
         Task<Resident> Update(Resident resident);
         Task<Resident> AdmitEnquiry(ResidentRequest resident);
     }

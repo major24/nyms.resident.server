@@ -25,6 +25,27 @@ namespace nyms.resident.server.Controllers
         }
 
         [HttpGet]
+        [Route("api/carehomes/{careHomeId}/residents")]
+        public IHttpActionResult GetAllResidentsAll(int careHomeId)
+        {
+            var user = HttpContext.Current.User as SecurityPrincipal;
+            var curUser = System.Threading.Thread.CurrentPrincipal;
+            logger.Info($"All resedents requested by {user.ForeName}");
+
+            var residents = _residentService.GetAllResidentsByCareHomeId(careHomeId);
+
+            if (residents == null)
+            {
+                logger.Warn($"No residents found");
+                return NotFound();
+            }
+
+            var residentResponseList = residents.Select(r => r.ToResidentListType());
+
+            return Ok(residentResponseList.ToArray());
+        }
+
+        [HttpGet]
         [Route("api/carehomes/{careHomeId}/residents/active")]
         public IHttpActionResult GetAllResidents(int careHomeId)
         {
@@ -32,7 +53,7 @@ namespace nyms.resident.server.Controllers
             var curUser = System.Threading.Thread.CurrentPrincipal;
             logger.Info($"All resedents requested by {user.ForeName}");
 
-            var residents = _residentService.GetResidentsByCareHomeId(careHomeId);
+            var residents = _residentService.GetActiveResidentsByCareHomeId(careHomeId);
 
             if (residents == null)
             {
@@ -62,6 +83,22 @@ namespace nyms.resident.server.Controllers
             return Ok(false);
         }
 
+        [HttpPost]
+        [Route("api/residents/{referenceId}/activate")]
+        public IHttpActionResult ActivateResident(string referenceId)
+        {
+            var user = HttpContext.Current.User as SecurityPrincipal;
+            logger.Info($"Exit date updated by {user.ForeName}");
+
+            var success = _residentService.ActivateResident(new Guid(referenceId));
+
+            if (!success)
+            {
+                return Ok(true);
+            }
+            logger.Warn($"Cannot activate resident");
+            return Ok(false);
+        }
 
         [HttpGet]
         [Route("api/residents/{referenceId}")]
