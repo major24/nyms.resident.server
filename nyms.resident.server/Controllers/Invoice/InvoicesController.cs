@@ -40,11 +40,16 @@ namespace nyms.resident.server.Controllers.Invoice
             if (string.IsNullOrEmpty(billingBeginDate)) throw new ArgumentNullException(nameof(billingBeginDate));
             if (string.IsNullOrEmpty(billingEndDate)) throw new ArgumentNullException(nameof(billingEndDate));
 
-            var invData = GetAllInvoicesByDate(billingBeginDate, billingEndDate);
-            
+            // var invData = GetAllInvoicesByDate(billingBeginDate, billingEndDate);
+            DateTime.TryParse(billingBeginDate, out DateTime billingBegin);
+            DateTime.TryParse(billingEndDate, out DateTime billingEnd);
+
+            if (billingBegin == null || billingEnd == null) throw new ArgumentException("Invalid dates");
+
+            var invData = this._invoiceService.GetInvoiceData(billingBegin, billingEnd);
+
             if (invData == null)
             {
-                // logger.Error($"No user info found for {referenceId}.");
                 return NotFound();
             }
             return Ok(invData);
@@ -60,7 +65,13 @@ namespace nyms.resident.server.Controllers.Invoice
             if (localAuthorityId <= 0) throw new ArgumentNullException(nameof(localAuthorityId));
             if (billingCycleId <= 0) throw new ArgumentNullException(nameof(billingCycleId));
 
-            var invData = this._invoiceService.GetInvoiceData(localAuthorityId, billingCycleId);
+            // var invData = this._invoiceService.GetInvoiceData(localAuthorityId, billingCycleId);
+            var billingCycles = this._invoiceService.GetBillingCycles().Result;
+            var billingCycle = billingCycles.Where(bc => bc.Id == billingCycleId).FirstOrDefault();
+            if (billingCycle == null) throw new ArgumentNullException(nameof(billingCycle));
+
+            var invData = this._invoiceService.GetInvoiceData(billingCycle.PeriodStart, billingCycle.PeriodEnd, billingCycleId);
+
             if (invData == null)
             {
                 return NotFound();
@@ -78,9 +89,14 @@ namespace nyms.resident.server.Controllers.Invoice
             if (string.IsNullOrEmpty(billingBeginDate)) throw new ArgumentNullException(nameof(billingBeginDate));
             if (string.IsNullOrEmpty(billingEndDate)) throw new ArgumentNullException(nameof(billingEndDate));
 
+            DateTime.TryParse(billingBeginDate, out DateTime billingBegin);
+            DateTime.TryParse(billingEndDate, out DateTime billingEnd);
+
             try
             {
-                var invData = GetAllInvoicesByDate(billingBeginDate, billingEndDate);
+                // var invData = GetAllInvoicesByDate(billingBeginDate, billingEndDate);
+                var invData = this._invoiceService.GetInvoiceData(billingBegin, billingEnd);
+                
 
                 var detailCsvReport = CreateDetailCsvReport(invData.InvoiceResidents, billingBeginDate, billingEndDate);
                 var singleLineCsvReport = CreateSingleLineCsvReport(invData.InvoiceResidents, billingBeginDate, billingEndDate);
@@ -149,8 +165,6 @@ namespace nyms.resident.server.Controllers.Invoice
         }
         
 
-
-
         private string CreateDetailCsvReport(IEnumerable<InvoiceResident> invResidents, string billingBeginDate, string billingEndDate)
         {
             string header = "Name,Payment Provider Id,Local Authority,Description,Start Date,End Date,Num.Of Days,Weekly Fee,Amount Due," + Environment.NewLine;
@@ -211,7 +225,7 @@ namespace nyms.resident.server.Controllers.Invoice
             return x;
         }
 
-        private InvoiceData GetAllInvoicesByDate(string billingBeginDate, string billingEndDate)
+/*        private InvoiceData GetAllInvoicesByDate(string billingBeginDate, string billingEndDate)
         {
             DateTime billingBegin;
             DateTime billingEnd;
@@ -221,10 +235,7 @@ namespace nyms.resident.server.Controllers.Invoice
             if (billingBegin == null || billingEnd == null) throw new ArgumentException("Invalid dates");
 
             return this._invoiceService.GetInvoiceData(billingBegin, billingEnd);
-        }
-
-
-
+        }*/
 
 
     }
