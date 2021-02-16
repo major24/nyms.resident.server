@@ -31,20 +31,24 @@ namespace nyms.resident.server.Controllers.Invoice
 
         // GET: api/Invoices
         [HttpGet]
-        [Route("api/invoices/all/{billingBeginDate}/{billingEndDate}")]
-        public IHttpActionResult GetAllInvoices(string billingBeginDate, string billingEndDate)
+        [Route("api/invoices/all/{startDate}/{endDate}")]
+        public IHttpActionResult GetAllInvoices(string startDate, string endDate)
         {
             var user = System.Threading.Thread.CurrentPrincipal as SecurityPrincipal;
             logger.Info($"Invoice requested by {user?.ForeName}");
 
-            if (string.IsNullOrEmpty(billingBeginDate)) throw new ArgumentNullException(nameof(billingBeginDate));
-            if (string.IsNullOrEmpty(billingEndDate)) throw new ArgumentNullException(nameof(billingEndDate));
+            if (string.IsNullOrEmpty(startDate)) throw new ArgumentNullException(nameof(startDate));
+            if (string.IsNullOrEmpty(endDate)) throw new ArgumentNullException(nameof(endDate));
 
-            var invData = GetAllInvoicesByDate(billingBeginDate, billingEndDate);
-            
+            DateTime.TryParse(startDate, out DateTime startDate1);
+            DateTime.TryParse(endDate, out DateTime endDate1);
+
+            if (startDate1 == null || endDate1 == null) throw new ArgumentException("Invalid dates");
+
+            var invData = this._invoiceService.GetInvoiceData(startDate1, endDate1);
+
             if (invData == null)
             {
-                // logger.Error($"No user info found for {referenceId}.");
                 return NotFound();
             }
             return Ok(invData);
@@ -61,6 +65,7 @@ namespace nyms.resident.server.Controllers.Invoice
             if (billingCycleId <= 0) throw new ArgumentNullException(nameof(billingCycleId));
 
             var invData = this._invoiceService.GetInvoiceData(localAuthorityId, billingCycleId);
+
             if (invData == null)
             {
                 return NotFound();
@@ -80,7 +85,13 @@ namespace nyms.resident.server.Controllers.Invoice
 
             try
             {
-                var invData = GetAllInvoicesByDate(billingBeginDate, billingEndDate);
+                // var invData = GetAllInvoicesByDate(billingBeginDate, billingEndDate);
+                DateTime.TryParse(billingBeginDate, out DateTime billingBegin);
+                DateTime.TryParse(billingEndDate, out DateTime billingEnd);
+
+                if (billingBegin == null || billingEnd == null) throw new ArgumentException("Invalid dates");
+
+                var invData = this._invoiceService.GetInvoiceData(billingBegin, billingEnd);
 
                 var detailCsvReport = CreateDetailCsvReport(invData.InvoiceResidents, billingBeginDate, billingEndDate);
                 var singleLineCsvReport = CreateSingleLineCsvReport(invData.InvoiceResidents, billingBeginDate, billingEndDate);
@@ -210,21 +221,6 @@ namespace nyms.resident.server.Controllers.Invoice
             var x = schedules.Where(s => s.PaymentProviderId == PaymentProviderId).Select(k => k.AmountDue).Sum();
             return x;
         }
-
-        private InvoiceData GetAllInvoicesByDate(string billingBeginDate, string billingEndDate)
-        {
-            DateTime billingBegin;
-            DateTime billingEnd;
-            DateTime.TryParse(billingBeginDate, out billingBegin);
-            DateTime.TryParse(billingEndDate, out billingEnd);
-
-            if (billingBegin == null || billingEnd == null) throw new ArgumentException("Invalid dates");
-
-            return this._invoiceService.GetInvoiceData(billingBegin, billingEnd);
-        }
-
-
-
 
 
     }
