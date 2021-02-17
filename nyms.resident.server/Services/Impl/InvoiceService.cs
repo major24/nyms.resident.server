@@ -48,7 +48,7 @@ namespace nyms.resident.server.Services.Impl
             var invoiceResidents = this.GetInvoiceResidentData(startDate, endDate);
             if (invoiceResidents == null || !invoiceResidents.Any()) return null;
             // also return if schedules is null as well
-            if (!invoiceResidents.FirstOrDefault().SchedulePayments.Any()) return null;
+            // if (!invoiceResidents.FirstOrDefault().SchedulePayments.Any()) return null;
 
             if (localAuthorityId > 0)
             {
