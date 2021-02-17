@@ -28,50 +28,50 @@ namespace nyms.resident.server.Services.Impl
         // Data by Date Range
         public InvoiceData GetInvoiceData(DateTime startDate, DateTime endDate)
         {
+            return GetCalucatedInvoiceData(startDate, endDate);
+        }
+
+        public InvoiceData GetInvoiceData(int localAuthorityId, int billingCycleId)
+        {
+            var billingCycles = GetBillingCycles().Result;
+            var billingCycle = billingCycles.Where(bc => bc.Id == billingCycleId).FirstOrDefault();
+            if (billingCycle == null) throw new ArgumentNullException(nameof(billingCycle));
+
+            return GetCalucatedInvoiceData(billingCycle.PeriodStart, billingCycle.PeriodEnd, localAuthorityId, billingCycleId);
+        }
+
+        private InvoiceData GetCalucatedInvoiceData(DateTime startDate, DateTime endDate, int localAuthorityId = 0, int billingCycleId = 0)
+        {
             if (startDate == null) throw new ArgumentNullException(nameof(startDate));
             if (endDate == null) throw new ArgumentNullException(nameof(endDate));
 
             var invoiceResidents = this.GetInvoiceResidentData(startDate, endDate);
-            var numOfDays = _feeCalculatorService.GetNumberOfDaysInMonth(startDate, endDate); // invoiceResidents.Select(d => d.SchedulePayments.Select(sp => sp.NumberOfDays)).FirstOrDefault().FirstOrDefault();
-
-            return new InvoiceData()
-            {
-                BillingCycleId = 0,
-                BeginDate = startDate,
-                EndDate = endDate,
-                BillingDate = DateTime.Now, // TODO
-                NumberOfDays = numOfDays,
-                InvoiceResidents = invoiceResidents
-            };
-        }
-
-        // Data by billing cycle id
-        public InvoiceData GetInvoiceData(int localAuthorityId, int billingCycleId)
-        {
-            var billingCycles = this.GetBillingCycles().Result;
-            var billingCycle = billingCycles.Where(bc => bc.Id == billingCycleId).FirstOrDefault();
-            if (billingCycle == null) throw new ArgumentNullException(nameof(billingCycle));
-
-            var invoiceResidents = this.GetInvoiceResidentData(billingCycle.PeriodStart, billingCycle.PeriodEnd);
             if (invoiceResidents == null || !invoiceResidents.Any()) return null;
+            // also return if schedules is null as well
+            // if (!invoiceResidents.FirstOrDefault().SchedulePayments.Any()) return null;
 
-            var invoiceDataByLa = invoiceResidents.Where(d => d.LocalAuthorityId == localAuthorityId);
-            var numOfDays = _feeCalculatorService.GetNumberOfDaysInMonth(billingCycle.PeriodStart, billingCycle.PeriodEnd);  //invoiceResidents.Select(d => d.SchedulePayments.Select(sp => sp.NumberOfDays)).FirstOrDefault().FirstOrDefault();
-
-            // assemble validated date with invoice data
-            var validatedInvoiceData = _invoiceDataProvider.GetValidatedInvoices(billingCycleId).Result; //(int)localAuthorityId, billingCycleId).Result;
+            if (localAuthorityId > 0)
+            {
+                invoiceResidents = invoiceResidents.Where(d => d.LocalAuthorityId == localAuthorityId);
+            }
+            
+            var numOfDays = _feeCalculatorService.GetNumberOfDaysInMonth(startDate, endDate); 
             // get usernames for mapping
             var users = _userService.GetUsers();
-            // get comments
-            var comments = _invoiceDataProvider.GetInvoiceComments(billingCycleId).Result; //(int)localAuthorityId, 
 
-            invoiceDataByLa.ForEach(d =>
+            // assemble validated date with invoice data
+            var validatedInvoiceData = _invoiceDataProvider.GetValidatedInvoices(startDate, endDate).Result; 
+          
+            // get comments
+            var comments = _invoiceDataProvider.GetInvoiceComments(startDate, endDate).Result; 
+
+            invoiceResidents.ForEach(d =>
             {
                 d.SchedulePayments.ForEach(sp =>
                 {
-                    var invoiceValidatedEntity = validatedInvoiceData.Where(ed => 
-                        ed.LocalAuthorityId == sp.LocalAuthorityId && 
-                        ed.PaymentTypeId == sp.PaymentTypeId && 
+                    var invoiceValidatedEntity = validatedInvoiceData.Where(ed =>
+                        ed.LocalAuthorityId == sp.LocalAuthorityId &&
+                        ed.PaymentTypeId == sp.PaymentTypeId &&
                         ed.ResidentId == sp.ResidentId &&
                         ed.ScheduleId == sp.Id).FirstOrDefault();
                     sp.InvoiceValidatedModel = new InvoiceValidatedModel();
@@ -100,11 +100,11 @@ namespace nyms.resident.server.Services.Impl
             return new InvoiceData()
             {
                 BillingCycleId = billingCycleId,
-                BeginDate = billingCycle.PeriodStart,
-                EndDate = billingCycle.PeriodEnd,
-                BillingDate = billingCycle.BillDate,
+                BeginDate = startDate,
+                EndDate = endDate,
+                BillingDate = DateTime.Now, //Todo
                 NumberOfDays = numOfDays,
-                InvoiceResidents = invoiceDataByLa
+                InvoiceResidents = invoiceResidents
             };
         }
 
@@ -135,12 +135,12 @@ namespace nyms.resident.server.Services.Impl
             return _invoiceDataProvider.InsertInvoiceComments(invoiceCommentsEntity);
         }
 
-
+        // CORE function
         private IEnumerable<InvoiceResident> GetInvoiceResidentData(DateTime startDate, DateTime endDate)
         {
             // each resi may have multiple contributors, LA || LA and CC || LA and CC1, CC2 
-            var schedules = this._invoiceDataProvider.GetAllSchedulesForInvoiceDate(startDate, endDate); //GetAllSchedules();
-            var residents = this._residentDataProvider.GetResidentsForInvoice(startDate, endDate); //.GetAll();
+            var schedules = this._invoiceDataProvider.GetAllSchedulesForInvoiceDate(startDate, endDate);
+            var residents = this._residentDataProvider.GetResidentsForInvoice(startDate, endDate);
 
             // create invoiceResident
             var invResidents = residents.Select(r =>

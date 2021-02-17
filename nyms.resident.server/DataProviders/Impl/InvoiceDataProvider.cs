@@ -121,7 +121,65 @@ namespace nyms.resident.server.DataProviders.Impl
             return Task.FromResult(true);
         }
 
-        public Task<IEnumerable<InvoiceValidatedEntity>> GetValidatedInvoices(int billingCycleId) //int residentId, 
+        public Task<IEnumerable<InvoiceValidatedEntity>> GetValidatedInvoices(DateTime startDate, DateTime endDate)
+        {
+            string sql = @"SELECT ival.id as id
+                              ,[schedule_id] as [scheduleid]
+                              ,ival.local_authority_id as localauthorityid
+                              ,[billing_cycle_id] as billingcycleid
+                              ,[resident_id] as residentid
+                              ,[payment_type_id] as paymenttypeid
+                              ,[amount_due] as amountdue
+                              ,[validated] as validated
+                              ,[validated_amount] as validatedamount
+                              ,[updated_by_id] as updatedbyid
+                              ,[updated_date] as updateddate
+                               FROM [dbo].[invoices_validated] ival
+                               INNER JOIN [dbo].[billing_periods] bp
+							   ON ival.billing_cycle_id = bp.id
+                               WHERE bp.period_start >= @startdate
+							   AND bp.period_end <= @enddate";
+
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                DynamicParameters dp = new DynamicParameters();
+                dp.Add("startdate", startDate.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input, 60);
+                dp.Add("enddate", endDate.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input, 60);
+                var result = conn.QueryAsync<InvoiceValidatedEntity>(sql, dp).Result;
+                return Task.FromResult(result);
+            }
+        }
+
+        public Task<IEnumerable<InvoiceCommentsEntity>> GetInvoiceComments(DateTime startDate, DateTime endDate)
+        {
+            string sql = @"SELECT ic.id as id
+                              ,ic.local_authority_id as localauthorityid
+                              ,[billing_cycle_id] as billingcycleid
+                              ,[resident_id] as residentid
+                              ,[payment_type_id] as paymenttypeid
+                              ,[transaction_amount] as transactionamount
+                              ,[comments] as comments
+                              ,[updated_by_id] as updatedbyid
+                              ,[updated_date] as updateddate
+                               FROM [dbo].[invoice_comments] ic
+                               INNER JOIN [dbo].[billing_periods] bp
+							   ON ic.billing_cycle_id = bp.id
+                               WHERE bp.period_start >= @startdate
+							   AND bp.period_end <= @enddate";
+
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                DynamicParameters dp = new DynamicParameters();
+                dp.Add("startdate", startDate.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input, 60);
+                dp.Add("enddate", endDate.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input, 60);
+                var result = conn.QueryAsync<InvoiceCommentsEntity>(sql, dp).Result;
+                return Task.FromResult(result);
+            }
+        }
+
+        public Task<IEnumerable<InvoiceValidatedEntity>> GetValidatedInvoices(int billingCycleId)
         {
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
@@ -147,7 +205,7 @@ namespace nyms.resident.server.DataProviders.Impl
             }
         }
 
-        public Task<IEnumerable<InvoiceCommentsEntity>> GetInvoiceComments(int billingCycleId) //int residentId, 
+        public Task<IEnumerable<InvoiceCommentsEntity>> GetInvoiceComments(int billingCycleId)
         {
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
