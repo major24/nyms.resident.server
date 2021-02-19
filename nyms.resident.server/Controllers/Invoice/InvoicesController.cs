@@ -64,7 +64,31 @@ namespace nyms.resident.server.Controllers.Invoice
             if (localAuthorityId <= 0) throw new ArgumentNullException(nameof(localAuthorityId));
             if (billingCycleId <= 0) throw new ArgumentNullException(nameof(billingCycleId));
 
-            var invData = this._invoiceService.GetInvoiceData(localAuthorityId, billingCycleId);
+            var invData = this._invoiceService.GetInvoiceData(billingCycleId);
+
+            if (invData == null)
+            {
+                return NotFound();
+            }
+            return Ok(invData);
+        }
+
+        [HttpGet]
+        [Route("api/invoices/validations/{startDate}/{endDate}")]
+        public IHttpActionResult GetAllValidations(string startDate, string endDate)
+        {
+            var user = System.Threading.Thread.CurrentPrincipal as SecurityPrincipal;
+            logger.Info($"Invoice requested by {user?.ForeName}");
+
+            if (string.IsNullOrEmpty(startDate)) throw new ArgumentNullException(nameof(startDate));
+            if (string.IsNullOrEmpty(endDate)) throw new ArgumentNullException(nameof(endDate));
+
+            DateTime.TryParse(startDate, out DateTime startDate1);
+            DateTime.TryParse(endDate, out DateTime endDate1);
+
+            if (startDate1 == null || endDate1 == null) throw new ArgumentException("Invalid dates");
+
+            var invData = _invoiceService.GetValidationsInvoiceData(startDate1, endDate1);
 
             if (invData == null)
             {
@@ -85,7 +109,6 @@ namespace nyms.resident.server.Controllers.Invoice
 
             try
             {
-                // var invData = GetAllInvoicesByDate(billingBeginDate, billingEndDate);
                 DateTime.TryParse(billingBeginDate, out DateTime billingBegin);
                 DateTime.TryParse(billingEndDate, out DateTime billingEnd);
 

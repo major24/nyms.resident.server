@@ -10,6 +10,7 @@ namespace nyms.resident.server.DataProviders.Interfaces
     {
         IEnumerable<SchedulePayment> GetAllSchedulesForInvoiceDate(DateTime billingStart, DateTime billingEnd);
         Task<IEnumerable<BillingCycle>> GetBillingCycles();
+        Task<IEnumerable<BillingCycle>> GetBillingCycles(DateTime startDate, DateTime endDate);
         Task<bool> UpdateValidatedInvoices(IEnumerable<InvoiceValidatedEntity> InvoiceValidatedEntities);
         Task<bool> InsertInvoiceComments(InvoiceCommentsEntity invoiceCommentsEntity);
         Task<IEnumerable<InvoiceValidatedEntity>> GetValidatedInvoices(int billingCycleId);
