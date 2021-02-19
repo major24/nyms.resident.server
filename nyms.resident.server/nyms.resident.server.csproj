@@ -233,6 +233,7 @@
     <Compile Include="Invoice\InvoiceResident.cs" />
     <Compile Include="Invoice\InvoiceValidatedEntity.cs" />
     <Compile Include="Invoice\InvoiceValidatedModel.cs" />
+    <Compile Include="Invoice\InvoiceValidationsReportResponse.cs" />
     <Compile Include="Models\Enquiry\EnquiryResponse.cs" />
     <Compile Include="Models\Resident\ContactInfo.cs" />
     <Compile Include="Models\Enquiry\EnquiryAction.cs" />

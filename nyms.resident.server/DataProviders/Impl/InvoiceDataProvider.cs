@@ -71,6 +71,28 @@ namespace nyms.resident.server.DataProviders.Impl
             }
         }
 
+        public Task<IEnumerable<BillingCycle>> GetBillingCycles(DateTime startDate, DateTime endDate)
+        {
+            string sql = @"SELECT [id] as id
+                              ,[local_authority_id] as localauthorityid
+                              ,[period_start] as periodstart
+                              ,[period_end] as periodend
+                              ,[bill_date] as billdate
+                               FROM [dbo].[billing_periods]
+	                           WHERE period_start >= @startdate
+                               AND period_end <= @enddate"; 
+
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                DynamicParameters dp = new DynamicParameters();
+                dp.Add("startdate", startDate.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input, 60);
+                dp.Add("enddate", endDate.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input, 60);
+                var result = conn.QueryAsync<BillingCycle>(sql, dp).Result;
+                return Task.FromResult(result);
+            }
+        }
+
         public Task<bool> UpdateValidatedInvoices(IEnumerable<InvoiceValidatedEntity> InvoiceValidatedEntities)
         {
             using (IDbConnection conn = new SqlConnection(_connectionString))

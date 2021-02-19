@@ -8,9 +8,10 @@ namespace nyms.resident.server.Services.Interfaces
     public interface IInvoiceService
     {
         InvoiceData GetInvoiceData(DateTime startDate, DateTime endDate);
-        InvoiceData GetInvoiceData(int localAuthorityId, int billingCycleId);
+        InvoiceData GetInvoiceData(int billingCycleId);
         Task<IEnumerable<BillingCycle>> GetBillingCycles();
         Task<bool> UpdateInvoicesValidated(InvoiceValidatedEntity[] invoiceValidatedEntities);
         Task<bool> InsertInvoiceComments(InvoiceCommentsEntity invoiceCommentsEntity);
+        IEnumerable<InvoiceValidationsReportResponse> GetValidationsInvoiceData(DateTime startDate, DateTime endDate);
     }
 }

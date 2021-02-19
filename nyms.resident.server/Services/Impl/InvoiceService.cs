@@ -31,14 +31,68 @@ namespace nyms.resident.server.Services.Impl
             return GetCalucatedInvoiceData(startDate, endDate);
         }
 
-        public InvoiceData GetInvoiceData(int localAuthorityId, int billingCycleId)
+        public InvoiceData GetInvoiceData(int billingCycleId)
         {
             var billingCycles = GetBillingCycles().Result;
             var billingCycle = billingCycles.Where(bc => bc.Id == billingCycleId).FirstOrDefault();
             if (billingCycle == null) throw new ArgumentNullException(nameof(billingCycle));
 
-            return GetCalucatedInvoiceData(billingCycle.PeriodStart, billingCycle.PeriodEnd, localAuthorityId, billingCycleId);
+            return GetCalucatedInvoiceData(billingCycle.PeriodStart, billingCycle.PeriodEnd, billingCycle.LocalAuthorityId, billingCycleId);
         }
+
+        public IEnumerable<InvoiceValidationsReportResponse> GetValidationsInvoiceData(DateTime startDate, DateTime endDate)
+        {
+            // get list of billing cycle ids based on start and end date
+            // each billing ids, get report (use above fn)
+            // create a new list of response based on the data above (by each bill id)
+            var billingCycles = _invoiceDataProvider.GetBillingCycles(startDate, endDate).Result;
+            if (billingCycles == null) throw new ArgumentNullException(nameof(billingCycles));
+
+            List<InvoiceValidationsReportResponse> result = new List<InvoiceValidationsReportResponse>();
+
+            billingCycles.ForEach((bc) =>
+            {
+                InvoiceData invData = GetCalucatedInvoiceData(bc.PeriodStart, bc.PeriodEnd, bc.LocalAuthorityId, bc.Id);  // GetInvoiceData(bc.Id);
+                if (invData != null)
+                {
+                    if (invData.InvoiceResidents.Any())
+                    {
+                        invData.InvoiceResidents.ForEach((iv) =>
+                        {
+                            if (iv.SchedulePayments.Any())
+                            {
+                                iv.SchedulePayments.ForEach((sp) =>
+                                {
+                                    InvoiceValidationsReportResponse invRpt = new InvoiceValidationsReportResponse();
+                                    invRpt.BillingCycleId = bc.Id;
+                                    invRpt.PeriodStartDate = invData.BeginDate;
+                                    invRpt.PeriodEndDate = invData.EndDate;
+                                    invRpt.Name = iv.Name;
+
+                                    invRpt.LocalAuthorityId = sp.LocalAuthorityId;
+                                    invRpt.LocalAuthority = sp.PaymentFromName;
+                                    invRpt.PaymentTypeId = sp.PaymentTypeId;
+                                    invRpt.Description = sp.Description;
+                                    invRpt.ResidentId = sp.ResidentId;
+                                    invRpt.AmountDue = sp.AmountDue;
+                                    invRpt.ValidatedAmount = sp.InvoiceValidatedModel.ValidatedAmount;
+                                    invRpt.Validated = sp.InvoiceValidatedModel.Validated;
+                                    invRpt.UpdatedBy = sp.InvoiceValidatedModel.UpdatedBy;
+                                    invRpt.UpdatedDate = sp.InvoiceValidatedModel.UpdatedDate;
+
+                                    result.Add(invRpt);
+                                });
+                            }
+                        }); // invData foreach
+                    }
+                }
+            }); // billing cycle foreach
+
+            return result;
+        }
+
+
+
 
         private InvoiceData GetCalucatedInvoiceData(DateTime startDate, DateTime endDate, int localAuthorityId = 0, int billingCycleId = 0)
         {
