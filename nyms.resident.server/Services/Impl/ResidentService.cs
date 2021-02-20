@@ -49,13 +49,7 @@ namespace nyms.resident.server.Services.Impl
             // Add required values for creation
             residentEntity.ReferenceId = Guid.NewGuid();
 
-            EnquiryEntity enquiryEntity = new EnquiryEntity()
-            {
-                ReferenceId = resident.EnquiryReferenceId,
-                Status = ENQUIRY_STATUS.admit.ToString(),
-                UpdatedBy = resident.UpdatedBy
-            };
-            var residentEntityUpdated = _residentDataProvider.Create(residentEntity, enquiryEntity).Result;
+            var residentEntityUpdated = _residentDataProvider.Create(residentEntity).Result;
 
             // todo: return new resident...
             var residentCreated = new Resident() { ReferenceId = residentEntity.ReferenceId };

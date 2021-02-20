@@ -1,6 +1,5 @@
 ﻿using nyms.resident.server.Models.Base;
 using nyms.resident.server.Models.Core;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace nyms.resident.server.Models

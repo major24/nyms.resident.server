@@ -29,8 +29,8 @@ namespace nyms.resident.server.DataProviders.Impl
                 string sqlDeleteInvValidated = @"DELETE FROM [dbo].[invoices_validated] WHERE resident_id = @id";
                 string sqlDeleteInvComments = @"DELETE FROM [dbo].[invoice_comments] WHERE resident_id = @id";
                 string sqlDeleteNok = @"DELETE FROM [dbo].[next_of_kin] WHERE resident_id = @id";
-                string sqlDeleteAddresses = @"DELETE FROM [dbo].[resident_nok_addresses] WHERE resident_id = @id";
-                string sqlDeleteContacts = @"DELETE FROM [dbo].[contacts] WHERE resident_id = @id";
+                string sqlDeleteAddresses = @"DELETE FROM [dbo].[resident_addresses] WHERE resident_id = @id";
+                string sqlDeleteContacts = @"DELETE FROM [dbo].[resident_contacts] WHERE resident_id = @id";
                 string sqlDeleteSocialWorkers = @"DELETE FROM [dbo].[social_workers] WHERE resident_id = @id";
 
                 conn.Open();

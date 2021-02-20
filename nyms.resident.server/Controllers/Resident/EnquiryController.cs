@@ -111,7 +111,7 @@ namespace nyms.resident.server.Controllers
             if (resident == null || string.IsNullOrEmpty(referenceId)) return BadRequest("Missing resident data or reference id");
             if (!GuidConverter.IsValid(resident.EnquiryReferenceId.ToString()))
                 return BadRequest("Connot convert enquiry refence id");
-            if (resident.AdmissionDate == null || resident.AdmissionDate.ToString() == "") // .MoveInDate == null || resident.MoveInDate.ToString() == "")
+            if (resident.AdmissionDate == null || resident.AdmissionDate.ToString() == "")
                 return BadRequest("Missing admission date");
 
             // ensure enquiry exists?
@@ -122,7 +122,7 @@ namespace nyms.resident.server.Controllers
             logger.Info($"Admit an enquiry by {loggedInUser.ForeName}");
             resident.UpdatedBy = loggedInUser.Id;
 
-            var updEnquiry = _residentService.AdmitEnquiry(resident); //this._enquiryService.Admit(resident).Result;
+            var updEnquiry = _residentService.AdmitEnquiry(resident);
             return Ok(updEnquiry);
         }
 

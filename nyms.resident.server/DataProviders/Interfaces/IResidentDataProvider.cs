@@ -13,7 +13,7 @@ namespace nyms.resident.server.DataProviders.Interfaces
         IEnumerable<Resident> GetResidentsForInvoice(DateTime billingStart, DateTime billingEnd);
         bool DischargeResident(Guid referenceId, DateTime exitDate);
         bool ActivateResident(Guid referenceId);
-        Task<ResidentEntity> Create(ResidentEntity resident, EnquiryEntity enquiry);
+        Task<ResidentEntity> Create(ResidentEntity resident); //, EnquiryEntity enquiry);
         Task<ResidentEntity> Update(ResidentEntity resident);
     }
 }
