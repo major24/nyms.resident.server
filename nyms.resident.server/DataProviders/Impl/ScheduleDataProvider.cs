@@ -137,7 +137,7 @@ namespace nyms.resident.server.DataProviders.Impl
                 dp.Add("localauthorityid", schedule.LocalAuthorityId, DbType.Int32, ParameterDirection.Input);
                 dp.Add("paymentproviderid", schedule.PaymentProviderId, DbType.String, ParameterDirection.Input, 80);
                 dp.Add("paymenttypeid", schedule.PaymentTypeId, DbType.String, ParameterDirection.Input, 80);
-                dp.Add("description", schedule.Description, DbType.String, ParameterDirection.Input, 200);
+                dp.Add("description", schedule.Description.Trim(), DbType.String, ParameterDirection.Input, 200);
                 dp.Add("schedulebegindate", schedule.ScheduleBeginDate, DbType.Date, ParameterDirection.Input, 80);
                 dp.Add("scheduleenddate", schedule.ScheduleEndDate, DbType.Date, ParameterDirection.Input, 80);
                 dp.Add("weeklyfee", schedule.WeeklyFee, DbType.Decimal, ParameterDirection.Input, 80);
@@ -168,7 +168,7 @@ namespace nyms.resident.server.DataProviders.Impl
                 dp.Add("localauthorityid", schedule.LocalAuthorityId, DbType.Int32, ParameterDirection.Input);
                 dp.Add("paymentproviderid", schedule.PaymentProviderId, DbType.String, ParameterDirection.Input, 80);
                 dp.Add("paymenttypeid", schedule.PaymentTypeId, DbType.String, ParameterDirection.Input, 80);
-                dp.Add("description", schedule.Description, DbType.String, ParameterDirection.Input, 200);
+                dp.Add("description", schedule.Description.Trim(), DbType.String, ParameterDirection.Input, 200);
                 dp.Add("schedulebegindate", schedule.ScheduleBeginDate, DbType.Date, ParameterDirection.Input, 80);
                 dp.Add("scheduleenddate", schedule.ScheduleEndDate, DbType.Date, ParameterDirection.Input, 80);
                 dp.Add("weeklyfee", schedule.WeeklyFee, DbType.Decimal, ParameterDirection.Input, 80);

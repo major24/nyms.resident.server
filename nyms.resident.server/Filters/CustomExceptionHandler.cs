@@ -22,7 +22,7 @@ namespace nyms.resident.server.Filters
                 errorMessage += actionExecutedContext.Exception.InnerException.Message;
             }
             // take first 100 chars from stacktrace
-            errorMessage += "::" + actionExecutedContext.Exception.StackTrace.ToString().Substring(0, 100);
+            errorMessage += "::" + actionExecutedContext.Exception.StackTrace.ToString().Substring(0, 1000);
             logger.Error($"Error: {errorMessage}");
 
             var response = new HttpResponseMessage();

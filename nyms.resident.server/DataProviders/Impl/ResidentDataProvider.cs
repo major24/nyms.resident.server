@@ -109,8 +109,17 @@ namespace nyms.resident.server.DataProviders.Impl
 
             if (contacts.Any())
             {
-                resident.EmailAddress = contacts.Where(c => c.ResidentId == residentId && c.ContactType == CONTACT_TYPE.email.ToString()).FirstOrDefault().Data;
-                resident.PhoneNumber = contacts.Where(c => c.ResidentId == residentId && c.ContactType == CONTACT_TYPE.phone.ToString()).FirstOrDefault().Data;
+                contacts.ForEach(ct =>
+                {
+                    if (ct.ContactType == CONTACT_TYPE.email.ToString())
+                    {
+                        resident.EmailAddress = ct.Data;
+                    }
+                    if (ct.ContactType == CONTACT_TYPE.phone.ToString())
+                    {
+                        resident.PhoneNumber = ct.Data;
+                    }
+                });
             }
 
             // assign nok address to nok person
@@ -406,13 +415,13 @@ namespace nyms.resident.server.DataProviders.Impl
             dp.Add("referenceid", residentEntity.ReferenceId, DbType.Guid, ParameterDirection.Input, 80);
             dp.Add("carehomeid", residentEntity.CareHomeId, DbType.Int32, ParameterDirection.Input);
             dp.Add("localauthorityid", residentEntity.LocalAuthorityId, DbType.Int32, ParameterDirection.Input);
-            dp.Add("nhsnumber", residentEntity.NhsNumber, DbType.String, ParameterDirection.Input, 20);
-            dp.Add("ponumber", residentEntity.PoNumber, DbType.String, ParameterDirection.Input, 20);
-            dp.Add("laid", residentEntity.LaId, DbType.String, ParameterDirection.Input, 20);
-            dp.Add("nymsid", residentEntity.NymsId, DbType.String, ParameterDirection.Input, 20);
-            dp.Add("forename", residentEntity.ForeName, DbType.String, ParameterDirection.Input, 80);
-            dp.Add("surname", residentEntity.SurName, DbType.String, ParameterDirection.Input, 80);
-            dp.Add("middlename", residentEntity.MiddleName, DbType.String, ParameterDirection.Input, 80);
+            dp.Add("nhsnumber", residentEntity.NhsNumber.Trim(), DbType.String, ParameterDirection.Input, 20);
+            dp.Add("ponumber", residentEntity.PoNumber.Trim(), DbType.String, ParameterDirection.Input, 20);
+            dp.Add("laid", residentEntity.LaId.Trim(), DbType.String, ParameterDirection.Input, 20);
+            dp.Add("nymsid", residentEntity.NymsId.Trim(), DbType.String, ParameterDirection.Input, 20);
+            dp.Add("forename", residentEntity.ForeName.Trim(), DbType.String, ParameterDirection.Input, 80);
+            dp.Add("surname", residentEntity.SurName.Trim(), DbType.String, ParameterDirection.Input, 80);
+            dp.Add("middlename", residentEntity.MiddleName.Trim(), DbType.String, ParameterDirection.Input, 80);
             dp.Add("dob", residentEntity.Dob, DbType.Date, ParameterDirection.Input, 80);
             dp.Add("gender", residentEntity.Gender, DbType.String, ParameterDirection.Input, 80);
             dp.Add("maritalstatus", residentEntity.MaritalStatus, DbType.String, ParameterDirection.Input, 80);
@@ -423,7 +432,7 @@ namespace nyms.resident.server.DataProviders.Impl
             dp.Add("roomnumber", residentEntity.RoomNumber, DbType.Int32, ParameterDirection.Input, 80);
             dp.Add("admissiondate", residentEntity.AdmissionDate, DbType.Date, ParameterDirection.Input, 80);
             dp.Add("exitdate", residentEntity.ExitDate, DbType.Date, ParameterDirection.Input, 80);
-            dp.Add("comments", residentEntity.Comments, DbType.String, ParameterDirection.Input, 500);
+            dp.Add("comments", residentEntity.Comments.Trim(), DbType.String, ParameterDirection.Input, 500);
             dp.Add("status", residentEntity.Status, DbType.String, ParameterDirection.Input, 80);
             dp.Add("updatedbyid", residentEntity.UpdatedById, DbType.Int32, ParameterDirection.Input);
             dp.Add("enquiryrefid", residentEntity.EnquiryReferenceId, DbType.Guid, ParameterDirection.Input, 80);
@@ -433,11 +442,11 @@ namespace nyms.resident.server.DataProviders.Impl
             {
                 dpAddrResident.Add("@reftype", residentEntity.Address.RefType, DbType.String, ParameterDirection.Input, 80);
                 dpAddrResident.Add("@addrtype", residentEntity.Address.AddrType, DbType.String, ParameterDirection.Input, 80);
-                dpAddrResident.Add("@street1", residentEntity.Address.Street1, DbType.String, ParameterDirection.Input, 100);
-                dpAddrResident.Add("@street2", residentEntity.Address.Street2, DbType.String, ParameterDirection.Input, 100);
-                dpAddrResident.Add("@city", residentEntity.Address.City, DbType.String, ParameterDirection.Input, 80);
-                dpAddrResident.Add("@county", residentEntity.Address.County, DbType.String, ParameterDirection.Input, 80);
-                dpAddrResident.Add("@postcode", residentEntity.Address.PostCode, DbType.String, ParameterDirection.Input, 80);
+                dpAddrResident.Add("@street1", residentEntity.Address.Street1.Trim(), DbType.String, ParameterDirection.Input, 100);
+                dpAddrResident.Add("@street2", residentEntity.Address.Street2.Trim(), DbType.String, ParameterDirection.Input, 100);
+                dpAddrResident.Add("@city", residentEntity.Address.City.Trim(), DbType.String, ParameterDirection.Input, 80);
+                dpAddrResident.Add("@county", residentEntity.Address.County.Trim(), DbType.String, ParameterDirection.Input, 80);
+                dpAddrResident.Add("@postcode", residentEntity.Address.PostCode.Trim(), DbType.String, ParameterDirection.Input, 80);
             }
 
             // turing enq into resident
@@ -487,10 +496,10 @@ namespace nyms.resident.server.DataProviders.Impl
                     {
                         DynamicParameters dpSw = new DynamicParameters();
                         dpSw.Add("residentid", newResidentId, DbType.Int32, ParameterDirection.Input);
-                        dpSw.Add("forename", residentEntity.SocialWorker.ForeName, DbType.String, ParameterDirection.Input, 80);
-                        dpSw.Add("surname", residentEntity.SocialWorker.SurName, DbType.String, ParameterDirection.Input, 80);
-                        dpSw.Add("emailaddress", residentEntity.SocialWorker.EmailAddress, DbType.String, ParameterDirection.Input, 200);
-                        dpSw.Add("phonenumber", residentEntity.SocialWorker.PhoneNumber, DbType.String, ParameterDirection.Input, 40);
+                        dpSw.Add("forename", residentEntity.SocialWorker.ForeName.Trim(), DbType.String, ParameterDirection.Input, 80);
+                        dpSw.Add("surname", residentEntity.SocialWorker.SurName.Trim(), DbType.String, ParameterDirection.Input, 80);
+                        dpSw.Add("emailaddress", residentEntity.SocialWorker.EmailAddress.Trim(), DbType.String, ParameterDirection.Input, 200);
+                        dpSw.Add("phonenumber", residentEntity.SocialWorker.PhoneNumber.Trim(), DbType.String, ParameterDirection.Input, 40);
                         var affRowsSw = conn.Execute(sqlInsertSocialWorker, dpSw, transaction: tran);
                     }
                     // noks, list of noks
@@ -500,9 +509,9 @@ namespace nyms.resident.server.DataProviders.Impl
                         residentEntity.NextOfKins.ForEach(nok =>
                         {
                             int newNokId = 0;
-                            dpNok.Add("forename", nok.ForeName, DbType.String, ParameterDirection.Input, 80);
-                            dpNok.Add("surname", nok.SurName, DbType.String, ParameterDirection.Input, 80);
-                            dpNok.Add("relationship", nok.Relationship, DbType.String, ParameterDirection.Input, 80);
+                            dpNok.Add("forename", nok.ForeName.Trim(), DbType.String, ParameterDirection.Input, 80);
+                            dpNok.Add("surname", nok.SurName.Trim(), DbType.String, ParameterDirection.Input, 80);
+                            dpNok.Add("relationship", nok.Relationship.Trim(), DbType.String, ParameterDirection.Input, 80);
                             dpNok.Add("updatedbyid", residentEntity.UpdatedById, DbType.Int32, ParameterDirection.Input);
 
                             dpNok.Add("residentid", newResidentId, DbType.Int32, ParameterDirection.Input);
@@ -513,11 +522,11 @@ namespace nyms.resident.server.DataProviders.Impl
                                 DynamicParameters dpAddrNok = new DynamicParameters();
                                 dpAddrNok.Add("@reftype", nok.Address.RefType, DbType.String, ParameterDirection.Input, 80);
                                 dpAddrNok.Add("@addrtype", nok.Address.AddrType, DbType.String, ParameterDirection.Input, 80);
-                                dpAddrNok.Add("@street1", nok.Address.Street1, DbType.String, ParameterDirection.Input, 100);
-                                dpAddrNok.Add("@street2", nok.Address.Street2, DbType.String, ParameterDirection.Input, 100);
-                                dpAddrNok.Add("@city", nok.Address.City, DbType.String, ParameterDirection.Input, 80);
-                                dpAddrNok.Add("@county", nok.Address.County, DbType.String, ParameterDirection.Input, 80);
-                                dpAddrNok.Add("@postcode", nok.Address.PostCode, DbType.String, ParameterDirection.Input, 80);
+                                dpAddrNok.Add("@street1", nok.Address.Street1.Trim(), DbType.String, ParameterDirection.Input, 100);
+                                dpAddrNok.Add("@street2", nok.Address.Street2.Trim(), DbType.String, ParameterDirection.Input, 100);
+                                dpAddrNok.Add("@city", nok.Address.City.Trim(), DbType.String, ParameterDirection.Input, 80);
+                                dpAddrNok.Add("@county", nok.Address.County.Trim(), DbType.String, ParameterDirection.Input, 80);
+                                dpAddrNok.Add("@postcode", nok.Address.PostCode.Trim(), DbType.String, ParameterDirection.Input, 80);
 
                                 dpAddrNok.Add("nokid", newNokId, DbType.Int32, ParameterDirection.Input);
                                 dpAddrNok.Add("residentid", newResidentId, DbType.Int32, ParameterDirection.Input);
