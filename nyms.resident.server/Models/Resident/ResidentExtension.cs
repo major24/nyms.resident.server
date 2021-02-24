@@ -1,4 +1,5 @@
 ﻿using nyms.resident.server.Models.Core;
+using System.Data.Common;
 using System.Linq;
 
 namespace nyms.resident.server.Models
@@ -57,6 +58,7 @@ namespace nyms.resident.server.Models
             {
                 result.SocialWorker = new SocialWorker()
                 {
+                    Id = resident.SocialWorker.Id,
                     ForeName = resident.SocialWorker.ForeName,
                     SurName = resident.SocialWorker.SurName,
                     EmailAddress = resident.SocialWorker.EmailAddress,
@@ -67,6 +69,7 @@ namespace nyms.resident.server.Models
             {
                 result.Address = new Address()
                 {
+                    Id = resident.Address.Id,
                     Street1 = resident.Address.Street1,
                     City = resident.Address.City,
                     County = resident.Address.County,

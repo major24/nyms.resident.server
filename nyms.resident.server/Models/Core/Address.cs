@@ -9,8 +9,6 @@ namespace nyms.resident.server.Models.Core
     {
         public int Id { get; set; }
         public int ResidentId { get; set; }
-        public int NokId { get; set; }
-        public string RefType { get; set; }
         public string AddrType { get; set; }
         public string Street1 { get; set; }
         public string Street2 { get; set; }

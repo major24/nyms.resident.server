@@ -5,6 +5,7 @@ using nyms.resident.server.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.ServiceModel.Configuration;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http.Results;
@@ -56,9 +57,82 @@ namespace nyms.resident.server.Services.Impl
             return Task.FromResult(residentCreated);
         }
 
-        public Task<Resident> Update(Resident resident)
+        public Task<Resident> Update(ResidentRequest resident)
         {
-            throw new NotImplementedException();
+            var residentExisting = GetResident(resident.ReferenceId);
+            if (residentExisting == null) throw new ArgumentNullException(nameof(resident));
+
+            var residentEntity = ConvertToResidentEntity(resident);
+            residentEntity.Id = residentExisting.Id;
+
+            // Contact Info. Issue: Contact info is separate table but Email and Phone comes as values
+            // Need to find if already exists? if so update else insert..
+            var existingResidentContacts = _residentDataProvider.GetResidentContactsByResidentId(residentEntity.Id);
+            List<ResidentContact> rcs = new List<ResidentContact>();
+            if (existingResidentContacts.Any())
+            {
+                // get existing email address or phone
+                existingResidentContacts.ForEach((rc) =>
+                {
+                    if (!string.IsNullOrEmpty(rc.ContactType) && rc.ContactType == CONTACT_TYPE.email.ToString())
+                    {
+                        rc.Id = rc.Id;
+                        rc.Data = resident.EmailAddress;
+                    }
+                    if (!string.IsNullOrEmpty(rc.ContactType) && rc.ContactType == CONTACT_TYPE.phone.ToString())
+                    {
+                        rc.Id = rc.Id;
+                        rc.Data = resident.PhoneNumber;
+                    }
+                    rcs.Add(rc);
+                });
+            } 
+            else
+            {
+                // No existing contacts found
+                if (!string.IsNullOrEmpty(residentEntity.EmailAddress))
+                {
+                    ResidentContact rc = new ResidentContact()
+                    {
+                        ContactType = CONTACT_TYPE.email.ToString(),
+                        Data = residentEntity.EmailAddress
+                    };
+                    rcs.Add(rc);
+                }
+                if (!string.IsNullOrEmpty(residentEntity.PhoneNumber))
+                {
+                    ResidentContact rc = new ResidentContact()
+                    {
+                        ContactType = CONTACT_TYPE.phone.ToString(),
+                        Data = residentEntity.PhoneNumber
+                    };
+                    rcs.Add(rc);
+                }
+            }
+            residentEntity.ResidentContacts = rcs.ToArray();
+
+            // SocialWorker Info. Issue: SW info is separate table
+            SocialWorker swToBeUpdIns = new SocialWorker();
+            if (resident.SocialWorker != null && resident.SocialWorker.ForeName != "")
+            {
+                swToBeUpdIns.ForeName = resident.SocialWorker.ForeName;
+                swToBeUpdIns.SurName = resident.SocialWorker.SurName;
+                swToBeUpdIns.EmailAddress = resident.SocialWorker.EmailAddress;
+                swToBeUpdIns.PhoneNumber = resident.SocialWorker.PhoneNumber;
+            }
+            // Need to find if already exists? if so update else insert..
+            SocialWorker existingSocialWorker = _residentDataProvider.GetSocialWorker(residentEntity.Id);
+            if (existingSocialWorker != null)
+            {
+                swToBeUpdIns.Id = existingSocialWorker.Id;
+            }
+            residentEntity.SocialWorker = swToBeUpdIns;
+
+            var residentEntityUpdated = _residentDataProvider.Update(residentEntity);
+
+            // todo: return new resident...
+            var residentCreated = new Resident() { ReferenceId = residentEntity.ReferenceId };
+            return Task.FromResult(residentCreated);
         }
 
         private ResidentEntity ConvertToResidentEntity(ResidentRequest resident)
@@ -98,7 +172,6 @@ namespace nyms.resident.server.Services.Impl
             {
                 residentEntity.Address = CreateAddress(
                     resident.Address,
-                    resident.Address.RefType ?? REF_TYPE.resident.ToString(),
                     resident.Address.AddrType ?? ADDRESS_TYPE.home.ToString());
             }
 
@@ -115,6 +188,8 @@ namespace nyms.resident.server.Services.Impl
             {
                 residentEntity.SocialWorker = resident.SocialWorker;
             }
+
+
 
             return residentEntity;
         }
@@ -134,10 +209,10 @@ namespace nyms.resident.server.Services.Impl
                 // if nok has address?
                 if (n.Address != null && n.Address.Street1 != "")
                 {
-                    newNok.Address = CreateAddress(
+/*                    newNok.Address = CreateAddress(
                         n.Address,
                         n.Address.RefType ?? REF_TYPE.nok.ToString(),
-                        n.Address.AddrType ?? ADDRESS_TYPE.home.ToString());
+                        n.Address.AddrType ?? ADDRESS_TYPE.home.ToString());*/
                 }
                 // if nok has contact info?
                 if (n.ContactInfos != null && n.ContactInfos.Any())
@@ -146,7 +221,6 @@ namespace nyms.resident.server.Services.Impl
                     {
                         return new ContactInfo()
                         {
-                            RefType = c.RefType,
                             ContactType = c.ContactType,
                             Data = c.Data
                         };
@@ -158,11 +232,11 @@ namespace nyms.resident.server.Services.Impl
             return noks.ToArray();
         }
 
-        private Address CreateAddress(Address address, string refType, string addrType)
+        private Address CreateAddress(Address address, string addrType)
         {
             return new Address()
             {
-                RefType = refType,
+                Id = address.Id,
                 AddrType = addrType,
                 Street1 = address.Street1,
                 Street2 = address.Street2,

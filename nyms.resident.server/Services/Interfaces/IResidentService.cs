@@ -14,7 +14,7 @@ namespace nyms.resident.server.Services.Interfaces
         Resident GetResident(Guid referenceId);
         bool DischargeResident(Guid referenceId, DateTime exitDate);
         bool ActivateResident(Guid referenceId);
-        Task<Resident> Update(Resident resident);
+        Task<Resident> Update(ResidentRequest resident);
         Task<Resident> AdmitEnquiry(ResidentRequest resident);
     }
 }

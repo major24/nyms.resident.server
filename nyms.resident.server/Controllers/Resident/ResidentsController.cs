@@ -123,6 +123,27 @@ namespace nyms.resident.server.Controllers
             return Ok(result);
         }
 
+        [HttpPost]
+        [Route("api/residents/{referenceId}")]
+        public IHttpActionResult UpdateResident(string referenceId, ResidentRequest resident)
+        {
+            if (string.IsNullOrEmpty(referenceId))
+            {
+                throw new ArgumentNullException(nameof(referenceId));
+            }
+            if (resident == null)
+            {
+                throw new ArgumentNullException(nameof(resident));
+            }
+
+            var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
+            logger.Info($"Resident updated by {loggedInUser.ForeName}");
+            resident.UpdatedBy = loggedInUser.Id;
+
+            var result = _residentService.Update(resident);
+            return Ok(result);
+        }
+
 
 
         // *** Schedules ***
