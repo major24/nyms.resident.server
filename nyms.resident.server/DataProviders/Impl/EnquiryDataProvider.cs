@@ -33,7 +33,7 @@ namespace nyms.resident.server.DataProviders.Impl
                     string sql = @"SELECT
                        e.id as id
                       ,e.reference_id as referenceid
-                      ,[care_home_id] as carehomeid
+                      ,e.care_home_id as carehomeid
                       ,[referral_agency_id] as referralagencyid
                       ,[local_authority_id] as localauthorityid
                       ,[forename] as forename
