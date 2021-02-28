@@ -96,12 +96,10 @@ namespace nyms.resident.server.DataProviders.Impl
             IEnumerable<LocalAuthority> localAuthorities = new List<LocalAuthority>();
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
-                string sql = @"SELECT la.id as id, la.name as name, ch.id as carehomeid
+                string sql = @"SELECT la.id as id, la.name as name, la.care_home_id as carehomeid
                                 FROM local_authorities la
-                                INNER JOIN care_homes_local_authorities chla
-                                ON chla.local_authority_id = la.id
                                 INNER JOIN care_homes ch
-                                ON ch.id = chla.care_home_id
+                                ON ch.id = la.care_home_id
                                 WHERE la.active = 'Y'";
 
                 conn.Open();
@@ -146,10 +144,8 @@ namespace nyms.resident.server.DataProviders.Impl
             IEnumerable<CareCategory> careCategories = new List<CareCategory>();
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
-                string sql = @"SELECT cc.id as id, cc.name as name, chcc.care_home_id as carehomeid
+                string sql = @"SELECT cc.id as id, cc.name as name, cc.care_home_id as carehomeid
                                         FROM [care_categories] cc
-                                        INNER JOIN [care_homes_care_categories] chcc
-                                        ON cc.id = chcc.care_category_id
                                         WHERE cc.active = 'Y'";
 
                 conn.Open();

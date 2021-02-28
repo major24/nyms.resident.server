@@ -153,6 +153,7 @@
     <Compile Include="App_Start\UnityConfig.cs" />
     <Compile Include="Invoice\FeeCalculatorServiceTest.cs" />
     <Compile Include="Invoice\FeeCalculatorServiceWoContributor.cs" />
+    <Compile Include="Invoice\AvgOccupancyRateTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Controllers\HomeControllerTest.cs" />
     <Compile Include="Controllers\ValuesControllerTest.cs" />
