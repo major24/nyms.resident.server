@@ -20,7 +20,7 @@ namespace nyms.resident.server.DataProviders.Impl
 
         }
 
-        public IEnumerable<Enquiry> GetAll()
+        public IEnumerable<Enquiry> GetEnquires()
         {
             // For list page, no need all the fields, 
             // when req for specific enq, should bring all fields
@@ -77,7 +77,7 @@ namespace nyms.resident.server.DataProviders.Impl
             }
         }
 
-        public Task<EnquiryEntity> GetByReferenceId(Guid referenceId)
+        public Task<EnquiryEntity> GetEnquiry(Guid referenceId)
         {
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {

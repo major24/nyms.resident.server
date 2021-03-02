@@ -12,7 +12,5 @@ namespace nyms.resident.server.DataProviders.Interfaces
         void CreateSchedule(ScheduleEntity schedule);
         void UpdateSchedule(ScheduleEntity schedule);
         void InactivateSchedule(int id);
-        IEnumerable<PaymentProvider> GetPaymentProviders();
-        IEnumerable<PaymentType> GetPaymentTypes();
     }
 }

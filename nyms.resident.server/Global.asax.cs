@@ -1,14 +1,6 @@
 ﻿using Newtonsoft.Json.Serialization;
-using NLog;
-using NLog.Config;
-using NLog.Targets;
 using nyms.resident.server.Services.Core;
-using System;
-using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
@@ -22,7 +14,6 @@ namespace nyms.resident.server
         {
             AreaRegistration.RegisterAllAreas();
             // encrypted conn string
-            // string connStr = DecryptString(ConfigurationManager.AppSettings["connectionString_nyms24"]);
             string connStr = Util.DecryptString(ConfigurationManager.AppSettings["connectionString_nyms24"]);
             UnityConfig.RegisterComponents(connStr);
             GlobalConfiguration.Configure(WebApiConfig.Register);

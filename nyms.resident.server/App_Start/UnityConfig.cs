@@ -4,6 +4,9 @@ using nyms.resident.server.Invoice;
 using nyms.resident.server.Services.Core;
 using nyms.resident.server.Services.Impl;
 using nyms.resident.server.Services.Interfaces;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Net.Http.Headers;
 using System.Web.Mvc;
 using Unity;
 using Unity.Injection;
@@ -29,13 +32,23 @@ namespace nyms.resident.server
             container.RegisterType<ICareHomeService, CareHomeService>();
             container.RegisterType<IInvoiceDataProvider, InvoiceDataProvider>(new InjectionConstructor(connectionString));
             container.RegisterType<IInvoiceService, InvoiceService>();
-            container.RegisterType<IResidentDataProvider, ResidentDataProvider>(new InjectionConstructor(connectionString));
+            container.RegisterType<IResidentContactDataProvider, ResidentContactDataProvider>(new InjectionConstructor(connectionString));
+            container.RegisterType<ISocialWorkerDataProvider, SocialWorkerDataProvider>(new InjectionConstructor(connectionString));
+            // requires additional parameters
+            container.RegisterType<IResidentDataProvider, ResidentDataProvider>(new InjectionConstructor(connectionString,
+                typeof(IResidentContactDataProvider), typeof(ISocialWorkerDataProvider)));
             container.RegisterType<IResidentService, ResidentService>();
             container.RegisterType<IFeeCalculatorService, FeeCalculatorService>();
+            
+            container.RegisterType<IPaymentProviderDataProvider, PaymentProviderDataProvider>(new InjectionConstructor(connectionString));
+            container.RegisterType<IPaymentTypeDataProvider, PaymentTypeDataProvider>(new InjectionConstructor(connectionString));
+            container.RegisterType<IBillingCycleDataProvider, BillingCycleDataProvider>(new InjectionConstructor(connectionString));
+
             container.RegisterType<IScheduleDataProvider, ScheduleDataProvider>(new InjectionConstructor(connectionString));
             container.RegisterType<IScheduleService, ScheduleService>();
             container.RegisterType<IDatabaseSetupProvider, DatabaseSetupProvider>(new InjectionConstructor(connectionString));
-            
+            container.RegisterType<IReportService, ReportService>();
+
             DependencyResolver.SetResolver(new Unity.Mvc5.UnityDependencyResolver(container));
 
             System.Web.Http.GlobalConfiguration.Configuration.DependencyResolver = new Unity.WebApi.UnityDependencyResolver(container);

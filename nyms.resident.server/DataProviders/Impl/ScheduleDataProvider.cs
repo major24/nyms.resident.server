@@ -22,9 +22,7 @@ namespace nyms.resident.server.DataProviders.Impl
 
         public IEnumerable<ResidentScheduleEntity> GetResidentSchedules()
         {
-            using (IDbConnection conn = new SqlConnection(_connectionString))
-            {
-                string sql = @"SELECT
+            string sql = @"SELECT
                                 r.id as residentid
                                 , r.reference_id referenceid
                                 , r.forename as forename
@@ -48,6 +46,8 @@ namespace nyms.resident.server.DataProviders.Impl
                             WHERE r.active = 'Y'
                             ORDER BY r.forename";
 
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
                 conn.Open();
                 var result = conn.QueryAsync<ResidentScheduleEntity>(sql).Result;
                 return result;
@@ -56,9 +56,7 @@ namespace nyms.resident.server.DataProviders.Impl
 
         public IEnumerable<ResidentScheduleEntity> GetResidentSchedules(Guid referenceId)
         {
-            using (IDbConnection conn = new SqlConnection(_connectionString))
-            {
-                string sql = @"SELECT
+            string sql = @"SELECT
                                 r.id as residentid
                                 , r.reference_id referenceid
                                 , r.forename as forename
@@ -82,6 +80,8 @@ namespace nyms.resident.server.DataProviders.Impl
                             AND s.active = 'Y'
                             AND r.active = 'Y'";
 
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
                 DynamicParameters dp = new DynamicParameters();
                 dp.Add("referenceid", referenceId, DbType.Guid, ParameterDirection.Input, 60);
                 conn.Open();
@@ -92,13 +92,13 @@ namespace nyms.resident.server.DataProviders.Impl
 
         public void UpdateScheduleEndDate(int id, DateTime scheduleEndDate)
         {
-            using (IDbConnection conn = new SqlConnection(_connectionString))
-            {
-                string sql = @"UPDATE [dbo].[schedules] 
+            string sql = @"UPDATE [dbo].[schedules] 
                             SET schedule_end_date = @scheduleenddate,
                             updated_date = GETDATE()
                             WHERE id = @id";
 
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
                 DynamicParameters dp = new DynamicParameters();
                 dp.Add("scheduleenddate", scheduleEndDate.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input);
                 dp.Add("id", id, DbType.Int32, ParameterDirection.Input);
@@ -110,9 +110,7 @@ namespace nyms.resident.server.DataProviders.Impl
 
         public void CreateSchedule(ScheduleEntity schedule)
         {
-            using (IDbConnection conn = new SqlConnection(_connectionString))
-            {
-                string sql = @"INSERT INTO [dbo].[schedules]
+            string sql = @"INSERT INTO [dbo].[schedules]
                            ([resident_id]
                            ,[local_authority_id]
                            ,[payment_provider_id]
@@ -131,6 +129,8 @@ namespace nyms.resident.server.DataProviders.Impl
                            ,@scheduleenddate
                            ,@weeklyfee)";
 
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
                 DynamicParameters dp = new DynamicParameters();
                 conn.Open();
                 dp.Add("residentid", schedule.ResidentId, DbType.Int32, ParameterDirection.Input);
@@ -148,9 +148,7 @@ namespace nyms.resident.server.DataProviders.Impl
 
         public void UpdateSchedule(ScheduleEntity schedule)
         {
-            using (IDbConnection conn = new SqlConnection(_connectionString))
-            {
-                string sql = @"UPDATE [dbo].[schedules] 
+            string sql = @"UPDATE [dbo].[schedules] 
                             SET
                             [local_authority_id] = @localauthorityid
                            ,[payment_provider_id] = @paymentproviderid
@@ -162,6 +160,8 @@ namespace nyms.resident.server.DataProviders.Impl
                            ,[updated_date] = GETDATE()
                             WHERE id = @id";
 
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
                 DynamicParameters dp = new DynamicParameters();
                 conn.Open();
                 dp.Add("id", schedule.Id, DbType.Int32, ParameterDirection.Input);
@@ -179,10 +179,10 @@ namespace nyms.resident.server.DataProviders.Impl
 
         public void InactivateSchedule(int id)
         {
+            string sql = @"DELETE FROM [dbo].[schedules] WHERE id = @id";
+
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
-                string sql = @"DELETE FROM [dbo].[schedules] WHERE id = @id";
-
                 DynamicParameters dp = new DynamicParameters();
                 dp.Add("id", id, DbType.Int32, ParameterDirection.Input);
 
@@ -191,34 +191,5 @@ namespace nyms.resident.server.DataProviders.Impl
             }
         }
 
-        public IEnumerable<PaymentProvider> GetPaymentProviders()
-        {
-            using (IDbConnection conn = new SqlConnection(_connectionString))
-            {
-                string sql = @"SELECT [id] as id
-                            ,[name] as name
-                            FROM[dbo].[payment_providers]
-                            WHERE active = 'Y'";
-
-                conn.Open();
-                var result = conn.Query<PaymentProvider>(sql);
-                return result;
-            }
-        }
-
-        public IEnumerable<PaymentType> GetPaymentTypes()
-        {
-            using (IDbConnection conn = new SqlConnection(_connectionString))
-            {
-                string sql = @"SELECT [id] as id
-                                ,[name] as name
-                                FROM[dbo].[payment_types]
-                                WHERE active = 'Y'";
-
-                conn.Open();
-                var result = conn.Query<PaymentType>(sql);
-                return result;
-            }
-        }
     }
 }
