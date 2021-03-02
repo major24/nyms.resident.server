@@ -5,10 +5,7 @@ using nyms.resident.server.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.ServiceModel.Configuration;
 using System.Threading.Tasks;
-using System.Web;
-using System.Web.Http.Results;
 using WebGrease.Css.Extensions;
 
 namespace nyms.resident.server.Services.Impl
@@ -16,25 +13,32 @@ namespace nyms.resident.server.Services.Impl
     public class ResidentService : IResidentService
     {
         private readonly IResidentDataProvider _residentDataProvider;
-        public ResidentService(IResidentDataProvider residentDataProvider)
+        private readonly IResidentContactDataProvider _residentContactDataProvider;
+        private readonly ISocialWorkerDataProvider _socialWorkerDataProvider;
+        public ResidentService(IResidentDataProvider residentDataProvider,
+            IResidentContactDataProvider residentContactDataProvider,
+            ISocialWorkerDataProvider socialWorkerDataProvider)
         {
-            _residentDataProvider = residentDataProvider ?? throw new ArgumentException(nameof(residentDataProvider));
+            _residentDataProvider = residentDataProvider ?? throw new ArgumentNullException(nameof(residentDataProvider));
+            _residentContactDataProvider = residentContactDataProvider ?? throw new ArgumentNullException(nameof(residentContactDataProvider));
+            _socialWorkerDataProvider = socialWorkerDataProvider ?? throw new ArgumentNullException(nameof(socialWorkerDataProvider));
         }
 
         public IEnumerable<Resident> GetAllResidentsByCareHomeId(int careHomeId)
         {
-            return this._residentDataProvider.GetAllResidentsByCareHomeId(careHomeId);
+            return this._residentDataProvider.GetResidents().Where(res => res.CareHomeId == careHomeId);
         }
 
         public IEnumerable<Resident> GetActiveResidentsByCareHomeId(int careHomeId)
         {
-            return this._residentDataProvider.GetActiveResidentsByCareHomeId(careHomeId);
+            return this._residentDataProvider.GetResidents().Where(res => res.CareHomeId == careHomeId && res.Active == "Y");
         }
 
         public Resident GetResident(Guid referenceId)
         {
             return this._residentDataProvider.GetResident(referenceId);
         }
+
         public bool DischargeResident(Guid referenceId, DateTime exitDate)
         {
             return this._residentDataProvider.DischargeResident(referenceId, exitDate);
@@ -44,6 +48,7 @@ namespace nyms.resident.server.Services.Impl
         {
             return this._residentDataProvider.ActivateResident(referenceId);
         }
+
         public Task<Resident> AdmitEnquiry(ResidentRequest resident)
         {
             var residentEntity = ConvertToResidentEntity(resident);
@@ -67,7 +72,7 @@ namespace nyms.resident.server.Services.Impl
 
             // Contact Info. Issue: Contact info is separate table but Email and Phone comes as values
             // Need to find if already exists? if so update else insert..
-            var existingResidentContacts = _residentDataProvider.GetResidentContactsByResidentId(residentEntity.Id);
+            var existingResidentContacts = _residentContactDataProvider.GetResidentContactsByResidentId(residentEntity.Id);    // _residentDataProvider.GetResidentContactsByResidentId(residentEntity.Id);
             List<ResidentContact> rcs = new List<ResidentContact>();
             if (existingResidentContacts.Any())
             {
@@ -121,7 +126,7 @@ namespace nyms.resident.server.Services.Impl
                 swToBeUpdIns.PhoneNumber = resident.SocialWorker.PhoneNumber;
             }
             // Need to find if already exists? if so update else insert..
-            SocialWorker existingSocialWorker = _residentDataProvider.GetSocialWorker(residentEntity.Id);
+            SocialWorker existingSocialWorker = _socialWorkerDataProvider.GetSocialWorkerByResidentId(residentEntity.Id);  //_residentDataProvider.GetSocialWorker(residentEntity.Id);
             if (existingSocialWorker != null)
             {
                 swToBeUpdIns.Id = existingSocialWorker.Id;
@@ -188,8 +193,6 @@ namespace nyms.resident.server.Services.Impl
             {
                 residentEntity.SocialWorker = resident.SocialWorker;
             }
-
-
 
             return residentEntity;
         }

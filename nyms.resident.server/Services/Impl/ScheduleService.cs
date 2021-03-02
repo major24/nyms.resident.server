@@ -1,22 +1,25 @@
-﻿using Microsoft.Ajax.Utilities;
-using nyms.resident.server.DataProviders.Interfaces;
-using nyms.resident.server.Invoice;
+﻿using nyms.resident.server.DataProviders.Interfaces;
 using nyms.resident.server.Models;
 using nyms.resident.server.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.ServiceModel;
-using System.Web;
 
 namespace nyms.resident.server.Services.Impl
 {
     public class ScheduleService : IScheduleService
     {
         private readonly IScheduleDataProvider _scheduleDataProvider;
-        public ScheduleService(IScheduleDataProvider scheduleDataProvider)
+        private readonly IPaymentProviderDataProvider _paymentProviderDataProvider;
+        private readonly IPaymentTypeDataProvider _paymentTypeDataProvider;
+
+        public ScheduleService(IScheduleDataProvider scheduleDataProvider,
+            IPaymentProviderDataProvider paymentProviderDataProvider,
+            IPaymentTypeDataProvider paymentTypeDataProvider)
         {
-            _scheduleDataProvider = scheduleDataProvider ?? throw new ArgumentException(nameof(scheduleDataProvider));
+            _scheduleDataProvider = scheduleDataProvider ?? throw new ArgumentNullException(nameof(scheduleDataProvider));
+            _paymentProviderDataProvider = paymentProviderDataProvider ?? throw new ArgumentNullException(nameof(paymentProviderDataProvider));
+            _paymentTypeDataProvider = paymentTypeDataProvider ?? throw new ArgumentNullException(nameof(paymentTypeDataProvider));
         }
 
         public IEnumerable<ResidentSchedule> GetResidentSchedules()
@@ -112,12 +115,12 @@ namespace nyms.resident.server.Services.Impl
 
         public IEnumerable<PaymentProvider> GetPaymentProviders()
         {
-            return _scheduleDataProvider.GetPaymentProviders();
+            return _paymentProviderDataProvider.GetPaymentProviders(); // _scheduleDataProvider.GetPaymentProviders();
         }
 
         public IEnumerable<PaymentType> GetPaymentTypes()
         {
-            return _scheduleDataProvider.GetPaymentTypes();
+            return _paymentTypeDataProvider.GetPaymentTypes(); // _scheduleDataProvider.GetPaymentTypes();
         }
     }
 }

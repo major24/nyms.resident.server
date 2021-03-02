@@ -1,7 +1,9 @@
 ﻿using Microsoft.Ajax.Utilities;
+using NLog;
 using nyms.resident.server.DataProviders.Interfaces;
 using nyms.resident.server.Invoice;
 using nyms.resident.server.Models.Authentication;
+using nyms.resident.server.Services.Core;
 using nyms.resident.server.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -12,17 +14,24 @@ namespace nyms.resident.server.Services.Impl
 {
     public class InvoiceService : IInvoiceService
     {
+        private static Logger logger = Nlogger2.GetLogger();
         private readonly IInvoiceDataProvider _invoiceDataProvider;
         private readonly IResidentDataProvider _residentDataProvider;
         private readonly IFeeCalculatorService _feeCalculatorService;
         private readonly IUserService _userService;
+        private readonly IBillingCycleDataProvider _billingCycleDataProvider;
 
-        public InvoiceService(IInvoiceDataProvider invoiceDataProvider, IResidentDataProvider residentDataProvider, IFeeCalculatorService feeCalculatorService, IUserService userService)
+        public InvoiceService(IInvoiceDataProvider invoiceDataProvider, 
+            IResidentDataProvider residentDataProvider, 
+            IFeeCalculatorService feeCalculatorService, 
+            IUserService userService,
+            IBillingCycleDataProvider billingCycleDataProvider)
         {
-            _invoiceDataProvider = invoiceDataProvider ?? throw new ArgumentException(nameof(invoiceDataProvider));
-            _residentDataProvider = residentDataProvider ?? throw new ArgumentException(nameof(residentDataProvider));
+            _invoiceDataProvider = invoiceDataProvider ?? throw new ArgumentNullException(nameof(invoiceDataProvider));
+            _residentDataProvider = residentDataProvider ?? throw new ArgumentNullException(nameof(residentDataProvider));
             _feeCalculatorService = feeCalculatorService ?? throw new ArgumentNullException(nameof(feeCalculatorService));
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+            _billingCycleDataProvider = billingCycleDataProvider ?? throw new ArgumentNullException(nameof(billingCycleDataProvider));
         }
 
         // Data by Date Range
@@ -45,7 +54,10 @@ namespace nyms.resident.server.Services.Impl
             // get list of billing cycle ids based on start and end date
             // each billing ids, get report (use above fn)
             // create a new list of response based on the data above (by each bill id)
-            var billingCycles = _invoiceDataProvider.GetBillingCycles(startDate, endDate).Result;
+            var billingCycles = _billingCycleDataProvider
+                .GetBillingCycles().Result
+                .Where(bc => bc.PeriodStart >= startDate && bc.PeriodEnd <= endDate);
+                
             if (billingCycles == null) throw new ArgumentNullException(nameof(billingCycles));
 
             List<InvoiceValidationsReportResponse> result = new List<InvoiceValidationsReportResponse>();
@@ -92,8 +104,6 @@ namespace nyms.resident.server.Services.Impl
         }
 
 
-
-
         private InvoiceData GetCalucatedInvoiceData(DateTime startDate, DateTime endDate, int localAuthorityId = 0, int billingCycleId = 0)
         {
             if (startDate == null) throw new ArgumentNullException(nameof(startDate));
@@ -101,8 +111,6 @@ namespace nyms.resident.server.Services.Impl
 
             var invoiceResidents = this.GetInvoiceResidentData(startDate, endDate);
             if (invoiceResidents == null || !invoiceResidents.Any()) return null;
-            // also return if schedules is null as well
-            // if (!invoiceResidents.FirstOrDefault().SchedulePayments.Any()) return null;
 
             if (localAuthorityId > 0)
             {
@@ -145,7 +153,8 @@ namespace nyms.resident.server.Services.Impl
                     }
 
                     // get comments for each sch payments
-                    var filteredComments = comments.Where(c => c.LocalAuthorityId == sp.LocalAuthorityId && c.PaymentTypeId == sp.PaymentTypeId && c.ResidentId == sp.ResidentId);
+                    var filteredComments = comments
+                        .Where(c => c.LocalAuthorityId == sp.LocalAuthorityId && c.PaymentTypeId == sp.PaymentTypeId && c.ResidentId == sp.ResidentId);
                     var cmts = filteredComments.Select(c => c.Comments).ToArray();
                     sp.Comments = cmts;
 
@@ -164,7 +173,7 @@ namespace nyms.resident.server.Services.Impl
 
         public Task<IEnumerable<BillingCycle>> GetBillingCycles()
         {
-            return _invoiceDataProvider.GetBillingCycles();
+            return _billingCycleDataProvider.GetBillingCycles();
         }
 
         public Task<bool> UpdateInvoicesValidated(InvoiceValidatedEntity[] invoiceValidatedEntities)
@@ -194,16 +203,21 @@ namespace nyms.resident.server.Services.Impl
         {
             // each resi may have multiple contributors, LA || LA and CC || LA and CC1, CC2 
             var schedules = this._invoiceDataProvider.GetAllSchedulesForInvoiceDate(startDate, endDate);
-            var residents = this._residentDataProvider.GetResidentsForInvoice(startDate, endDate);
+            var residents = this._residentDataProvider
+                .GetResidents()
+                .Where(res => res.ExitDate >= startDate && res.AdmissionDate <= endDate);
+
+            // logger.Info($"Invoice requested by {user?.ForeName}");
 
             // create invoiceResident
             var invResidents = residents.Select(r =>
             {
                 // find their schedules. by LA or CC or LA+CC?
                 var _schedules = schedules.Where(s => s.ResidentId == r.Id);
-                var _invResidents = new InvoiceResident(r.Id, $"{r.ForeName} {r.SurName}", _schedules);
-                _invResidents.LocalAuthorityId = _schedules.Select(s => s.LocalAuthorityId).FirstOrDefault();
-                var residentsWithCalculatedFees = _feeCalculatorService.CalculateFee(_invResidents, startDate, endDate);
+                var _invResident = new InvoiceResident(r.Id, $"{r.ForeName} {r.SurName}", _schedules);
+                _invResident.LocalAuthorityId = _schedules.Select(s => s.LocalAuthorityId).FirstOrDefault();
+                logger.Info($"Calculate invoice amount {_invResident.Name}");
+                var residentsWithCalculatedFees = _feeCalculatorService.CalculateFee(_invResident, startDate, endDate);
 
                 // sum LA total, LA Fee + Supliment Fee(s)
                 // PaymentProviderId = LA=1, CC=2, PV=3
@@ -213,7 +227,7 @@ namespace nyms.resident.server.Services.Impl
 
                 // get resident weekly fee (LA Fee + CC Fee)
                 residentsWithCalculatedFees.ResidentWeeklyFee = residentsWithCalculatedFees.GetSchedules()
-                .Where(s => s.PaymentTypeId == 1).Select(k => k.WeeklyFee).Sum(); // 1=Weekly
+                .Where(s => s.PaymentTypeId == 1 || s.PaymentTypeId == 2).Select(k => k.WeeklyFee).Sum(); // 1=Weekly
 
                 // get GrandTotal (all amount dues)
                 residentsWithCalculatedFees.GrandTotal = residentsWithCalculatedFees.GetSchedules()
@@ -223,9 +237,6 @@ namespace nyms.resident.server.Services.Impl
                 residentsWithCalculatedFees.SetSchedules(
                     residentsWithCalculatedFees.GetSchedules().OrderBy(s => s.LocalAuthorityId));
 
-                // make id zero, not visible to web client
-                // residentsWithCalculatedFees.Id = 0;
-
                 return residentsWithCalculatedFees;
             }).ToArray();
 
@@ -233,7 +244,6 @@ namespace nyms.resident.server.Services.Impl
 
             return result;
         }
-
 
     }
 }

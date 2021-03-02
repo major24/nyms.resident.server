@@ -15,29 +15,23 @@ namespace nyms.resident.server.DataProviders.Impl
     public class ResidentDataProvider : IResidentDataProvider
     {
         private readonly string _connectionString;
+        private readonly IResidentContactDataProvider _residentContactDataProvider;
+        private readonly ISocialWorkerDataProvider _socialWorkerDataProvider;
 
-        public ResidentDataProvider(string connectionString)
+        public ResidentDataProvider(string connectionString,
+            IResidentContactDataProvider residentContactDataProvider,
+            ISocialWorkerDataProvider socialWorkerDataProvider)
         {
             _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
+            _residentContactDataProvider = residentContactDataProvider ?? throw new ArgumentNullException(nameof(residentContactDataProvider));
+            _socialWorkerDataProvider = socialWorkerDataProvider ?? throw new ArgumentNullException(nameof(socialWorkerDataProvider));
         }
 
-        public IEnumerable<Resident> GetAllResidentsByCareHomeId(int careHomeId)
+        public IEnumerable<Resident> GetResidents()
         {
-            return GetResidentsByCareHomeId(careHomeId, false);
-        }
-
-        public IEnumerable<Resident> GetActiveResidentsByCareHomeId(int careHomeId)
-        {
-            return GetResidentsByCareHomeId(careHomeId, true);
-        }
-
-
-        private IEnumerable<Resident> GetResidentsByCareHomeId(int carehomeId, bool isActive = true)
-        {
-            using (IDbConnection conn = new SqlConnection(_connectionString))
-            {
-                string sql = @"SELECT
-                              [reference_id] as referenceid
+            string sql = @"SELECT
+                               [id] as id
+                              ,[reference_id] as referenceid
                               ,[care_home_id] as carehomeid
                               ,[local_authority_id] as localauthorityid
                               ,[nhs_number] as nhsnumber
@@ -64,21 +58,12 @@ namespace nyms.resident.server.DataProviders.Impl
                               ,[updated_by_id] as updatedbyid
                               ,[updated_date] as updateddate
                         FROM [dbo].[residents]
-                        WHERE care_home_id = @carehomeid";
+                            ORDER BY forename";
 
-                if (isActive)
-                {
-                    sql += " AND active = 'Y' ORDER BY forename";
-                }
-                else
-                {
-                    sql += " ORDER BY forename";
-                }
-
-                DynamicParameters dp = new DynamicParameters();
-                dp.Add("carehomeid", carehomeId, DbType.Int32, ParameterDirection.Input);
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
                 conn.Open();
-                var result = conn.QueryAsync<Resident>(sql, dp).Result;
+                var result = conn.QueryAsync<Resident>(sql).Result;
                 return result;
             }
         }
@@ -92,9 +77,9 @@ namespace nyms.resident.server.DataProviders.Impl
             int residentId = resident.Id;
             // Get all contacts and addresses
             var addresses = GetAddressesByResidentId(residentId);
-            var residentContacts = GetResidentContactsByResidentId(residentId);
+            var residentContacts = _residentContactDataProvider.GetResidentContactsByResidentId(residentId);  //GetResidentContactsByResidentId(residentId);
             var nextofkins = GetNextOfKinsByResidentId(residentId);
-            var socialWorker = GetSocialWorker(residentId);
+            var socialWorker = _socialWorkerDataProvider.GetSocialWorkerByResidentId(residentId); // GetSocialWorker(residentId);
 
             // assign resident address, email and phone
             if (addresses.Any())
@@ -121,38 +106,6 @@ namespace nyms.resident.server.DataProviders.Impl
                 });
             }
 
-/*            // assign nok address to nok person
-            if (nextofkins != null && nextofkins.Any())
-            {
-                List<NextOfKin> noks = new List<NextOfKin>();
-                nextofkins.ForEach(nok =>
-                {
-                    // one address only
-                    if (addresses.Any())
-                        nok.Address = addresses.Where(a => nok.Id == a.NokId).FirstOrDefault();
-
-                    // multiple contacts later. now one email and phone
-                    if (contacts.Any())
-                    {
-                        List<ContactInfo> contactInfos = new List<ContactInfo>();
-                        contacts.ForEach(ct =>
-                        {
-                            if (ct.NokId == nok.Id)
-                            {
-                                contactInfos.Add(new ContactInfo()
-                                    { Id = ct.Id, ResidentId = residentId, NokId = ct.NokId, ContactType = ct.ContactType, RefType = ct.RefType, Data = ct.Data }
-                                );
-                            }
-                        });
-                        nok.ContactInfos = contactInfos;
-                    }
-
-                    noks.Add(nok);
-                });
-
-                resident.NextOfKins = noks;
-            }*/
-
             if (socialWorker != null)
             {
                 resident.SocialWorker = new SocialWorker()
@@ -164,76 +117,6 @@ namespace nyms.resident.server.DataProviders.Impl
                 };
             }
             return resident;
-        }
-
-
-
-        private Resident _GetResident(Guid referenceId)
-        {
-            using (IDbConnection conn = new SqlConnection(_connectionString))
-            {
-                string sql = @"SELECT
-                               [id] as id 
-                              ,[reference_id] as referenceid
-                              ,[care_home_id] as carehomeid
-                              ,[local_authority_id] as localauthorityid
-                              ,[nhs_number] as nhsnumber
-                              ,[po_number] as ponumber
-                              ,[la_id] as laid
-                              ,[nyms_id] as nymsid
-                              ,[forename] as forename
-                              ,[surname] as surname
-                              ,[middle_name] as middlename
-                              ,[dob] as dob
-                              ,[gender] as gender
-                              ,[marital_status] as maritalstatus
-                              ,[care_category_id] carecategoryid
-                              ,[care_need] as careneed
-                              ,[stay_type] as staytype
-                              ,[room_location] as roomlocation
-                              ,[room_number] as roomnumber
-                              ,[admission_date] as admissiondate
-                              ,[exit_date] as exitdate
-                              ,[exit_reason] as exitreason
-                              ,[comments] as comments
-                              ,[status] as status
-                              ,[active] as active
-                              ,[updated_by_id] as updatedbyid
-                              ,[updated_date] as updateddate
-                        FROM [dbo].[residents]
-                        WHERE reference_id = @referenceid";
-
-                DynamicParameters dp = new DynamicParameters();
-                dp.Add("referenceid", referenceId, DbType.Guid, ParameterDirection.Input);
-                conn.Open();
-                var result = conn.QueryFirstOrDefault<Resident>(sql, dp);
-                return result;
-            }
-        }
-
-        public IEnumerable<Resident> GetResidentsForInvoice(DateTime billingStart, DateTime billingEnd)
-        {
-            using (IDbConnection conn = new SqlConnection(_connectionString))
-            {
-                string sql = @"SELECT
-                               [id] as id
-                              ,[reference_id] as referenceid
-                              ,[local_authority_id] as localauthorityid
-                              ,[forename] as forename
-                              ,[surname] as surname
-                            ,[created_date] as createddate
-                        FROM [dbo].[residents]
-                        WHERE [exit_date] >= @billingstart             
-                        AND admission_date <= @billingend";
-                // AND active = 'Y'";
-
-                DynamicParameters dp = new DynamicParameters();
-                dp.Add("billingstart", billingStart.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input);
-                dp.Add("billingend", billingEnd.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input);
-                conn.Open();
-                var result = conn.QueryAsync<Resident>(sql, dp).Result;
-                return result;
-            }
         }
 
         public bool DischargeResident(Guid referenceId, DateTime exitDate)
@@ -793,6 +676,49 @@ namespace nyms.resident.server.DataProviders.Impl
         }
 
 
+        private Resident _GetResident(Guid referenceId)
+        {
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                string sql = @"SELECT
+                               [id] as id 
+                              ,[reference_id] as referenceid
+                              ,[care_home_id] as carehomeid
+                              ,[local_authority_id] as localauthorityid
+                              ,[nhs_number] as nhsnumber
+                              ,[po_number] as ponumber
+                              ,[la_id] as laid
+                              ,[nyms_id] as nymsid
+                              ,[forename] as forename
+                              ,[surname] as surname
+                              ,[middle_name] as middlename
+                              ,[dob] as dob
+                              ,[gender] as gender
+                              ,[marital_status] as maritalstatus
+                              ,[care_category_id] carecategoryid
+                              ,[care_need] as careneed
+                              ,[stay_type] as staytype
+                              ,[room_location] as roomlocation
+                              ,[room_number] as roomnumber
+                              ,[admission_date] as admissiondate
+                              ,[exit_date] as exitdate
+                              ,[exit_reason] as exitreason
+                              ,[comments] as comments
+                              ,[status] as status
+                              ,[active] as active
+                              ,[updated_by_id] as updatedbyid
+                              ,[updated_date] as updateddate
+                        FROM [dbo].[residents]
+                        WHERE reference_id = @referenceid";
+
+                DynamicParameters dp = new DynamicParameters();
+                dp.Add("referenceid", referenceId, DbType.Guid, ParameterDirection.Input);
+                conn.Open();
+                var result = conn.QueryFirstOrDefault<Resident>(sql, dp);
+                return result;
+            }
+        }
+
         private IEnumerable<NextOfKin> GetNextOfKinsByResidentId(int residentId)
         {
             using (IDbConnection conn = new SqlConnection(_connectionString))
@@ -838,48 +764,6 @@ namespace nyms.resident.server.DataProviders.Impl
                 return result;
             }
         }
-
-        public IEnumerable<ResidentContact> GetResidentContactsByResidentId(int residentId)
-        {
-            using (IDbConnection conn = new SqlConnection(_connectionString))
-            {
-                string sql = @"SELECT [id] as id
-                                     ,[contact_type] as contacttype
-                                     ,[data] as data
-                                      FROM [dbo].[resident_contacts]
-                                    WHERE [resident_id] = @residentid
-                                    AND [active] = 'Y'";
-
-                DynamicParameters dp = new DynamicParameters();
-                dp.Add("residentid", residentId, DbType.Int32, ParameterDirection.Input);
-                conn.Open();
-                var result = conn.Query<ResidentContact>(sql, dp);
-                return result;
-            }
-        }
-
-        public SocialWorker GetSocialWorker(int residentId)
-        {
-            string sql = @"SELECT [id] as id
-                          ,[resident_id] as residentid
-                          ,[forename] as forename
-                          ,[surname] as surname
-                          ,[email_address] as emailaddress
-                          ,[phone_number] as phonenumber
-                      FROM [dbo].[social_workers]
-                      WHERE [resident_id] = @residentid";
-
-            using (IDbConnection conn = new SqlConnection(_connectionString))
-            { 
-                DynamicParameters dp = new DynamicParameters();
-                dp.Add("residentid", residentId, DbType.Int32, ParameterDirection.Input);
-                conn.Open();
-                var result = conn.QueryFirstOrDefault<SocialWorker>(sql, dp);
-                return result;
-            }
-
-        }
-
 
     }
 }

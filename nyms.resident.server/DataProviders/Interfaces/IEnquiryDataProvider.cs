@@ -7,8 +7,8 @@ namespace nyms.resident.server.DataProviders.Interfaces
 {
     public interface IEnquiryDataProvider
     {
-        IEnumerable<Enquiry> GetAll();
-        Task<EnquiryEntity> GetByReferenceId(Guid referenceId);
+        IEnumerable<Enquiry> GetEnquires();
+        Task<EnquiryEntity> GetEnquiry(Guid referenceId);
         Task<int> Create(Enquiry enquiry);
         Task<Enquiry> Update(Enquiry enquiry);
         IEnumerable<EnquiryAction> GetActions(int enquiryId);

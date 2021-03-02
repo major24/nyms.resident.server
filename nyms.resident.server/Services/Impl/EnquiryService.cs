@@ -22,12 +22,12 @@ namespace nyms.resident.server.Services.Impl
 
         public IEnumerable<Enquiry> GetAll()
         {
-            return _enquiryDataProvider.GetAll();
+            return _enquiryDataProvider.GetEnquires();
         }
 
         public Task<Enquiry> GetByReferenceId(Guid referenceId)
         {
-            var entity = _enquiryDataProvider.GetByReferenceId(referenceId).Result;
+            var entity = _enquiryDataProvider.GetEnquiry(referenceId).Result;
             if (entity == null) return null;
 
             // else, convert db entity to web enquiry
@@ -86,7 +86,7 @@ namespace nyms.resident.server.Services.Impl
 
         public IEnumerable<EnquiryAction> GetActions(Guid referenceId)
         {
-            var entity = _enquiryDataProvider.GetByReferenceId(referenceId).Result;
+            var entity = _enquiryDataProvider.GetEnquiry(referenceId).Result;
             IEnumerable<EnquiryAction> actions = new List<EnquiryAction>();
 
             if (entity != null)
@@ -98,7 +98,7 @@ namespace nyms.resident.server.Services.Impl
 
         public void SaveActions(Guid referenceId, EnquiryAction[] enquiryActions)
         {
-            var entity = _enquiryDataProvider.GetByReferenceId(referenceId).Result;
+            var entity = _enquiryDataProvider.GetEnquiry(referenceId).Result;
             // add enquiry id to actions (fkey)
             enquiryActions.ForEach(en => en.EnquiryId = entity.Id);
 
