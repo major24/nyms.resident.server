@@ -40,6 +40,7 @@ namespace nyms.resident.server.Models
                 MaritalStatus = resident.MaritalStatus,
                 LaId = resident.LaId,
                 PoNumber = resident.PoNumber,
+                NymsId = resident.NymsId,
                 CareNeed = resident.CareNeed,
                 StayType = resident.StayType,
                 AdmissionDate = resident.AdmissionDate,
