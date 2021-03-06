@@ -30,10 +30,10 @@ namespace nyms.resident.server.DataProviders.Impl
         public IEnumerable<Resident> GetResidents()
         {
             string sql = @"SELECT
-                               [id] as id
-                              ,[reference_id] as referenceid
-                              ,[care_home_id] as carehomeid
-                              ,[local_authority_id] as localauthorityid
+                               r.id as id
+                              ,r.reference_id as referenceid
+                              ,r.care_home_id as carehomeid
+                              ,r.local_authority_id as localauthorityid
                               ,[nhs_number] as nhsnumber
                               ,[po_number] as ponumber
                               ,[la_id] as laid
@@ -54,10 +54,17 @@ namespace nyms.resident.server.DataProviders.Impl
                               ,[exit_reason] as exitreason
                               ,[comments] as comments
                               ,[status] as status
-                              ,[active] as active
+                              ,r.active as active
                               ,[updated_by_id] as updatedbyid
                               ,[updated_date] as updateddate
-                        FROM [dbo].[residents]
+							  ,[care_home_division_id] as carehomedivisionid
+							  ,la.name as localauthorityname
+							  ,chd.name as carehomedivisionname
+                        FROM [dbo].[residents] r
+						INNER JOIN [dbo].[local_authorities] la
+						ON la.id = r.local_authority_id
+						INNER JOIN [dbo].[care_home_divisions] chd
+						ON chd.id = r.care_home_division_id
                             ORDER BY forename";
 
             using (IDbConnection conn = new SqlConnection(_connectionString))

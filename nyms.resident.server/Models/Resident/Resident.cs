@@ -6,7 +6,7 @@ namespace nyms.resident.server.Models
 {
     public class Resident : ResidentBase
     {
-        public int Id { get; }
+        public int Id { get; set;  }
         public int CareHomeId { get; set; }
         public int LocalAuthorityId { get; set; }
         public string NhsNumber { get; set; }
@@ -35,5 +35,7 @@ namespace nyms.resident.server.Models
         public string PhoneNumber { get; set; }
         public IEnumerable<NextOfKin> NextOfKins { get; set; }
         public int CareHomeDivisionId { get; set; }
+        public string CareHomeDivisionName { get; set; }
+        public string LocalAuthorityName { get; set; }
     }
 }
