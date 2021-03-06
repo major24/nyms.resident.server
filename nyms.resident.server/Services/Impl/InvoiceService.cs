@@ -14,7 +14,6 @@ namespace nyms.resident.server.Services.Impl
 {
     public class InvoiceService : IInvoiceService
     {
-        private static Logger logger = Nlogger2.GetLogger();
         private readonly IInvoiceDataProvider _invoiceDataProvider;
         private readonly IResidentDataProvider _residentDataProvider;
         private readonly IFeeCalculatorService _feeCalculatorService;
@@ -207,8 +206,6 @@ namespace nyms.resident.server.Services.Impl
                 .GetResidents()
                 .Where(res => res.ExitDate >= startDate && res.AdmissionDate <= endDate);
 
-            // logger.Info($"Invoice requested by {user?.ForeName}");
-
             // create invoiceResident
             var invResidents = residents.Select(r =>
             {
@@ -216,7 +213,7 @@ namespace nyms.resident.server.Services.Impl
                 var _schedules = schedules.Where(s => s.ResidentId == r.Id);
                 var _invResident = new InvoiceResident(r.Id, $"{r.ForeName} {r.SurName}", _schedules);
                 _invResident.LocalAuthorityId = _schedules.Select(s => s.LocalAuthorityId).FirstOrDefault();
-                logger.Info($"Calculate invoice amount {_invResident.Name}");
+                // logger.Info($"Calculate invoice amount {_invResident.Name}");
                 var residentsWithCalculatedFees = _feeCalculatorService.CalculateFee(_invResident, startDate, endDate);
 
                 // sum LA total, LA Fee + Supliment Fee(s)
@@ -226,8 +223,15 @@ namespace nyms.resident.server.Services.Impl
                 residentsWithCalculatedFees.TotalLaFee = sumWeekly;
 
                 // get resident weekly fee (LA Fee + CC Fee)
-                residentsWithCalculatedFees.ResidentWeeklyFee = residentsWithCalculatedFees.GetSchedules()
-                .Where(s => s.PaymentTypeId == 1 || s.PaymentTypeId == 2).Select(k => k.WeeklyFee).Sum(); // 1=Weekly
+                var payTypeIds = residentsWithCalculatedFees.GetSchedules().Select(s => s.PaymentTypeId).Distinct();
+                payTypeIds.ForEach(payId => 
+                {
+                    if (payId <= 3) // paymentTypeId 1 = La, 2 = CC 3 = Private
+                    {
+                        var wf = residentsWithCalculatedFees.GetSchedules().Where(s => s.PaymentTypeId == payId).Select(s => s.WeeklyFee).FirstOrDefault();
+                        residentsWithCalculatedFees.ResidentWeeklyFee += wf;
+                    }
+                });
 
                 // get GrandTotal (all amount dues)
                 residentsWithCalculatedFees.GrandTotal = residentsWithCalculatedFees.GetSchedules()
@@ -236,6 +240,11 @@ namespace nyms.resident.server.Services.Impl
                 // order by local auth id
                 residentsWithCalculatedFees.SetSchedules(
                     residentsWithCalculatedFees.GetSchedules().OrderBy(s => s.LocalAuthorityId));
+
+                // Added la div names for report purposes
+                residentsWithCalculatedFees.LocalAuthorityName = r.LocalAuthorityName;
+                residentsWithCalculatedFees.CareHomeDivisionId = r.CareHomeDivisionId;
+                residentsWithCalculatedFees.CareHomeDivisionName = r.CareHomeDivisionName;
 
                 return residentsWithCalculatedFees;
             }).ToArray();

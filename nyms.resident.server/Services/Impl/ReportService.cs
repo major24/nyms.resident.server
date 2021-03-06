@@ -11,18 +11,7 @@ namespace nyms.resident.server.Services.Impl
 {
     public class ReportService : IReportService
     {
-        //private readonly IInvoiceDataProvider _invoiceDataProvider;
         private readonly IResidentDataProvider _residentDataProvider;
-        //private readonly IFeeCalculatorService _feeCalculatorService;
-        //private readonly IUserService _userService;
-
-        /*        public ReportService(IInvoiceDataProvider invoiceDataProvider, IResidentDataProvider residentDataProvider, IFeeCalculatorService feeCalculatorService, IUserService userService)
-                {
-                    _invoiceDataProvider = invoiceDataProvider ?? throw new ArgumentException(nameof(invoiceDataProvider));
-                    _residentDataProvider = residentDataProvider ?? throw new ArgumentException(nameof(residentDataProvider));
-                    _feeCalculatorService = feeCalculatorService ?? throw new ArgumentNullException(nameof(feeCalculatorService));
-                    _userService = userService ?? throw new ArgumentNullException(nameof(userService));
-                }*/
 
         public ReportService(IResidentDataProvider residentDataProvider)
         {
