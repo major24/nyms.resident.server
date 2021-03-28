@@ -1,4 +1,5 @@
-﻿using nyms.resident.server.DataProviders.Interfaces;
+﻿using Microsoft.Ajax.Utilities;
+using nyms.resident.server.DataProviders.Interfaces;
 using nyms.resident.server.Invoice;
 using nyms.resident.server.Models;
 using nyms.resident.server.Models.Reports;
@@ -26,43 +27,61 @@ namespace nyms.resident.server.Services.Impl
             var listOfAllDates = Enumerable.Range(0, totalNumOfDays).Select(day => startDate.AddDays(day)).ToList();
 
             var residents = _residentDataProvider.GetResidents().ToList();
-            if (!residents.Any())
-            {
-                return null;
-            }
+            if (!residents.Any()) return null;
 
             List<OccupancyReportResponse> listResult = new List<OccupancyReportResponse>();
-            listOfAllDates.ForEach((thisDate) =>
+            // find by divisions
+            var divisionIds= residents.Select(r => r.CareHomeDivisionId).Distinct();
+            divisionIds.ForEach(divId =>
             {
-                var listOfResidentStayedForTheDate = residents
-                    .FindAll(r => r.AdmissionDate <= thisDate && r.ExitDate >= thisDate.AddDays(1))
-                    .GroupBy(r => r.CareHomeDivisionId).ToList();
-                if (listOfResidentStayedForTheDate.Any())
+                List<OccupancyCountByDate> list = new List<OccupancyCountByDate>();
+                var divName = residents.Where(r => r.CareHomeDivisionId == divId).FirstOrDefault().CareHomeDivisionName;
+                listOfAllDates.ForEach((thisDate) =>
                 {
-                    foreach (IGrouping<int, Resident> grp in listOfResidentStayedForTheDate)
+                    var listOfResidentStayedForTheDate = residents
+                        .FindAll(r => r.AdmissionDate <= thisDate && r.ExitDate >= thisDate.AddDays(1))
+                        .Where(r => r.CareHomeDivisionId == divId);
+                    OccupancyCountByDate occupancyCountByDate = new OccupancyCountByDate()
                     {
-                        var key = grp.Key;
-                        var totalResidents = grp.Count();
-                        var careHomeDivisionId = grp.FirstOrDefault().CareHomeDivisionId;
-                        OccupancyReportResponse result = new OccupancyReportResponse() 
-                        { 
-                            ThisDate = thisDate, 
-                            TotalNumberOfResidents = totalResidents, 
-                            CareHomeDivisionId = careHomeDivisionId 
-                        };
-                        listResult.Add(result);
-                    }
-                }
-                else
-                {
-                    OccupancyReportResponse result = new OccupancyReportResponse() 
-                    { 
-                        ThisDate = thisDate, 
-                        TotalNumberOfResidents = 0, 
-                        CareHomeDivisionId = 0 
+                        ThisDate = thisDate,
+                        TotalNumberOfResidents = listOfResidentStayedForTheDate.Count()
                     };
-                    listResult.Add(result);
-                }
+                    list.Add(occupancyCountByDate);
+                });
+                OccupancyReportResponse occupancyReportResponse = new OccupancyReportResponse(divId)
+                {
+                    GroupBy = "Division",
+                    Name = divName,
+                    OccupancyCountByDates = list
+                };
+                listResult.Add(occupancyReportResponse);
+            });
+
+            // get counts for fund provider ids
+            var fundProviderIds = residents.Select(r => r.LocalAuthorityId).Distinct();
+            fundProviderIds.ForEach(provId =>
+            {
+                List<OccupancyCountByDate> list = new List<OccupancyCountByDate>();
+                var provName = residents.Where(r => r.LocalAuthorityId == provId).FirstOrDefault().LocalAuthorityName;
+                listOfAllDates.ForEach((thisDate) =>
+                {
+                    var listOfResidentStayedForTheDate = residents
+                        .FindAll(r => r.AdmissionDate <= thisDate && r.ExitDate >= thisDate.AddDays(1))
+                        .Where(r => r.LocalAuthorityId == provId);
+                    OccupancyCountByDate occupancyCountByDate = new OccupancyCountByDate()
+                    {
+                        ThisDate = thisDate,
+                        TotalNumberOfResidents = listOfResidentStayedForTheDate.Count()
+                    };
+                    list.Add(occupancyCountByDate);
+                });
+                OccupancyReportResponse occupancyReportResponse = new OccupancyReportResponse()
+                {
+                    GroupBy = "FundProvider",
+                    Name = provName,
+                    OccupancyCountByDates = list
+                };
+                listResult.Add(occupancyReportResponse);
             });
 
             return listResult.ToArray();
