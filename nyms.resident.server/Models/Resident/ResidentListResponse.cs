@@ -15,5 +15,6 @@ namespace nyms.resident.server.Models
         public DateTime AdmissionDate { get; set; }
         public DateTime? ExitDate { get; set; }
         public string Active { get; set; }
+        public DateTime DischargedFromHomeDate { get; set; }
     }
 }

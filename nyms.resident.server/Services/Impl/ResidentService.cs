@@ -39,11 +39,16 @@ namespace nyms.resident.server.Services.Impl
             return this._residentDataProvider.GetResident(referenceId);
         }
 
-        public bool DischargeResident(Guid referenceId, DateTime exitDate)
+        public bool DischargeResident(Guid referenceId, DateTime dischargeDate)
         {
-            return this._residentDataProvider.DischargeResident(referenceId, exitDate);
+            return this._residentDataProvider.DischargeResident(referenceId, dischargeDate);
         }
 
+        public bool ExitInvoiceResident(Guid referenceId, DateTime exitDate)
+        {
+            return this._residentDataProvider.ExitInvoiceResident(referenceId, exitDate);
+        }
+        
         public bool ActivateResident(Guid referenceId)
         {
             return this._residentDataProvider.ActivateResident(referenceId);

@@ -58,6 +58,7 @@ namespace nyms.resident.server.DataProviders.Impl
                               ,[updated_by_id] as updatedbyid
                               ,[updated_date] as updateddate
 							  ,[care_home_division_id] as carehomedivisionid
+                              ,[discharged_from_home_date] as dischargedfromhomedate
 							  ,la.name as localauthorityname
 							  ,chd.name as carehomedivisionname
                         FROM [dbo].[residents] r
@@ -126,7 +127,27 @@ namespace nyms.resident.server.DataProviders.Impl
             return resident;
         }
 
-        public bool DischargeResident(Guid referenceId, DateTime exitDate)
+        public bool DischargeResident(Guid referenceId, DateTime dischargeDate)
+        {
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                string sql = @"UPDATE [dbo].[residents] 
+                                SET discharged_from_home_date = @dischargedfromhomedate,
+                                    active = 'N',
+                                    updated_date = GETDATE()
+                        WHERE [reference_id] = @referenceId";
+
+                DynamicParameters dp = new DynamicParameters();
+                dp.Add("dischargedfromhomedate", dischargeDate.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input);
+                dp.Add("referenceid", referenceId, DbType.Guid, ParameterDirection.Input, 60);
+
+                conn.Open();
+                var affRows = conn.Execute(sql, dp);
+                return true;
+            }
+        }
+
+        public bool ExitInvoiceResident(Guid referenceId, DateTime exitDate)
         {
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
@@ -152,7 +173,7 @@ namespace nyms.resident.server.DataProviders.Impl
                 dpSch.Add("referenceid", referenceId, DbType.Guid, ParameterDirection.Input, 60);
 
                 conn.Open();
-                using(var tran = conn.BeginTransaction())
+                using (var tran = conn.BeginTransaction())
                 {
                     var affRows = conn.Execute(sql, dp, transaction: tran);
                     var affRows2 = conn.Execute(sqlSchUpdate, dpSch, transaction: tran);
@@ -161,7 +182,7 @@ namespace nyms.resident.server.DataProviders.Impl
                 }
             }
         }
-
+        
         public bool ActivateResident(Guid referenceId)
         {
             using (IDbConnection conn = new SqlConnection(_connectionString))

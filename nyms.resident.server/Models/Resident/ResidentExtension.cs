@@ -21,6 +21,7 @@ namespace nyms.resident.server.Models
                 StayType = resident.StayType,
                 AdmissionDate = resident.AdmissionDate,
                 ExitDate = resident.ExitDate,
+                DischargedFromHomeDate = resident.DischargedFromHomeDate,
                 Active = resident.Active
             };
         }

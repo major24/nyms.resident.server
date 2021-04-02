@@ -19,13 +19,13 @@ namespace nyms.resident.server.Tests.Invoice
         {
             List<Resident> residents = new List<Resident>()
             {
-                new Resident() { ForeName = "R1", CareHomeId = 1, CareHomeDivisionId = 1, AdmissionDate = new DateTime(2020, 01, 15), ExitDate = new DateTime(9999, 12, 31), CareHomeDivisionName = "PC", LocalAuthorityId = 1, LocalAuthorityName = "Derby" },
-                new Resident() { ForeName = "R2", CareHomeId = 1, CareHomeDivisionId = 1, AdmissionDate = new DateTime(2020, 01, 16), ExitDate = new DateTime(2020, 01, 20), CareHomeDivisionName = "PC", LocalAuthorityId = 1, LocalAuthorityName = "Derby" },
-                new Resident() { ForeName = "R3", CareHomeId = 1, CareHomeDivisionId = 2, AdmissionDate = new DateTime(2020, 01, 16), ExitDate = new DateTime(9999, 12, 31), CareHomeDivisionName = "ML", LocalAuthorityId = 1, LocalAuthorityName = "Derby" },
-                new Resident() { ForeName = "R3", CareHomeId = 1, CareHomeDivisionId = 2, AdmissionDate = new DateTime(2020, 01, 18), ExitDate = new DateTime(9999, 12, 31), CareHomeDivisionName = "ML", LocalAuthorityId = 1, LocalAuthorityName = "Derby" },
-                new Resident() { ForeName = "R3", CareHomeId = 1, CareHomeDivisionId = 1, AdmissionDate = new DateTime(2020, 01, 19), ExitDate = new DateTime(9999, 12, 31), CareHomeDivisionName = "PC", LocalAuthorityId = 2, LocalAuthorityName = "Manchester" },
-                new Resident() { ForeName = "R4", CareHomeId = 1, CareHomeDivisionId = 2, AdmissionDate = new DateTime(2020, 01, 22), ExitDate = new DateTime(9999, 12, 31), CareHomeDivisionName = "ML", LocalAuthorityId = 2, LocalAuthorityName = "Manchester" },
-                new Resident() { ForeName = "R5", CareHomeId = 1, CareHomeDivisionId = 1, AdmissionDate = new DateTime(2020, 01, 23), ExitDate = new DateTime(2020, 01, 25), CareHomeDivisionName = "PC", LocalAuthorityId = 100, LocalAuthorityName = "Private" },
+                new Resident() { ForeName = "R1", CareHomeId = 1, CareHomeDivisionId = 1, AdmissionDate = new DateTime(2020, 01, 15), DischargedFromHomeDate = new DateTime(9999, 12, 31), CareHomeDivisionName = "PC", LocalAuthorityId = 1, LocalAuthorityName = "Derby" },
+                new Resident() { ForeName = "R2", CareHomeId = 1, CareHomeDivisionId = 1, AdmissionDate = new DateTime(2020, 01, 16), DischargedFromHomeDate = new DateTime(2020, 01, 20), CareHomeDivisionName = "PC", LocalAuthorityId = 1, LocalAuthorityName = "Derby" },
+                new Resident() { ForeName = "R3", CareHomeId = 1, CareHomeDivisionId = 2, AdmissionDate = new DateTime(2020, 01, 16), DischargedFromHomeDate = new DateTime(9999, 12, 31), CareHomeDivisionName = "ML", LocalAuthorityId = 1, LocalAuthorityName = "Derby" },
+                new Resident() { ForeName = "R3", CareHomeId = 1, CareHomeDivisionId = 2, AdmissionDate = new DateTime(2020, 01, 18), DischargedFromHomeDate = new DateTime(9999, 12, 31), CareHomeDivisionName = "ML", LocalAuthorityId = 1, LocalAuthorityName = "Derby" },
+                new Resident() { ForeName = "R3", CareHomeId = 1, CareHomeDivisionId = 1, AdmissionDate = new DateTime(2020, 01, 19), DischargedFromHomeDate = new DateTime(9999, 12, 31), CareHomeDivisionName = "PC", LocalAuthorityId = 2, LocalAuthorityName = "Manchester" },
+                new Resident() { ForeName = "R4", CareHomeId = 1, CareHomeDivisionId = 2, AdmissionDate = new DateTime(2020, 01, 22), DischargedFromHomeDate = new DateTime(9999, 12, 31), CareHomeDivisionName = "ML", LocalAuthorityId = 2, LocalAuthorityName = "Manchester" },
+                new Resident() { ForeName = "R5", CareHomeId = 1, CareHomeDivisionId = 1, AdmissionDate = new DateTime(2020, 01, 23), DischargedFromHomeDate = new DateTime(2020, 01, 25), CareHomeDivisionName = "PC", LocalAuthorityId = 100, LocalAuthorityName = "Private" },
             };
             var startDate = new DateTime(2020, 01, 14);
             var endDate = new DateTime(2020, 01, 26);

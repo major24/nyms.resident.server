@@ -253,6 +253,7 @@
     <Compile Include="Models\Enquiry\EnquiryListResponse.cs" />
     <Compile Include="Models\Resident\NextOfKin.cs" />
     <Compile Include="Models\Resident\ResidentContact.cs" />
+    <Compile Include="Models\Resident\ResidentDischargeExitRequest.cs" />
     <Compile Include="Models\Resident\ResidentEntity.cs" />
     <Compile Include="Models\Resident\ResidentExtension.cs" />
     <Compile Include="Models\Resident\ResidentListResponse.cs" />

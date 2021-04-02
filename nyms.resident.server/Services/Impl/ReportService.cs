@@ -1,7 +1,5 @@
 ﻿using Microsoft.Ajax.Utilities;
 using nyms.resident.server.DataProviders.Interfaces;
-using nyms.resident.server.Invoice;
-using nyms.resident.server.Models;
 using nyms.resident.server.Models.Reports;
 using nyms.resident.server.Services.Interfaces;
 using System;
@@ -39,7 +37,7 @@ namespace nyms.resident.server.Services.Impl
                 listOfAllDates.ForEach((thisDate) =>
                 {
                     var listOfResidentStayedForTheDate = residents
-                        .FindAll(r => r.AdmissionDate <= thisDate && r.ExitDate >= thisDate.AddDays(1))
+                        .FindAll(r => r.AdmissionDate <= thisDate && r.DischargedFromHomeDate >= thisDate.AddDays(1))
                         .Where(r => r.CareHomeDivisionId == divId);
                     OccupancyCountByDate occupancyCountByDate = new OccupancyCountByDate()
                     {
@@ -66,7 +64,7 @@ namespace nyms.resident.server.Services.Impl
                 listOfAllDates.ForEach((thisDate) =>
                 {
                     var listOfResidentStayedForTheDate = residents
-                        .FindAll(r => r.AdmissionDate <= thisDate && r.ExitDate >= thisDate.AddDays(1))
+                        .FindAll(r => r.AdmissionDate <= thisDate && r.DischargedFromHomeDate >= thisDate.AddDays(1))
                         .Where(r => r.LocalAuthorityId == provId);
                     OccupancyCountByDate occupancyCountByDate = new OccupancyCountByDate()
                     {

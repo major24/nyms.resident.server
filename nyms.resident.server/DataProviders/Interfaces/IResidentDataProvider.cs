@@ -11,7 +11,8 @@ namespace nyms.resident.server.DataProviders.Interfaces
         Resident GetResident(Guid referenceId);
         Task<ResidentEntity> Create(ResidentEntity residentEntity);
         Task<ResidentEntity> Update(ResidentEntity residentEntity);
-        bool DischargeResident(Guid referenceId, DateTime exitDate);
+        bool DischargeResident(Guid referenceId, DateTime dischargeDate);
+        bool ExitInvoiceResident(Guid referenceId, DateTime exitDate);
         bool ActivateResident(Guid referenceId);
     }
 }

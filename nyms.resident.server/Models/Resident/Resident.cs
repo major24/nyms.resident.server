@@ -37,5 +37,6 @@ namespace nyms.resident.server.Models
         public int CareHomeDivisionId { get; set; }
         public string CareHomeDivisionName { get; set; }
         public string LocalAuthorityName { get; set; }
+        public DateTime DischargedFromHomeDate { get; set; }
     }
 }

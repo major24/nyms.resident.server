@@ -68,12 +68,29 @@ namespace nyms.resident.server.Controllers
 
         [HttpPost]
         [Route("api/residents/{referenceId}/discharge")]
-        public IHttpActionResult DischargeResident(string referenceId, Models.Resident resident)
+        public IHttpActionResult DischargeResident(string referenceId, ResidentDischargeExitRequest residentDischargeExitRequest)
         {
             var user = HttpContext.Current.User as SecurityPrincipal;
             logger.Info($"Exit date updated by {user.ForeName}");
 
-            var success = _residentService.DischargeResident(new Guid(referenceId), (DateTime)resident.ExitDate);
+            var success = _residentService.DischargeResident(new Guid(referenceId), residentDischargeExitRequest.DischargedFromHomeDate);
+
+            if (!success)
+            {
+                return Ok(true);
+            }
+            logger.Warn($"Cannot update exit date");
+            return Ok(false);
+        }
+
+        [HttpPost]
+        [Route("api/residents/{referenceId}/exitschedule")]
+        public IHttpActionResult ExitInvoiceResident(string referenceId, ResidentDischargeExitRequest residentDischargeExitRequest)
+        {
+            var user = HttpContext.Current.User as SecurityPrincipal;
+            logger.Info($"Exit date updated by {user.ForeName}");
+
+            var success = _residentService.ExitInvoiceResident(new Guid(referenceId), (DateTime)residentDischargeExitRequest.ExitDate);
 
             if (!success)
             {
