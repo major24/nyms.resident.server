@@ -6,7 +6,6 @@ using nyms.resident.server.Services.Interfaces;
 using System;
 using System.Linq;
 using System.Web.Http;
-using System.Web.Http.Cors;
 
 namespace nyms.resident.server.Controllers
 {
@@ -54,46 +53,6 @@ namespace nyms.resident.server.Controllers
 
             return Ok(careHomes.ToArray());
         }
-
-
-        [HttpGet]
-        [Route("api/enquires/{referenceId}/carehome/details")]
-        public IHttpActionResult GetCareHomesDetailsByEnquiryRefId(string referenceId)
-        {
-            if (string.IsNullOrEmpty(referenceId))
-            {
-                throw new ArgumentNullException(nameof(referenceId));
-            }
-
-            var enquiry = _enquiryService.GetByReferenceId(GuidConverter.Convert(referenceId)).Result;
-            if (enquiry == null)
-            {
-                return BadRequest("Cannot find enquiry. Please contact admin.");
-            }
-
-            var careHomeDetail = _careHomeService.GetCareHomesDetails(enquiry.CareHomeId);
-            return Ok(careHomeDetail);
-        }
-
-        [HttpGet]
-        [Route("api/residents/{referenceId}/carehome/details")]
-        public IHttpActionResult GetCareHomesDetailsByResidentRefId(string referenceId)
-        {
-            if (string.IsNullOrEmpty(referenceId))
-            {
-                throw new ArgumentNullException(nameof(referenceId));
-            }
-
-            var resident = _residentService.GetResident(GuidConverter.Convert(referenceId));
-            if (resident == null)
-            {
-                return BadRequest("Cannot find resident. Please contact admin.");
-            }
-
-            var careHomeDetail = _careHomeService.GetCareHomesDetails(resident.CareHomeId);
-            return Ok(careHomeDetail);
-        }
-
     }
 }
 

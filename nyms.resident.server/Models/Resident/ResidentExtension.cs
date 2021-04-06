@@ -53,7 +53,8 @@ namespace nyms.resident.server.Models
                 RoomNumber = resident.RoomNumber,
                 Comments = resident.Comments,
                 EmailAddress = resident.EmailAddress,
-                PhoneNumber = resident.PhoneNumber
+                PhoneNumber = resident.PhoneNumber,
+                CareHomeDivisionId = resident.CareHomeDivisionId
             };
 
             if (resident.SocialWorker != null)

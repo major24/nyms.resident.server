@@ -18,11 +18,13 @@ namespace nyms.resident.server.Controllers
         private static readonly Logger logger = Nlogger2.GetLogger();
         private readonly IEnquiryService _enquiryService;
         private readonly IResidentService _residentService;
+        private readonly ICareHomeService _careHomeService;
 
-        public EnquiryController(IUserService userService, IEnquiryService enquiryService, IResidentService residentService)
+        public EnquiryController(IUserService userService, IEnquiryService enquiryService, IResidentService residentService, ICareHomeService careHomeService)
         {
             _enquiryService = enquiryService ?? throw new ArgumentNullException(nameof(enquiryService));
             _residentService = residentService ?? throw new ArgumentNullException(nameof(residentService));
+            _careHomeService = careHomeService ?? throw new ArgumentNullException(nameof(careHomeService));
         }
 
         [HttpGet]
@@ -153,6 +155,25 @@ namespace nyms.resident.server.Controllers
             this._enquiryService.SaveActions(new Guid(referenceId), enquiryActions);
 
             return Ok(true);
+        }
+
+        [HttpGet]
+        [Route("api/enquires/{referenceId}/carehome/details")]
+        public IHttpActionResult GetCareHomesDetailsByEnquiryRefId(string referenceId)
+        {
+            if (string.IsNullOrEmpty(referenceId))
+            {
+                throw new ArgumentNullException(nameof(referenceId));
+            }
+
+            var enquiry = _enquiryService.GetByReferenceId(GuidConverter.Convert(referenceId)).Result;
+            if (enquiry == null)
+            {
+                return BadRequest("Cannot find enquiry. Please contact admin.");
+            }
+
+            var careHomeDetail = _careHomeService.GetCareHomesDetails(enquiry.CareHomeId);
+            return Ok(careHomeDetail);
         }
 
     }

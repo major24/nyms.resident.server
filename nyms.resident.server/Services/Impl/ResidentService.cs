@@ -174,7 +174,8 @@ namespace nyms.resident.server.Services.Impl
                 Address = null,
                 NextOfKins = null,
                 EmailAddress = resident.EmailAddress,
-                PhoneNumber = resident.PhoneNumber
+                PhoneNumber = resident.PhoneNumber,
+                CareHomeDivisionId = resident.CareHomeDivisionId
             };
 
             // fill in if resident address found?

@@ -70,13 +70,24 @@ namespace nyms.resident.server.DataProviders.Impl
                     }).ToArray();
                 }
 
-                // asseble local authorites
+                // assemble local authorites
                 IEnumerable<LocalAuthority> localAuthorites = GetLocalAuthorities();
                 if (localAuthorites != null && localAuthorites.Any())
                 {
                     var _x = careHomes.Select(ch =>
                     {
                         ch.LocalAuthorities = localAuthorites.Where(cc => cc.CareHomeId == ch.Id).ToArray();
+                        return ch;
+                    }).ToArray();
+                }
+
+                // assemble care home divisions
+                IEnumerable<CareHomeDivision> careHomeDivisions = GetCareHomeDivisions();
+                if (careHomeDivisions != null && careHomeDivisions.Any())
+                {
+                    var _x = careHomes.Select(ch =>
+                    {
+                        ch.CareHomeDivisions = careHomeDivisions.Where(chd => chd.CareHomeId == ch.Id).ToArray();
                         return ch;
                     }).ToArray();
                 }
@@ -141,7 +152,6 @@ namespace nyms.resident.server.DataProviders.Impl
 
         private IEnumerable<CareCategory> GetCareCategories()
         {
-            IEnumerable<CareCategory> careCategories = new List<CareCategory>();
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
                 string sql = @"SELECT cc.id as id, cc.name as name, cc.care_home_id as carehomeid
@@ -152,7 +162,20 @@ namespace nyms.resident.server.DataProviders.Impl
                 var result = conn.QueryAsync<CareCategory>(sql).Result;
                 return result;
             }
+        }
 
+        private IEnumerable<CareHomeDivision> GetCareHomeDivisions()
+        {
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                string sql = @"SELECT chd.id as id, chd.name as name, chd.care_home_id as carehomeid
+                                        FROM [care_home_divisions] chd
+                                        WHERE chd.active = 'Y'";
+
+                conn.Open();
+                var result = conn.QueryAsync<CareHomeDivision>(sql).Result;
+                return result;
+            }
         }
 
 

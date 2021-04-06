@@ -245,6 +245,7 @@
     <Compile Include="Invoice\InvoiceValidatedEntity.cs" />
     <Compile Include="Invoice\InvoiceValidatedModel.cs" />
     <Compile Include="Invoice\InvoiceValidationsReportResponse.cs" />
+    <Compile Include="Models\CareHome\CareHomeDivision.cs" />
     <Compile Include="Models\Enquiry\EnquiryResponse.cs" />
     <Compile Include="Models\Reports\OccupancyReportResponse.cs" />
     <Compile Include="Models\Resident\ContactInfo.cs" />

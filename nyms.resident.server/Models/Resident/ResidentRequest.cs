@@ -30,5 +30,6 @@ namespace nyms.resident.server.Models
         public IEnumerable<NextOfKin> NextOfKins { get; set; }
         public Guid EnquiryReferenceId { get; set; }
         public int UpdatedBy { get; set; }
+        public int CareHomeDivisionId { get; set; }
     }
 }

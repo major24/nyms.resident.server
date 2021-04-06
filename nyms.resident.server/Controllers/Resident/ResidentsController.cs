@@ -8,6 +8,7 @@ using System;
 using System.Linq;
 using System.Web;
 using System.Web.Http;
+using nyms.resident.server.Core;
 
 namespace nyms.resident.server.Controllers
 {
@@ -17,11 +18,13 @@ namespace nyms.resident.server.Controllers
         private static Logger logger = Nlogger2.GetLogger();
         private readonly IResidentService _residentService;
         private readonly IScheduleService _scheduleService;
+        private readonly ICareHomeService _careHomeService;
 
-        public ResidentsController(IUserService userService, IResidentService residentService, IScheduleService scheduleService)
+        public ResidentsController(IUserService userService, IResidentService residentService, IScheduleService scheduleService, ICareHomeService careHomeService)
         {
             _residentService = residentService ?? throw new ArgumentNullException(nameof(residentService));
             _scheduleService = scheduleService ?? throw new ArgumentNullException(nameof(scheduleService));
+            _careHomeService = careHomeService ?? throw new ArgumentNullException(nameof(careHomeService));
         }
 
         [HttpGet]
@@ -245,6 +248,25 @@ namespace nyms.resident.server.Controllers
             this._scheduleService.InactivateSchedule(id);
 
             return Ok("Updated");
+        }
+
+        [HttpGet]
+        [Route("api/residents/{referenceId}/carehome/details")]
+        public IHttpActionResult GetCareHomesDetailsByResidentRefId(string referenceId)
+        {
+            if (string.IsNullOrEmpty(referenceId))
+            {
+                throw new ArgumentNullException(nameof(referenceId));
+            }
+
+            var resident = _residentService.GetResident(GuidConverter.Convert(referenceId));
+            if (resident == null)
+            {
+                return BadRequest("Cannot find resident. Please contact admin.");
+            }
+
+            var careHomeDetail = _careHomeService.GetCareHomesDetails(resident.CareHomeId);
+            return Ok(careHomeDetail);
         }
 
     }

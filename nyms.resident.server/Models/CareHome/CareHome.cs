@@ -12,5 +12,6 @@ namespace nyms.resident.server.Models
         public IEnumerable<RoomLocation> RoomLocations { get; set; }
         public IEnumerable<CareCategory> CareCategories { get; set; }
         public IEnumerable<LocalAuthority> LocalAuthorities { get; set; }
+        public IEnumerable<CareHomeDivision> CareHomeDivisions { get; set; }
     }
 }

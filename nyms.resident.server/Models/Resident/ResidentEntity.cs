@@ -40,5 +40,6 @@ namespace nyms.resident.server.Models
         public string EmailAddress { get; set; }
         public string PhoneNumber { get; set; }
         public IEnumerable<ResidentContact> ResidentContacts { get; set; }
+        public int CareHomeDivisionId { get; set; }
     }
 }
