@@ -231,7 +231,8 @@ namespace nyms.resident.server.DataProviders.Impl
                    ,[comments]
                    ,[status]
                    ,[updated_by_id]
-                   ,[enquiry_ref_id])
+                   ,[enquiry_ref_id]
+                   ,[care_home_division_id])
                 VALUES
                    (@referenceid
                    ,@carehomeid
@@ -256,7 +257,8 @@ namespace nyms.resident.server.DataProviders.Impl
                    ,@comments
                    ,@status
                    ,@updatedbyid
-                   ,@enquiryrefid);
+                   ,@enquiryrefid
+                   ,@carehomedivisionid);
                     SELECT CAST(SCOPE_IDENTITY() as int);";
             string sqlInsertAddress = @"INSERT INTO [dbo].[resident_addresses]
                                        ([resident_id]
@@ -338,6 +340,7 @@ namespace nyms.resident.server.DataProviders.Impl
             dp.Add("status", residentEntity.Status, DbType.String, ParameterDirection.Input, 80);
             dp.Add("updatedbyid", residentEntity.UpdatedById, DbType.Int32, ParameterDirection.Input);
             dp.Add("enquiryrefid", residentEntity.EnquiryReferenceId, DbType.Guid, ParameterDirection.Input, 80);
+            dp.Add("carehomedivisionid", residentEntity.CareHomeDivisionId, DbType.Int32, ParameterDirection.Input);
 
             DynamicParameters dpAddrResident = new DynamicParameters();
             if (residentEntity.Address != null)
@@ -481,6 +484,7 @@ namespace nyms.resident.server.DataProviders.Impl
                    ,[comments] = @comments
                    ,[status] = @status
                    ,[updated_by_id] = @updatedbyid
+                   ,[care_home_division_id] = @carehomedivisionid
                 WHERE [id] = @id";
 
             string sqlUpdateAddress = @"UPDATE [dbo].[resident_addresses] SET
@@ -573,7 +577,8 @@ namespace nyms.resident.server.DataProviders.Impl
             dp.Add("status", residentEntity.Status, DbType.String, ParameterDirection.Input, 80);
             dp.Add("updatedbyid", residentEntity.UpdatedById, DbType.Int32, ParameterDirection.Input);
             dp.Add("id", residentEntity.Id, DbType.Int32, ParameterDirection.Input); // for Where clause
-
+            dp.Add("carehomedivisionid", residentEntity.CareHomeDivisionId, DbType.Int32, ParameterDirection.Input);
+            
             DynamicParameters dpAddrResident = new DynamicParameters();
             if (residentEntity.Address != null)
             {
@@ -736,6 +741,7 @@ namespace nyms.resident.server.DataProviders.Impl
                               ,[active] as active
                               ,[updated_by_id] as updatedbyid
                               ,[updated_date] as updateddate
+                              ,[care_home_division_id] as carehomedivisionid
                         FROM [dbo].[residents]
                         WHERE reference_id = @referenceid";
 
