@@ -9,6 +9,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Http;
 using nyms.resident.server.Core;
+using System.Collections.Generic;
 
 namespace nyms.resident.server.Controllers
 {
@@ -28,14 +29,26 @@ namespace nyms.resident.server.Controllers
         }
 
         [HttpGet]
-        [Route("api/carehomes/{careHomeId}/residents")]
-        public IHttpActionResult GetAllResidentsAll(int careHomeId)
+        [Route("api/residents")]
+        public IHttpActionResult GetAllResidentsAll(string q)
         {
+            // q = active / all
             var user = HttpContext.Current.User as SecurityPrincipal;
             var curUser = System.Threading.Thread.CurrentPrincipal;
             logger.Info($"All resedents requested by {user.ForeName}");
 
-            var residents = _residentService.GetAllResidentsByCareHomeId(careHomeId);
+            IEnumerable<Models.Resident> residents = null;
+            if (q == "active")
+            {
+                residents = _residentService.GetActiveResidents();
+            }
+            else
+            {
+                residents = _residentService.GetAllResidents();
+            }
+
+            // TODO: CareHome Manger ROLE. Return resident BY CARE HOME ONLY
+            // TODO: For admin, get ALL Residents in ALL CARE HOMES
 
             if (residents == null)
             {
@@ -48,26 +61,7 @@ namespace nyms.resident.server.Controllers
             return Ok(residentResponseList.ToArray());
         }
 
-        [HttpGet]
-        [Route("api/carehomes/{careHomeId}/residents/active")]
-        public IHttpActionResult GetAllResidents(int careHomeId)
-        {
-            var user = HttpContext.Current.User as SecurityPrincipal;
-            var curUser = System.Threading.Thread.CurrentPrincipal;
-            logger.Info($"All resedents requested by {user.ForeName}");
-
-            var residents = _residentService.GetActiveResidentsByCareHomeId(careHomeId);
-
-            if (residents == null)
-            {
-                logger.Warn($"No residents found");
-                return NotFound();
-            }
-
-            var residentResponseList = residents.Select(r => r.ToResidentListType());
-
-            return Ok(residentResponseList.ToArray());
-        }
+        
 
         [HttpPost]
         [Route("api/residents/{referenceId}/discharge")]

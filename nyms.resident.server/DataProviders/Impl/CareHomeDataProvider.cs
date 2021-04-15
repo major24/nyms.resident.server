@@ -107,11 +107,16 @@ namespace nyms.resident.server.DataProviders.Impl
             IEnumerable<LocalAuthority> localAuthorities = new List<LocalAuthority>();
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
-                string sql = @"SELECT la.id as id, la.name as name, la.care_home_id as carehomeid
+                string sql = @"SELECT la.id as id, la.name as name, chla.care_home_id as carehomeid
+                                FROM[dbo].[local_authorities] la
+                                INNER JOIN[dbo].[care_homes_local_authorities] chla
+                                    ON la.id = chla.local_authority_id
+                                WHERE la.active = 'Y'";
+/*                string sql = @"SELECT la.id as id, la.name as name, la.care_home_id as carehomeid
                                 FROM local_authorities la
                                 INNER JOIN care_homes ch
                                 ON ch.id = la.care_home_id
-                                WHERE la.active = 'Y'";
+                                WHERE la.active = 'Y'";*/
 
                 conn.Open();
                 var result = conn.QueryAsync<LocalAuthority>(sql).Result;

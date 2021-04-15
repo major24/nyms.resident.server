@@ -24,6 +24,16 @@ namespace nyms.resident.server.Services.Impl
             _socialWorkerDataProvider = socialWorkerDataProvider ?? throw new ArgumentNullException(nameof(socialWorkerDataProvider));
         }
 
+        public IEnumerable<Resident> GetAllResidents()
+        {
+            return this._residentDataProvider.GetResidents();
+        }
+
+        public IEnumerable<Resident> GetActiveResidents()
+        {
+            return this._residentDataProvider.GetResidents().Where(res => res.Active == "Y");
+        }
+
         public IEnumerable<Resident> GetAllResidentsByCareHomeId(int careHomeId)
         {
             return this._residentDataProvider.GetResidents().Where(res => res.CareHomeId == careHomeId);

@@ -10,7 +10,8 @@ namespace nyms.resident.server.Models.Reports
         Dictionary<int, int> LettableRoomsLookup = new Dictionary<int, int>()
         {
             { 1, 28 },
-            { 2, 25 }
+            { 2, 25 },
+            { 3, 60 }
         };
 
         public OccupancyReportResponse()
