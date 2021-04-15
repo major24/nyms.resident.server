@@ -9,6 +9,8 @@ namespace nyms.resident.server.Services.Interfaces
 {
     public interface IResidentService
     {
+        IEnumerable<Resident> GetAllResidents();
+        IEnumerable<Resident> GetActiveResidents();
         IEnumerable<Resident> GetAllResidentsByCareHomeId(int careHomeId);
         IEnumerable<Resident> GetActiveResidentsByCareHomeId(int careHomeId);
         Resident GetResident(Guid referenceId);
