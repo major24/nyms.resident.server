@@ -1,17 +1,15 @@
-﻿using nyms.resident.server.Core;
-using nyms.resident.server.DataProviders.Interfaces;
-using nyms.resident.server.Models.Authentication;
+﻿using nyms.resident.server.DataProviders.Interfaces;
+using nyms.resident.server.Filters;
 using nyms.resident.server.Services.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web;
 using System.Web.Http;
 
 namespace nyms.resident.server.Controllers
 {
+    // [AdminAuthenticationFilter]
     public class TestDbController : ApiController
     {
         private readonly IUserService _userService;
@@ -68,6 +66,47 @@ namespace nyms.resident.server.Controllers
             _residentService.AdmitEnquiry(resident);
             return Created("", "test resident created");
         }
+
+        [HttpPost]
+        [Route("api/database/spends/clear")]
+        public HttpResponseMessage ClearSpendsDatabase([FromUri] string q)
+        {
+            try
+            {
+                if (q == "budgets")
+                {
+                    _databaseSetupProvider.ClearBudgetsDatabase();
+                } 
+                else
+                {
+                    _databaseSetupProvider.ClearSpendsDatabase();
+                }
+                
+                return Request.CreateResponse(HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                HttpResponseMessage response = Request.CreateResponse(HttpStatusCode.InternalServerError, $"Error: {ex.Message}");
+                return response;
+            }
+        }
+
+        [HttpPost]
+        [Route("api/database/users/clear")]
+        public HttpResponseMessage ClearTestUsers()
+        {
+            try
+            {
+                _databaseSetupProvider.ClearTestUsers();
+                return Request.CreateResponse(HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                HttpResponseMessage response = Request.CreateResponse(HttpStatusCode.InternalServerError, $"Error: {ex.Message}");
+                return response;
+            }
+        }
+
 
 
     }

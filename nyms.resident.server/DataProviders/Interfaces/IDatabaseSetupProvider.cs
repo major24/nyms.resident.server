@@ -4,5 +4,8 @@
     {
         void SeedDatabase();
         void ClearDatabase();
+        void ClearSpendsDatabase();
+        void ClearBudgetsDatabase();
+        void ClearTestUsers();
     }
 }

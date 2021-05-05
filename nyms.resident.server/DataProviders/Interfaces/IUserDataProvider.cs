@@ -10,7 +10,9 @@ namespace nyms.resident.server.DataProviders.Interfaces
         Task<User> GetById(int id);
         Task<User> GetUserByReferenceId(Guid referenceId);
         Task<User> GetUserByUserNamePassword(string userName, string password);
+        void CreateUser(string userName, string password, User user);
         void SetPassword(Guid referenceId, string password);
         IEnumerable<User> GetUsers();
+        void AssignRoles(int userId, IEnumerable<UserRolePermission> userRolePermissions);
     }
 }

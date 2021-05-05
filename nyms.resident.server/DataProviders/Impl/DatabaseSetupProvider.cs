@@ -1,9 +1,12 @@
 ﻿using Dapper;
+using Microsoft.Ajax.Utilities;
 using nyms.resident.server.DataProviders.Interfaces;
 using nyms.resident.server.Models;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 
 namespace nyms.resident.server.DataProviders.Impl
 {
@@ -58,6 +61,147 @@ namespace nyms.resident.server.DataProviders.Impl
                 }
             }
         }
+
+        public void ClearSpendsDatabase()
+        {
+            string sqlSelectAll = @"select cat.id as categoryid, b.id as budgetid, s.id as spendid 
+                                    from spend_category cat left join spend_budgets b on cat.id = b.spend_category_id 
+                                    left join spends s on b.id = s.spend_budget_id
+                                    where cat.name like 'Test%'";
+
+            string sqlDelSpends = @"DELETE FROM [dbo].[spends] WHERE [spend_budget_id] = @id";
+            string sqlDelSpendsbudgetAllocations = @"DELETE FROM [dbo].[spend_budget_allocations] WHERE [spend_budget_id] = @id";
+            string sqlDelSpendsbudget = @"DELETE FROM [dbo].[spend_budgets] WHERE [id] = @id";
+            string sqlDelSpendRoles = @"DELETE FROM [dbo].[spend_category_roles] WHERE [spend_category_id] = @id";
+            string sqlDelSpendsCategory = @"DELETE FROM [dbo].[spend_category] WHERE [id] = @id";
+
+            List<int> CategoryIds = new List<int>();
+            List<int> SpendBudgetIds = new List<int>();
+            List<int> SpendIds = new List<int>();
+
+            using(SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                SqlCommand cmd = new SqlCommand(sqlSelectAll, conn);
+                conn.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+                while(reader.Read())
+                {
+                    CategoryIds.Add((int)reader[0]);
+                    if (reader[1] != DBNull.Value)
+                    {
+                        SpendBudgetIds.Add((int)reader[1]);
+                    }
+                    if (reader[2] != DBNull.Value)
+                    {
+                        SpendIds.Add((int)reader[2]);
+                    }
+                }
+            }
+
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                using (var tran = conn.BeginTransaction())
+                {
+                    DynamicParameters dp = new DynamicParameters();
+                    SpendIds.ForEach(id => {
+                        dp.Add("id", id, DbType.Int32, ParameterDirection.Input);
+                        var affRowsX = conn.Execute(sqlDelSpends, dp, transaction: tran);  
+                    });
+                    SpendBudgetIds.ForEach(id =>
+                    {
+                        dp.Add("id", id, DbType.Int32, ParameterDirection.Input);
+                        var affRows1 = conn.Execute(sqlDelSpendsbudgetAllocations, dp, transaction: tran);
+                        var affRows2 = conn.Execute(sqlDelSpendsbudget, dp, transaction: tran);
+                    });
+                    CategoryIds.ForEach(id =>
+                    {
+                        dp.Add("id", id, DbType.Int32, ParameterDirection.Input); 
+                        var affRowsX1 = conn.Execute(sqlDelSpendRoles, dp, transaction: tran);
+                        var affRowsX2 = conn.Execute(sqlDelSpendsCategory, dp, transaction: tran);
+                    });
+                    tran.Commit();
+                }
+            }
+        }
+
+
+        public void ClearBudgetsDatabase()
+        {
+            string sqlSelTestBudgets = @"select id as id from spend_budgets
+                                    where name like 'Test%'";
+
+            // string sqlDelSpends = @"DELETE FROM [dbo].[spends] WHERE [spend_budget_id] = @id";
+            string sqlDelSpendsbudgetAllocations = @"DELETE FROM [dbo].[spend_budget_allocations] WHERE [spend_budget_id] = @id";
+            string sqlDelSpendsbudget = @"DELETE FROM [dbo].[spend_budgets] WHERE [id] = @id";
+
+            List<int> SpendBudgetIds = new List<int>();
+            // List<int> SpendIds = new List<int>();
+
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                SqlCommand cmd = new SqlCommand(sqlSelTestBudgets, conn);
+                conn.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    SpendBudgetIds.Add((int)reader[0]);
+                }
+            }
+
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                using (var tran = conn.BeginTransaction())
+                {
+                    DynamicParameters dp = new DynamicParameters();
+/*                    SpendIds.ForEach(id => {
+                        dp.Add("id", id, DbType.Int32, ParameterDirection.Input);
+                        var affRowsX = conn.Execute(sqlDelSpends, dp, transaction: tran);
+                    });*/
+                    SpendBudgetIds.ForEach(id =>
+                    {
+                        dp.Add("id", id, DbType.Int32, ParameterDirection.Input);
+                        var affRows1 = conn.Execute(sqlDelSpendsbudgetAllocations, dp, transaction: tran);
+                        var affRows2 = conn.Execute(sqlDelSpendsbudget, dp, transaction: tran);
+                    });
+
+                    tran.Commit();
+                }
+            }
+        }
+
+        public void ClearTestUsers()
+        {
+            string sqlSelTestUsers = @"select id as id from users
+                                    where username like 'test%'";
+            string sqlDeleteTestRoles = @"delete from users_roles where user_id = @userid";
+            string sqlDeleteTestUsers = @"delete from users where id = @id";
+
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                var users = conn.Query<User>(sqlSelTestUsers).ToArray();
+
+                using (var tran = conn.BeginTransaction())
+                {
+                    users.ForEach(u =>
+                    {
+                        DynamicParameters dp = new DynamicParameters();
+                        dp.Add("userid", u.Id, DbType.Int32, ParameterDirection.Input);
+                        var affRows0 = conn.Execute(sqlDeleteTestRoles, dp, transaction: tran);
+                    });
+                    users.ForEach(u =>
+                    {
+                        DynamicParameters dp = new DynamicParameters();
+                        dp.Add("id", u.Id, DbType.Int32, ParameterDirection.Input);
+                        var affRows0 = conn.Execute(sqlDeleteTestUsers, dp, transaction: tran);
+                    });
+                    tran.Commit();
+                }
+            }
+        }
+
 
         public void SeedDatabase()
         {

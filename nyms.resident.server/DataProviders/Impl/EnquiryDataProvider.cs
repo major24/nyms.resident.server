@@ -174,7 +174,7 @@ namespace nyms.resident.server.DataProviders.Impl
                    ,@comments
                    ,@status
                    ,@updatedbyid);
-                SELECT CAST(SCOPE_IDENTITY() as int)";
+                SELECT CAST(SCOPE_IDENTITY() as int);";
 
                 DynamicParameters dp = new DynamicParameters();
                 dp.Add("referenceid", enquiry.ReferenceId, DbType.Guid, ParameterDirection.Input, 80);
