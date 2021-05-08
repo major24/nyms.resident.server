@@ -201,6 +201,11 @@
     <Compile Include="Controllers\Resident\EnquiryController.cs" />
     <Compile Include="Controllers\Resident\ResidentsController.cs" />
     <Compile Include="Controllers\Resident\ScheduleController.cs" />
+    <Compile Include="Controllers\Security\SecurityController.cs" />
+    <Compile Include="Controllers\Spends\BudgetAdminController.cs" />
+    <Compile Include="Controllers\Spends\BudgetUserController.cs" />
+    <Compile Include="Controllers\Spends\SpendCategoriesController.cs" />
+    <Compile Include="Controllers\Spends\SpendController.cs" />
     <Compile Include="Controllers\TestDbController.cs" />
     <Compile Include="Controllers\User\UsersController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
@@ -216,7 +221,10 @@
     <Compile Include="DataProviders\Impl\ResidentContactDataProvider.cs" />
     <Compile Include="DataProviders\Impl\ResidentDataProvider.cs" />
     <Compile Include="DataProviders\Impl\ScheduleDataProvider.cs" />
+    <Compile Include="DataProviders\Impl\SecurityDataProvider.cs" />
     <Compile Include="DataProviders\Impl\SocialWorkerDataProvider.cs" />
+    <Compile Include="DataProviders\Impl\BudgetDataProvider.cs" />
+    <Compile Include="DataProviders\Impl\SpendCategoriesDataProvider.cs" />
     <Compile Include="DataProviders\Impl\UserDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\IBillingCycleDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\IDatabaseSetupProvider.cs" />
@@ -228,7 +236,10 @@
     <Compile Include="DataProviders\Interfaces\IResidentContactDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\IResidentDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\IScheduleDataProvider.cs" />
+    <Compile Include="DataProviders\Interfaces\ISecurityDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\ISocialWorkerDataProvider.cs" />
+    <Compile Include="DataProviders\Interfaces\IBudgetDataProvider.cs" />
+    <Compile Include="DataProviders\Interfaces\ISpendCategoriesDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\IUserDataProvider.cs" />
     <Compile Include="Filters\AdminAuthenticationFilter.cs" />
     <Compile Include="Filters\CustomExceptionHandler.cs" />
@@ -245,6 +256,7 @@
     <Compile Include="Invoice\InvoiceValidatedEntity.cs" />
     <Compile Include="Invoice\InvoiceValidatedModel.cs" />
     <Compile Include="Invoice\InvoiceValidationsReportResponse.cs" />
+    <Compile Include="Models\CareHome\CareHome.cs" />
     <Compile Include="Models\CareHome\CareHomeDivision.cs" />
     <Compile Include="Models\Enquiry\EnquiryResponse.cs" />
     <Compile Include="Models\Reports\OccupancyReportResponse.cs" />
@@ -270,7 +282,7 @@
     <Compile Include="Models\Authentication\AuthenticationResponse.cs" />
     <Compile Include="Models\Authentication\SecurityPrincipal.cs" />
     <Compile Include="Models\CareHome\CareCategory.cs" />
-    <Compile Include="Models\CareHome\CareHome.cs" />
+    <Compile Include="Models\CareHome\CareHomeDetail.cs" />
     <Compile Include="Models\CareHome\LocalAuthority.cs" />
     <Compile Include="Models\CareHome\Room.cs" />
     <Compile Include="Models\CareHome\RoomLocation.cs" />
@@ -284,9 +296,25 @@
     <Compile Include="Models\Enquiry\Enquiry.cs" />
     <Compile Include="Models\Resident\Resident.cs" />
     <Compile Include="Models\Resident\ResidentBase.cs" />
+    <Compile Include="Models\Security\SpendCategoryRoleEntity.cs" />
+    <Compile Include="Models\Spends\Budget.cs" />
+    <Compile Include="Models\Spends\BudgetAllocation.cs" />
+    <Compile Include="Models\Spends\BudgetAllocationEntity.cs" />
+    <Compile Include="Models\Spends\BudgetEntity.cs" />
+    <Compile Include="Models\Spends\BudgetListResponse.cs" />
+    <Compile Include="Models\Spends\BudgetRequest.cs" />
+    <Compile Include="Models\Spends\BudgetResponse.cs" />
+    <Compile Include="Models\Spends\SpendCategory.cs" />
+    <Compile Include="Models\Spends\SpendCategoryCareHomeEntity.cs" />
+    <Compile Include="Models\Spends\SpendCategoryRequest.cs" />
+    <Compile Include="Models\Spends\SpendCategoryResponse.cs" />
+    <Compile Include="Models\Spends\SpendMasterCategory.cs" />
+    <Compile Include="Models\Spends\SpendCategoryEntity.cs" />
+    <Compile Include="Models\Spends\SpendRequest.cs" />
+    <Compile Include="Models\Spends\SpendResponse.cs" />
     <Compile Include="Models\User\CareHomeRole.cs" />
-    <Compile Include="Models\User\CareHomeUser.cs" />
     <Compile Include="Models\User\Role.cs" />
+    <Compile Include="Models\User\UserRolePermission.cs" />
     <Compile Include="Models\User\User.cs" />
     <Compile Include="Models\User\UserEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -301,6 +329,9 @@
     <Compile Include="Services\Impl\ReportService.cs" />
     <Compile Include="Services\Impl\ResidentService.cs" />
     <Compile Include="Services\Impl\ScheduleService.cs" />
+    <Compile Include="Services\Impl\SecurityService.cs" />
+    <Compile Include="Services\Impl\BudgetService.cs" />
+    <Compile Include="Services\Impl\SpendCategoriesService.cs" />
     <Compile Include="Services\Impl\UserService.cs" />
     <Compile Include="Services\Interfaces\IAuthenticationService.cs" />
     <Compile Include="Services\Interfaces\ICareHomeService.cs" />
@@ -309,6 +340,9 @@
     <Compile Include="Services\Interfaces\IReportService.cs" />
     <Compile Include="Services\Interfaces\IResidentService.cs" />
     <Compile Include="Services\Interfaces\IScheduleService.cs" />
+    <Compile Include="Services\Interfaces\ISecurityService.cs" />
+    <Compile Include="Services\Interfaces\IBudgetService.cs" />
+    <Compile Include="Services\Interfaces\ISpendCategoriesService.cs" />
     <Compile Include="Services\Interfaces\IUserService.cs" />
   </ItemGroup>
   <ItemGroup>

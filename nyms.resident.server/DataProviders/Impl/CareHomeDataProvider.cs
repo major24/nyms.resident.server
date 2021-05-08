@@ -18,33 +18,55 @@ namespace nyms.resident.server.DataProviders.Impl
             _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
         }
 
-        public CareHome GetCareHomeByReferenceId(Guid referenceId)
+        public CareHomeDetail GetCareHomeByReferenceId(Guid referenceId)
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<CareHome> GetCareHomes()
+        public IEnumerable<CareHome> GetCareHomes()  //<CareHomeDetail>
         {
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
-                string sql = @"SELECT ch.id as id, ch.reference_id as referenceid, ch.name as name
+                string sql = @"SELECT ch.id as id, ch.reference_id as referenceid, ch.name as name, ch.ch_code as chcode
                                         FROM [care_homes] ch
                                         WHERE ch.active = 'Y'";
 
                 conn.Open();
-                var result = conn.Query<CareHome>(sql);
-                return result;
+                var careHomes = conn.Query<CareHome>(sql);
+
+                // assemble care home divisions
+                IEnumerable<CareHomeDivision> careHomeDivisions = GetCareHomeDivisions();
+                if (careHomeDivisions != null && careHomeDivisions.Any())
+                {
+                    var _x = careHomes.Select(ch =>
+                    {
+                        ch.CareHomeDivisions = careHomeDivisions.Where(chd => chd.CareHomeId == ch.Id).ToArray();
+                        return ch;
+                    }).ToArray();
+                }
+                return careHomes;
             }
-            
         }
 
         // Get all details and assemble in one place
         // instead do in parts and assemble..
-        public IEnumerable<CareHome> GetCareHomesDetails()
+        public IEnumerable<CareHomeDetail> GetCareHomesDetails()
         {
             try
             {
-                IEnumerable<CareHome> careHomes = GetCareHomes();
+                // IEnumerable<CareHomeDetail> careHomes = GetCareHomes();
+                IEnumerable<CareHome> careHomesBasic = GetCareHomes();
+                IEnumerable<CareHomeDetail> careHomes = careHomesBasic.Select(ch =>
+                  {
+                      return new CareHomeDetail()
+                      {
+                          Id = ch.Id,
+                          Name = ch.Name,
+                          ReferenceId = ch.ReferenceId,
+                          CareHomeDivisions = ch.CareHomeDivisions
+                      };
+                  }).ToArray();
+
                 if (careHomes == null || !careHomes.Any()) return null;
 
                 IEnumerable<RoomLocation> roomLocations = GetRoomLocations();
@@ -81,7 +103,7 @@ namespace nyms.resident.server.DataProviders.Impl
                     }).ToArray();
                 }
 
-                // assemble care home divisions
+/*                // assemble care home divisions
                 IEnumerable<CareHomeDivision> careHomeDivisions = GetCareHomeDivisions();
                 if (careHomeDivisions != null && careHomeDivisions.Any())
                 {
@@ -90,7 +112,7 @@ namespace nyms.resident.server.DataProviders.Impl
                         ch.CareHomeDivisions = careHomeDivisions.Where(chd => chd.CareHomeId == ch.Id).ToArray();
                         return ch;
                     }).ToArray();
-                }
+                }*/
 
                 // return assebled carehomes...
                 return careHomes;

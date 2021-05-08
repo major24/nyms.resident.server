@@ -3,6 +3,7 @@ using nyms.resident.server.Filters;
 using nyms.resident.server.Services.Core;
 using nyms.resident.server.Services.Interfaces;
 using System;
+using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Cors;
 
@@ -18,6 +19,20 @@ namespace nyms.resident.server.Controllers.User
         public UsersController(IUserService userService)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+        }
+
+        [HttpGet]
+        [Route("api/users")]
+        public IHttpActionResult GetUsers()
+        {
+            var users = _userService.GetUsers();
+            if (users == null || !users.Any())
+            {
+                logger.Error($"No users found");
+                return NotFound();
+            }
+
+            return Ok(users);
         }
 
         [HttpGet]

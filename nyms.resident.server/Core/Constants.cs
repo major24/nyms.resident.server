@@ -16,6 +16,14 @@
         public static readonly string ENQUIRY_ACTION_STATUS_PENDING = "pending";
         public static readonly string ENQUIRY_ACTION_STATUS_COMPLETED = "completed";
         public static readonly string ENQUIRY_ACTION_STATUS_COMPLETING = "_completing";
+
+        // spends
+        public static readonly string BUDGET_APPROVED = "Y";
+        // budget status
+        public static readonly string BUDGET_STATUS_CREATED = "Created";
+        public static readonly string BUDGET_STATUS_OPEN = "Open";
+        public static readonly string BUDGET_STATUS_COMPLETED = "Completed";
+        public static readonly string BUDGET_STATUS_CANCELLED = "Cancelled";
     }
 
     public enum ENQUIRY_STATUS
@@ -39,5 +47,13 @@
        home
     }
 
+    public enum USER_ROLE
+    {
+        SuperAdmin = 1,
+        Admin = 2,
+        Manger = 3,
+        FinanceAdmin = 4
+    }
 
+    
 }

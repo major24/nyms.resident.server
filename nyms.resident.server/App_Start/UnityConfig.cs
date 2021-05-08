@@ -49,6 +49,13 @@ namespace nyms.resident.server
             container.RegisterType<IDatabaseSetupProvider, DatabaseSetupProvider>(new InjectionConstructor(connectionString));
             container.RegisterType<IReportService, ReportService>();
 
+            container.RegisterType<ISpendCategoriesDataProvider, SpendCategoriesDataProvider>(new InjectionConstructor(connectionString));
+            container.RegisterType<ISpendCategoriesService, SpendCategoriesService>();
+            container.RegisterType<IBudgetDataProvider, BudgetDataProvider>(new InjectionConstructor(connectionString));
+            container.RegisterType<IBudgetService, BudgetService>();
+            container.RegisterType<ISecurityDataProvider, SecurityDataProvider>(new InjectionConstructor(connectionString));
+            container.RegisterType<ISecurityService, SecurityService>();
+
             DependencyResolver.SetResolver(new Unity.Mvc5.UnityDependencyResolver(container));
 
             System.Web.Http.GlobalConfiguration.Configuration.DependencyResolver = new Unity.WebApi.UnityDependencyResolver(container);

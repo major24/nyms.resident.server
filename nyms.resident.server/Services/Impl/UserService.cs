@@ -17,6 +17,18 @@ namespace nyms.resident.server.Services.Impl
             _userDataProvider = userDataProvider ?? throw new ArgumentNullException(nameof(userDataProvider));
         }
 
+        public IEnumerable<User> GetUsers()
+        {
+            try
+            {
+                return this._userDataProvider.GetUsers();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public  Task<User> GetById(int id)
         {
             throw new NotImplementedException();
@@ -32,21 +44,20 @@ namespace nyms.resident.server.Services.Impl
             return _userDataProvider.GetUserByUserNamePassword(userName, password);
         }
 
+        public void CreateUser(User user)
+        {
+            _userDataProvider.CreateUser(user.UserName, BCrypt.Net.BCrypt.HashPassword(user.Password), user);
+        }
+
         public void SetPassword(Guid referenceId, string password)
         {
             _userDataProvider.SetPassword(referenceId, BCrypt.Net.BCrypt.HashPassword(password));
         }
 
-        public IEnumerable<User> GetUsers()
+        public void AssignRoles(int userId, IEnumerable<UserRolePermission> userRolePermissions)
         {
-            try
-            {
-                return this._userDataProvider.GetUsers();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
+            _userDataProvider.AssignRoles(userId, userRolePermissions);
         }
+
     }
 }

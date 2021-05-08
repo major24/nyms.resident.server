@@ -9,6 +9,7 @@ namespace nyms.resident.server.Models
         public Guid ReferenceId { get; set; }
         public int Id { get; set; }
         public string Email { get; set; }
+        public string UserName { get; set; }
         public string Password { get; set; }
         public IEnumerable<CareHomeRole> CareHomeRoles { get; set; }
     }
