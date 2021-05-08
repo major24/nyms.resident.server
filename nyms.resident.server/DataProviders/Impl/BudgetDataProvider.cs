@@ -11,16 +11,16 @@ using System.Linq;
 
 namespace nyms.resident.server.DataProviders.Impl
 {
-    public class SpendBudgetDataProvider : ISpendBudgetDataProvider
+    public class BudgetDataProvider : IBudgetDataProvider
     {
         private readonly string _connectionString;
 
-        public SpendBudgetDataProvider(string connectionString)
+        public BudgetDataProvider(string connectionString)
         {
             _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
         }
 
-        public IEnumerable<SpendBudgetEntity> GetSpendBudgets()
+        public IEnumerable<BudgetEntity> GetBudgets()
         {
             string sql = @"SELECT id as id
                             ,reference_id as referenceid
@@ -36,39 +36,39 @@ namespace nyms.resident.server.DataProviders.Impl
                             ,created_date as createddate
                             ,updated_by_id as updatedbyid
                             ,updated_date as updateddate
-                            FROM [dbo].[spend_budgets]";
+                            FROM [dbo].[budgets]";
             string sqlAllocations = @"SELECT id as id
-                            ,spend_budget_id as spendbudgetid
+                            ,budget_id as budgetid
                             ,amount as amount
                             ,approved as approved
                             ,approved_by_id as approvedbyid
                             ,approved_date as approveddate
                             ,updated_by_id as updatedbyid
                             ,updated_date as updateddate
-                            FROM [dbo].[spend_budget_allocations]";
+                            FROM [dbo].[budget_allocations]";
 
-            IEnumerable<SpendBudgetEntity> spendBudgetEntities;
-            IEnumerable<SpendBudgetAllocationEntity> spendBudgetAllocationEntities;
+            IEnumerable<BudgetEntity> budgetEntities;
+            IEnumerable<BudgetAllocationEntity> budgetAllocationEntities;
 
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
-                spendBudgetEntities = conn.QueryAsync<SpendBudgetEntity>(sql).Result;
-                spendBudgetAllocationEntities = conn.QueryAsync<SpendBudgetAllocationEntity>(sqlAllocations).Result;
+                budgetEntities = conn.QueryAsync<BudgetEntity>(sql).Result;
+                budgetAllocationEntities = conn.QueryAsync<BudgetAllocationEntity>(sqlAllocations).Result;
             }
 
-            if (spendBudgetEntities != null && spendBudgetEntities.Any())
+            if (budgetEntities != null && budgetEntities.Any())
             {
-                spendBudgetEntities.ForEach(b =>
+                budgetEntities.ForEach(b =>
                 {
-                    b.SpendBudgetAllocations = spendBudgetAllocationEntities.Where(a => a.SpendBudgetId == b.Id).ToArray();
+                    b.BudgetAllocations = budgetAllocationEntities.Where(a => a.BudgetId == b.Id).ToArray();
                 });
             }
 
-            return spendBudgetEntities;
+            return budgetEntities;
         }
 
-        public SpendBudgetEntity GetSpendBudget(Guid referenceId)
+        public BudgetEntity GetBudget(Guid referenceId)
         {
             string sql = @"SELECT id as id
                             ,reference_id as referenceid
@@ -84,42 +84,43 @@ namespace nyms.resident.server.DataProviders.Impl
                             ,created_date as createddate
                             ,updated_by_id as updatedbyid
                             ,updated_date as updateddate
-                            FROM [dbo].[spend_budgets]
+                            FROM [dbo].[budgets]
                             WHERE reference_id = @referenceid";
 
             string sqlAllocations = @"SELECT a.id as id
-                            ,spend_budget_id as spendbudgetid
+                            ,budget_id as budgetid
                             ,amount as amount
                             ,approved as approved
                             ,approved_by_id as approvedbyid
                             ,approved_date as approveddate
+                            ,reason as reason
                             ,a.updated_by_id as updatedbyid
                             ,a.updated_date as updateddate
-                            FROM [dbo].[spend_budget_allocations] a
-							INNER JOIN [dbo].[spend_budgets] b
-							ON b.id = a.spend_budget_id
+                            FROM [dbo].[budget_allocations] a
+							INNER JOIN [dbo].[budgets] b
+							ON b.id = a.budget_id
 							WHERE b.reference_id = @referenceid
                             ORDER BY a.approved desc";
 
-            SpendBudgetEntity spendBudgetEntity;
-            IEnumerable<SpendBudgetAllocationEntity> spendBudgetAllocationEntities;
+            BudgetEntity budgetEntity;
+            IEnumerable<BudgetAllocationEntity> budgetAllocationEntities;
 
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
                 DynamicParameters dp = new DynamicParameters();
                 dp.Add("referenceid", referenceId, DbType.Guid, ParameterDirection.Input, 60);
-                spendBudgetEntity = conn.QueryFirstOrDefault<SpendBudgetEntity>(sql, dp);
-                spendBudgetAllocationEntities = conn.QueryAsync<SpendBudgetAllocationEntity>(sqlAllocations, dp).Result;
-                spendBudgetEntity.SpendBudgetAllocations = spendBudgetAllocationEntities;
+                budgetEntity = conn.QueryFirstOrDefault<BudgetEntity>(sql, dp);
+                budgetAllocationEntities = conn.QueryAsync<BudgetAllocationEntity>(sqlAllocations, dp).Result;
+                budgetEntity.BudgetAllocations = budgetAllocationEntities;
             }
 
-            return spendBudgetEntity;
+            return budgetEntity;
         }
 
-        public SpendBudgetEntity Insert(SpendBudgetEntity spendBudgetEntity)
+        public BudgetEntity Insert(BudgetEntity budgetEntity)
         {
-            string sql = @"INSERT INTO [dbo].[spend_budgets]
+            string sql = @"INSERT INTO [dbo].[budgets]
                             ([spend_category_id]
                             ,[care_home_id]
                             ,[name]
@@ -141,8 +142,8 @@ namespace nyms.resident.server.DataProviders.Impl
                             ,@createdbyid);
                             SELECT CAST(SCOPE_IDENTITY() as int);";
 
-            string sqlInsAllocations = @"INSERT INTO [dbo].[spend_budget_allocations]
-                            ([spend_budget_id]
+            string sqlInsAllocations = @"INSERT INTO [dbo].[budget_allocations]
+                            ([budget_id]
                             ,[amount]
                             ,[approved]
                             ,[approved_by_id]
@@ -151,7 +152,7 @@ namespace nyms.resident.server.DataProviders.Impl
                             ,[updated_by_id]
                             ,[updated_date])
                             VALUES
-                            (@spendbudgetid
+                            (@budgetid
                             ,@amount
                             ,@approved
                             ,@approvedbyid
@@ -161,15 +162,15 @@ namespace nyms.resident.server.DataProviders.Impl
                             ,@updateddate)";
 
             DynamicParameters dp = new DynamicParameters();
-            dp.Add("spendcategoryid", spendBudgetEntity.SpendCategoryId, DbType.Int32, ParameterDirection.Input);
-            dp.Add("carehomeid", spendBudgetEntity.CareHomeId, DbType.Int32, ParameterDirection.Input);
-            dp.Add("name", spendBudgetEntity.Name, DbType.String, ParameterDirection.Input, 100);
-            dp.Add("datefrom", spendBudgetEntity.DateFrom.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input, 60);
-            dp.Add("dateto", spendBudgetEntity.DateTo.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input, 60);
-            dp.Add("description", spendBudgetEntity.Description, DbType.String, ParameterDirection.Input, 1000);
-            dp.Add("poprefix", spendBudgetEntity.PoPrefix, DbType.String, ParameterDirection.Input, 50);
-            dp.Add("status", spendBudgetEntity.Status, DbType.String, ParameterDirection.Input, 50);
-            dp.Add("createdbyid", spendBudgetEntity.CreatedById, DbType.Int32, ParameterDirection.Input);
+            dp.Add("spendcategoryid", budgetEntity.SpendCategoryId, DbType.Int32, ParameterDirection.Input);
+            dp.Add("carehomeid", budgetEntity.CareHomeId, DbType.Int32, ParameterDirection.Input);
+            dp.Add("name", budgetEntity.Name, DbType.String, ParameterDirection.Input, 100);
+            dp.Add("datefrom", budgetEntity.DateFrom.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input, 60);
+            dp.Add("dateto", budgetEntity.DateTo.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input, 60);
+            dp.Add("description", budgetEntity.Description, DbType.String, ParameterDirection.Input, 1000);
+            dp.Add("poprefix", budgetEntity.PoPrefix, DbType.String, ParameterDirection.Input, 50);
+            dp.Add("status", budgetEntity.Status, DbType.String, ParameterDirection.Input, 50);
+            dp.Add("createdbyid", budgetEntity.CreatedById, DbType.Int32, ParameterDirection.Input);
 
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
@@ -178,12 +179,12 @@ namespace nyms.resident.server.DataProviders.Impl
                 {
                     var newBudgetId = conn.QuerySingle<int>(sql, dp, commandType: CommandType.Text, transaction: tran);
 
-                    if (spendBudgetEntity.SpendBudgetAllocations != null && spendBudgetEntity.SpendBudgetAllocations.Any())
+                    if (budgetEntity.BudgetAllocations != null && budgetEntity.BudgetAllocations.Any())
                     {
-                        spendBudgetEntity.SpendBudgetAllocations.ForEach(alloc =>
+                        budgetEntity.BudgetAllocations.ForEach(alloc =>
                         {
                             DynamicParameters dp2 = new DynamicParameters();
-                            dp2.Add("spendbudgetid", newBudgetId, DbType.Int32, ParameterDirection.Input);
+                            dp2.Add("budgetid", newBudgetId, DbType.Int32, ParameterDirection.Input);
                             dp2.Add("amount", alloc.Amount, DbType.Decimal, ParameterDirection.Input);
                             dp2.Add("approved", alloc.Approved, DbType.String, ParameterDirection.Input, 10);
                             dp2.Add("approvedbyid", alloc.ApprovedById, DbType.Int32, ParameterDirection.Input);
@@ -198,12 +199,12 @@ namespace nyms.resident.server.DataProviders.Impl
                     tran.Commit();
                 }
             }
-            return spendBudgetEntity;
+            return budgetEntity;
         }
 
-        public SpendBudgetEntity Update(SpendBudgetEntity spendBudgetEntity)
+        public BudgetEntity Update(BudgetEntity budgetEntity)
         {
-            string sql = @"UPDATE [dbo].[spend_budgets] SET
+            string sql = @"UPDATE [dbo].[budgets] SET
                              [name] = @name
                             ,[date_from] = @datefrom
                             ,[date_to] = @dateto
@@ -214,7 +215,7 @@ namespace nyms.resident.server.DataProviders.Impl
                             ,[updated_date] = @updateddate
                             WHERE id = @id";
 
-            string sqlUpdAllocations = @"UPDATE [dbo].[spend_budget_allocations] SET
+            string sqlUpdAllocations = @"UPDATE [dbo].[budget_allocations] SET
                              [amount] = @amount
                             ,[approved] = @approved
                             ,[approved_by_id] = @approvedbyid
@@ -224,16 +225,35 @@ namespace nyms.resident.server.DataProviders.Impl
                             ,[updated_date] = @updateddate
                             WHERE id = @id";
 
+            string sqlInsAllocations = @"INSERT INTO [dbo].[budget_allocations]
+                            ([budget_id]
+                            ,[amount]
+                            ,[approved]
+                            ,[approved_by_id]
+                            ,[approved_date]
+                            ,[reason]
+                            ,[updated_by_id]
+                            ,[updated_date])
+                            VALUES
+                            (@budgetid
+                            ,@amount
+                            ,@approved
+                            ,@approvedbyid
+                            ,@approveddate
+                            ,@reason
+                            ,@updatedbyid
+                            ,@updateddate)";
+
             DynamicParameters dp = new DynamicParameters();
-            dp.Add("name", spendBudgetEntity.Name, DbType.String, ParameterDirection.Input, 100);
-            dp.Add("datefrom", spendBudgetEntity.DateFrom, DbType.Date, ParameterDirection.Input, 60);
-            dp.Add("dateto", spendBudgetEntity.DateTo, DbType.Date, ParameterDirection.Input, 60);
-            dp.Add("description", spendBudgetEntity.Description, DbType.String, ParameterDirection.Input, 1000);
-            dp.Add("poprefix", spendBudgetEntity.PoPrefix, DbType.String, ParameterDirection.Input, 50);
-            dp.Add("status", spendBudgetEntity.Status, DbType.String, ParameterDirection.Input, 50);
-            dp.Add("updatedbyid", spendBudgetEntity.UpdatedById, DbType.Int32, ParameterDirection.Input);
-            dp.Add("updateddate", spendBudgetEntity.UpdatedDate, DbType.DateTime, ParameterDirection.Input, 60);
-            dp.Add("id", spendBudgetEntity.Id, DbType.Int32, ParameterDirection.Input);
+            dp.Add("name", budgetEntity.Name, DbType.String, ParameterDirection.Input, 100);
+            dp.Add("datefrom", budgetEntity.DateFrom, DbType.Date, ParameterDirection.Input, 60);
+            dp.Add("dateto", budgetEntity.DateTo, DbType.Date, ParameterDirection.Input, 60);
+            dp.Add("description", budgetEntity.Description, DbType.String, ParameterDirection.Input, 1000);
+            dp.Add("poprefix", budgetEntity.PoPrefix, DbType.String, ParameterDirection.Input, 50);
+            dp.Add("status", budgetEntity.Status, DbType.String, ParameterDirection.Input, 50);
+            dp.Add("updatedbyid", budgetEntity.UpdatedById, DbType.Int32, ParameterDirection.Input);
+            dp.Add("updateddate", budgetEntity.UpdatedDate, DbType.DateTime, ParameterDirection.Input, 60);
+            dp.Add("id", budgetEntity.Id, DbType.Int32, ParameterDirection.Input);
 
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
@@ -242,9 +262,9 @@ namespace nyms.resident.server.DataProviders.Impl
                 {
                     var affRowsX1 = conn.Execute(sql, dp, transaction: tran);
 
-                    if (spendBudgetEntity.SpendBudgetAllocations != null && spendBudgetEntity.SpendBudgetAllocations.Any())
+                    if (budgetEntity.BudgetAllocations != null && budgetEntity.BudgetAllocations.Any())
                     {
-                        spendBudgetEntity.SpendBudgetAllocations.ForEach(alloc =>
+                        budgetEntity.BudgetAllocations.ForEach(alloc =>
                         {
                             DynamicParameters dp2 = new DynamicParameters();
                             dp2.Add("amount", alloc.Amount, DbType.Decimal, ParameterDirection.Input);
@@ -254,19 +274,29 @@ namespace nyms.resident.server.DataProviders.Impl
                             dp2.Add("reason", alloc.Reason, DbType.String, ParameterDirection.Input, 1000);
                             dp2.Add("updatedbyid", alloc.UpdatedById, DbType.Int32, ParameterDirection.Input);
                             dp2.Add("updateddate", alloc.UpdatedDate, DbType.DateTime, ParameterDirection.Input, 60);
-                            dp2.Add("id", alloc.Id, DbType.Int32, ParameterDirection.Input);
 
-                            var affRowsX2 = conn.Execute(sqlUpdAllocations, dp2, transaction: tran);
+                            if (alloc.Id > 0)
+                            {
+                                // Update
+                                dp2.Add("id", alloc.Id, DbType.Int32, ParameterDirection.Input);
+                                var affRowsX2 = conn.Execute(sqlUpdAllocations, dp2, transaction: tran);
+                            }
+                            else
+                            {
+                                dp2.Add("budgetid", budgetEntity.Id, DbType.Int32, ParameterDirection.Input);
+                                var affRowsX2 = conn.Execute(sqlInsAllocations, dp2, transaction: tran);
+                            }
+
                         });
                     }
                     tran.Commit();
                 }
             }
-            return spendBudgetEntity;
+            return budgetEntity;
         }
 
         // buget response for Budget-List Page
-        public IEnumerable<SpendBudgetListResponse> GetSpendBudgetListResponses()
+        public IEnumerable<BudgetListResponse> GetBudgetListResponses()
         {
             string sql = @"SELECT 
                          bu.id as id
@@ -281,20 +311,21 @@ namespace nyms.resident.server.DataProviders.Impl
                         ,bu.status as status
                         ,sqttl.budget_total as budgettotal
                         ,sqttl.approved as approved
+                        ,sqttl.reason as reason
                         ,sqspndttl.spend_total as spendtotal
                         ,sqspndttl.vat_total as vattotal
                         ,ch.name as carehomename
                         ,cat.name as spendcategoryname
                         FROM (
-                        SELECT a.spend_budget_id as bud_id, sum(a.amount) as budget_total, approved as approved FROM [dbo].[spend_budget_allocations] as a
-                        GROUP BY a.spend_budget_id, a.approved
+                        SELECT a.budget_id as bud_id, sum(a.amount) as budget_total, approved as approved, reason as reason FROM [dbo].[budget_allocations] as a
+                        GROUP BY a.budget_id, a.approved, a.reason
                         ) as sqttl
                         LEFT JOIN 
-                        (SELECT * FROM [dbo].[spend_budgets]) as bu
+                        (SELECT * FROM [dbo].[budgets]) as bu
                         on bu.id = sqttl.bud_id
                         LEFT JOIN 
-                        (select b.spend_budget_id as bud_id, sum(b.amount) as spend_total, sum(b.vat) as vat_total FROM [dbo].[spends] as b
-                        GROUP BY b.spend_budget_id
+                        (select b.budget_id as bud_id, sum(b.amount) as spend_total, sum(b.vat) as vat_total FROM [dbo].[spends] as b
+                        GROUP BY b.budget_id
                         ) as sqspndttl
                         on bu.id = sqspndttl.bud_id
                         INNER JOIN 
@@ -307,11 +338,11 @@ namespace nyms.resident.server.DataProviders.Impl
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
-                return conn.QueryAsync<SpendBudgetListResponse>(sql).Result;
+                return conn.QueryAsync<BudgetListResponse>(sql).Result;
             }
         }
 
-        public SpendBudgetListResponse GetSpendBudgetListResponseByReferenceId(Guid referenceId)
+        public BudgetListResponse GetBudgetListResponseByReferenceId(Guid referenceId)
         {
             string sql = @"SELECT 
                          bu.id as id
@@ -325,22 +356,26 @@ namespace nyms.resident.server.DataProviders.Impl
                         ,bu.po_prefix as poprefix
                         ,bu.status as status
                         ,sqttl.budget_total as budgettotal
-                        ,sqttl.approved as approved
+                        --,sqttl.approved as approved
                         ,sqspndttl.spend_total as spendtotal
                         ,sqspndttl.vat_total as vattotal
                         ,ch.name as carehomename
                         ,cat.name as spendcategoryname
                         FROM (
-                        SELECT a.spend_budget_id as bud_id, sum(a.amount) as budget_total, approved as approved FROM [dbo].[spend_budget_allocations] as a
-                        GROUP BY a.spend_budget_id, a.approved
+                        SELECT a.budget_id as bud_id, sum(a.amount) as budget_total
+                        --,approved as approved 
+                        FROM [dbo].[budget_allocations] as a
+                        WHERE a.approved = 'Y'
+                        GROUP BY a.budget_id
+                        -- , a.approved
                         ) as sqttl
                         LEFT JOIN 
-                        (SELECT * FROM [dbo].[spend_budgets]
+                        (SELECT * FROM [dbo].[budgets]
                         WHERE reference_id = @referenceid) as bu
                         on bu.id = sqttl.bud_id
                         LEFT JOIN 
-                        (select b.spend_budget_id as bud_id, sum(b.amount) as spend_total, sum(b.vat) as vat_total FROM [dbo].[spends] as b
-                        GROUP BY b.spend_budget_id
+                        (select b.budget_id as bud_id, sum(b.amount) as spend_total, sum(b.vat) as vat_total FROM [dbo].[spends] as b
+                        GROUP BY b.budget_id
                         ) as sqspndttl
                         on bu.id = sqspndttl.bud_id
                         INNER JOIN 
@@ -352,7 +387,7 @@ namespace nyms.resident.server.DataProviders.Impl
 
             string sqlSelSpends = @"SELECT 
                                      sp.id as id
-                                    ,sp.spend_budget_id as spendbudgetid
+                                    ,sp.budget_id as budgetid
                                     ,sp.amount as amount
                                     ,sp.vat as vat
                                     ,sp.po_number as ponumber
@@ -362,7 +397,7 @@ namespace nyms.resident.server.DataProviders.Impl
                                     FROM [dbo].[spends] sp
                                     INNER JOIN [dbo].[users] u
                                     ON sp.created_by_id = u.id
-                                    WHERE sp.spend_budget_id = @spendbudgetid";
+                                    WHERE sp.budget_id = @budgetid";
 
             DynamicParameters dp = new DynamicParameters();
             dp.Add("referenceid", referenceId, DbType.Guid, ParameterDirection.Input, 60);
@@ -370,11 +405,11 @@ namespace nyms.resident.server.DataProviders.Impl
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
-                var budget = conn.QueryFirstOrDefault<SpendBudgetListResponse>(sql, dp);
+                var budget = conn.QueryFirstOrDefault<BudgetListResponse>(sql, dp);
                 if (budget != null && budget.Id > 0)
                 {
                     DynamicParameters dp2 = new DynamicParameters();
-                    dp2.Add("spendbudgetid", budget.Id, DbType.Int32, ParameterDirection.Input);
+                    dp2.Add("budgetid", budget.Id, DbType.Int32, ParameterDirection.Input);
                     budget.SpendResponses = conn.Query<SpendResponse>(sqlSelSpends, dp2);
                 }
                 return budget;
@@ -387,14 +422,14 @@ namespace nyms.resident.server.DataProviders.Impl
         public SpendRequest CreateSpend(SpendRequest spendRequest)
         {
             string sql = @"INSERT INTO [dbo].[spends]
-                            ([spend_budget_id]
+                            ([budget_id]
                             ,[amount]
                             ,[vat]
                             ,[po_number]
                             ,[notes]
                             ,[created_by_id])
                             VALUES
-                            (@spendbudgetid
+                            (@budgetid
                             ,@amount
                             ,@vat
                             ,@ponumber
@@ -420,10 +455,10 @@ namespace nyms.resident.server.DataProviders.Impl
                     var newUnqId = conn.QuerySingle<int>(sqlInsUnqNbr, dp, commandType: CommandType.Text, transaction: tran);
 
                     // pad unq id to ponumber
-                    spendRequest.PoNumber = spendRequest.PoNumber + "-" + newUnqId;
+                    spendRequest.PoNumber = spendRequest.PoNumber + "-" + DateTime.Now.ToString("MMyy") + "-" + newUnqId;
 
                     DynamicParameters dp2 = new DynamicParameters();
-                    dp2.Add("spendbudgetid", spendRequest.SpendBudgetId, DbType.Int32, ParameterDirection.Input);
+                    dp2.Add("budgetid", spendRequest.BudgetId, DbType.Int32, ParameterDirection.Input);
                     dp2.Add("amount", spendRequest.Amount, DbType.Decimal, ParameterDirection.Input);
                     dp2.Add("vat", spendRequest.Vat, DbType.Decimal, ParameterDirection.Input);
                     dp2.Add("ponumber", spendRequest.PoNumber, DbType.String, ParameterDirection.Input, 100);

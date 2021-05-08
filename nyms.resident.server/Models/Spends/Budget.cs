@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace nyms.resident.server.Models
 {
-    public class SpendBudgetEntity
+    public class Budget
     {
         public int Id { get; set; }
         public Guid ReferenceId { get; set; }
@@ -19,6 +19,5 @@ namespace nyms.resident.server.Models
         public DateTime CreatedDate { get; set; }
         public int UpdatedById { get; set; }
         public DateTime UpdatedDate { get; set; }
-        public IEnumerable<SpendBudgetAllocationEntity> SpendBudgetAllocations { get; set; }
     }
 }

@@ -2,10 +2,10 @@
 
 namespace nyms.resident.server.Models
 {
-    public class SpendBudgetAllocationEntity
+    public class BudgetAllocationEntity
     {
         public int Id { get; set; }
-        public int SpendBudgetId { get; set; }
+        public int BudgetId { get; set; }
         public Decimal Amount { get; set; }
         public string Approved { get; set; }
         public int? ApprovedById { get; set; }

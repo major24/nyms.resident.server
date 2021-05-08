@@ -136,8 +136,8 @@ namespace nyms.resident.server.DataProviders.Impl
                 conn.Open();
                 using (var tran = conn.BeginTransaction())
                 {
-                    var maxId = conn.QuerySingle<int>(sqlCount, commandType: CommandType.Text, transaction: tran);
                     // add id (NOT Identity)
+                    var maxId = conn.QuerySingle<int>(sqlCount, commandType: CommandType.Text, transaction: tran);
                     dp.Add("id", (maxId + 1), DbType.Int32, ParameterDirection.Input);
                     var affRowsX = conn.Execute(sqlInsert, dp, transaction: tran);
                     tran.Commit();                

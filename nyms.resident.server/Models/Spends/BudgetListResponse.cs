@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace nyms.resident.server.Models
 {
-    public class SpendBudgetListResponse
+    public class BudgetListResponse
     {
         public int Id { get; set; }
         public Guid ReferenceId { get; set; }

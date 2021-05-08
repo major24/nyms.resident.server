@@ -16,16 +16,16 @@ using System.Web.Http;
 namespace nyms.resident.server.Controllers.Spends
 {
     [UserAuthenticationFilter]
-    public class SpendBudgetUserController : ApiController
+    public class BudgetUserController : ApiController
     {
         private static Logger logger = Nlogger2.GetLogger();
-        private readonly ISpendBudgetService _spendBudgetService;
+        private readonly IBudgetService _budgetService;
         private readonly ISecurityService _securityService;
 
-        public SpendBudgetUserController(ISpendBudgetService spendBudgetService,
+        public BudgetUserController(IBudgetService budgetService,
             ISecurityService securityService)
         {
-            _spendBudgetService = spendBudgetService ?? throw new ArgumentNullException(nameof(spendBudgetService));
+            _budgetService = budgetService ?? throw new ArgumentNullException(nameof(budgetService));
             _securityService = securityService ?? throw new ArgumentNullException(nameof(securityService));
         }
 
@@ -35,15 +35,14 @@ namespace nyms.resident.server.Controllers.Spends
         public IHttpActionResult GetBudgetsForUser()
         {
             var user = HttpContext.Current.User as SecurityPrincipal;
-            var curUser = System.Threading.Thread.CurrentPrincipal;
             logger.Info($"Get budget requested by {user.ForeName}");
 
-            IEnumerable<SpendBudgetListResponse> spendBudgetListResponses = _spendBudgetService.GetSpendBudgetListResponses();
+            IEnumerable<BudgetListResponse> budgetListResponses = _budgetService.GetBudgetListResponses();
 
-            // Rule: Users, only get Approved and Open budgets for processing
-            var filterApprovedAndOpenBudgetListResponses = spendBudgetListResponses.Where(b =>
+            // Rule1: Users, only get Approved and Open budgets for processing
+            var filterApprovedAndOpenBudgetListResponses = budgetListResponses.Where(b =>
             {
-                return b.Approved == "Y" && b.Status == "Open";
+                return b.Approved == Constants.BUDGET_APPROVED && b.Status == Constants.BUDGET_STATUS_OPEN;
             }).ToArray();
 
             if (filterApprovedAndOpenBudgetListResponses == null)
@@ -52,16 +51,31 @@ namespace nyms.resident.server.Controllers.Spends
                 return NotFound();
             }
 
-            // Rule: Access Control based on role(s)
-            var permissions = _securityService.GetRolePermissions(user.Id);
-            if (IsAdmin(permissions, user.Id))
+            var groupedByBudId = filterApprovedAndOpenBudgetListResponses.GroupBy(b => b.Id);
+            List<BudgetListResponse> groupedResponse = new List<BudgetListResponse>();
+
+            groupedByBudId.ForEach(g =>
             {
-                return Ok(filterApprovedAndOpenBudgetListResponses);
+                var curBudget = g.FirstOrDefault();
+                decimal bTotal = 0;
+                g.ForEach(b =>
+                {
+                    bTotal += b.BudgetTotal;
+                });
+                curBudget.BudgetTotal = bTotal;
+                groupedResponse.Add(curBudget);
+            });
+
+            // Rule2: Access Control based on role(s)
+            var permissions = _securityService.GetRolePermissions(user.Id);
+            if (IsAdmin(permissions))
+            {
+                return Ok(groupedResponse);
             }
             else
             {
                 // Manager. Find by spend cate id and care home id
-                var filteredBuds = FilterBudgets(permissions, filterApprovedAndOpenBudgetListResponses);
+                var filteredBuds = FilterBudgets(permissions, groupedResponse);
                 return Ok(filteredBuds);
             }
         }
@@ -71,12 +85,11 @@ namespace nyms.resident.server.Controllers.Spends
         public IHttpActionResult GetBudgetAndSpendsByReferenceId(string referenceId)
         {
             var user = HttpContext.Current.User as SecurityPrincipal;
-            var curUser = System.Threading.Thread.CurrentPrincipal;
             logger.Info($"Get budget requested by {user.ForeName}");
 
-            var spendBudgetListResponses = _spendBudgetService.GetSpendBudgetListResponseByReferenceId(new Guid(referenceId));
+            var budgetListResponses = _budgetService.GetBudgetListResponseByReferenceId(new Guid(referenceId));
 
-            return Ok(spendBudgetListResponses);
+            return Ok(budgetListResponses);
         }
 
 
@@ -91,7 +104,7 @@ namespace nyms.resident.server.Controllers.Spends
                 return BadRequest("spend request not found");
             }
 
-            if (spendRequest.SpendBudgetId <= 0 || spendRequest.Amount <= 0)
+            if (spendRequest.BudgetId <= 0 || spendRequest.Amount <= 0)
             {
                 return BadRequest("Spend budget id and or amount not found");
             }
@@ -100,16 +113,16 @@ namespace nyms.resident.server.Controllers.Spends
             logger.Info($"Spend Budget created by {loggedInUser.ForeName}");
             spendRequest.CreatedById = loggedInUser.Id;
 
-            var result = _spendBudgetService.CreateSpend(spendRequest);
+            var result = _budgetService.CreateSpend(spendRequest);
             return Ok(result);
         }
 
 
-        private IEnumerable<SpendBudgetListResponse> FilterBudgets(IEnumerable<UserRolePermission> permissions, IEnumerable<SpendBudgetListResponse> spendBudgetListResponses)
+        private IEnumerable<BudgetListResponse> FilterBudgets(IEnumerable<UserRolePermission> permissions, IEnumerable<BudgetListResponse> budgetListResponses)
         {
             if (permissions.Any())
             {
-                List<SpendBudgetListResponse> permittedSpendBudgetListResponses = new List<SpendBudgetListResponse>();
+                List<BudgetListResponse> permittedBudgetListResponses = new List<BudgetListResponse>();
                 // Make distinct spend_category_id
                 Dictionary<int, int> dicSpendCategoryIds = new Dictionary<int, int>();
                 permissions.ForEach(p =>
@@ -120,41 +133,41 @@ namespace nyms.resident.server.Controllers.Spends
                     }
                 });
                 dicSpendCategoryIds.ForEach(d => {
-                    var tmp = spendBudgetListResponses.Where(bud => bud.SpendCategoryId == d.Key);
+                    var tmp = budgetListResponses.Where(bud => bud.SpendCategoryId == d.Key);
                     // add to main list
                     tmp.ForEach(bud =>
                     {
-                        permittedSpendBudgetListResponses.Add(bud);
+                        permittedBudgetListResponses.Add(bud);
                     });
                 });
 
                 // care home filter
                 // get carehome id
-                var chIds = permissions.Select(p => p.CareHomeId);
-                List<SpendBudgetListResponse> permittedCareHomeSpendBudgetListResponses = new List<SpendBudgetListResponse>();
+                var chIds = permissions.Select(p => p.CareHomeId).Distinct<int>();
+                List<BudgetListResponse> permittedCareHomeBudgetListResponses = new List<BudgetListResponse>();
                 chIds.ForEach(chId =>
                 {
-                    var tmp = permittedSpendBudgetListResponses.FindAll(bud => bud.CareHomeId == chId);
+                    var tmp = permittedBudgetListResponses.FindAll(bud => bud.CareHomeId == chId);
                     tmp.ForEach(bud =>
                     {
-                        permittedCareHomeSpendBudgetListResponses.Add(bud);
+                        permittedCareHomeBudgetListResponses.Add(bud);
                     });
                 });
 
-                return permittedCareHomeSpendBudgetListResponses;
+                return permittedCareHomeBudgetListResponses;
             }
 
-            return spendBudgetListResponses;
+            return budgetListResponses;
         }
 
 
-        private bool IsAdmin(IEnumerable<UserRolePermission> permissions, int userId)
+        private bool IsAdmin(IEnumerable<UserRolePermission> permissions)
         {
             if (permissions.Any())
             {
                 foreach(var p in permissions)
                 {
-                    if (p.RoleId == 2 || p.RoleId == 4)
+                    if (p.RoleId == (int)USER_ROLE.Admin || p.RoleId == (int)USER_ROLE.FinanceAdmin)
                     {
                         return true;
                     }
@@ -162,8 +175,6 @@ namespace nyms.resident.server.Controllers.Spends
             }
             return false;
         }
-
-
 
     }
 }

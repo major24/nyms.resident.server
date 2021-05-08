@@ -68,20 +68,33 @@ namespace nyms.resident.server.Controllers
         }
 
         [HttpPost]
-        [Route("api/database/spends/clear")]
-        public HttpResponseMessage ClearSpendsDatabase([FromUri] string q)
+        [Route("api/database/categories/clear")]
+        public HttpResponseMessage ClearCategoriesDatabase()
         {
             try
             {
-                if (q == "budgets")
-                {
-                    _databaseSetupProvider.ClearBudgetsDatabase();
-                } 
-                else
-                {
-                    _databaseSetupProvider.ClearSpendsDatabase();
-                }
-                
+                _databaseSetupProvider.ClearSpendsDatabase();
+                _databaseSetupProvider.ClearBudgetsDatabase();
+
+                return Request.CreateResponse(HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                HttpResponseMessage response = Request.CreateResponse(HttpStatusCode.InternalServerError, $"Error: {ex.Message}");
+                return response;
+            }
+        }
+
+
+        [HttpPost]
+        [Route("api/database/spends/clear")]
+        public HttpResponseMessage ClearSpendsDatabase()
+        {
+            try
+            {
+                _databaseSetupProvider.ClearSpendsDatabase();
+                _databaseSetupProvider.ClearBudgetsDatabase();
+
                 return Request.CreateResponse(HttpStatusCode.OK);
             }
             catch (Exception ex)

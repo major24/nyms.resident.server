@@ -14,14 +14,14 @@ using System.Web.Http;
 namespace nyms.resident.server.Controllers.Spends
 {
     [AdminAuthenticationFilter]
-    public class SpendBudgetAdminController : ApiController
+    public class BudgetAdminController : ApiController
     {
         private static Logger logger = Nlogger2.GetLogger();
-        private readonly ISpendBudgetService _spendBudgetService;
+        private readonly IBudgetService _budgetService;
 
-        public SpendBudgetAdminController(ISpendBudgetService spendBudgetService)
+        public BudgetAdminController(IBudgetService budgetService)
         {
-            _spendBudgetService = spendBudgetService ?? throw new ArgumentNullException(nameof(spendBudgetService));
+            _budgetService = budgetService ?? throw new ArgumentNullException(nameof(budgetService));
         }
 
         [HttpGet]
@@ -32,17 +32,18 @@ namespace nyms.resident.server.Controllers.Spends
             var curUser = System.Threading.Thread.CurrentPrincipal;
             logger.Info($"Get budget requested by {user.ForeName}");
 
-            IEnumerable <SpendBudgetListResponse> spendBudgetListResponses = _spendBudgetService.GetSpendBudgetListResponses();
+            IEnumerable <BudgetListResponse> budgetListResponses = _budgetService.GetBudgetListResponses();
 
-            if (spendBudgetListResponses == null || !spendBudgetListResponses.Any())
+            if (budgetListResponses == null || !budgetListResponses.Any())
             {
                 logger.Warn($"Budgets not found");
                 return NotFound();
             }
 
-            // For Admin, oo restriction approved or status, but do GroupBy. multiple allocation amounts bring > 1 records per budget
-            var groupedByBudId = spendBudgetListResponses.GroupBy(b => b.Id); //.Select(b => b).ToArray();
-            List<SpendBudgetListResponse> groupedResponse = new List<SpendBudgetListResponse>();
+            // For Admin, no restriction on approved or status closed/cancelled, 
+            // but do GroupBy. multiple allocation amounts bring > 1 records per budget
+            var groupedByBudId = budgetListResponses.GroupBy(b => b.Id);
+            List<BudgetListResponse> groupedResponse = new List<BudgetListResponse>();
 
             groupedByBudId.ForEach(g =>
             {
@@ -59,96 +60,91 @@ namespace nyms.resident.server.Controllers.Spends
             return Ok(groupedResponse);
         }
         
-        // Cannot use with USER. Returs alloction to be edited
+        // Cannot use with USER. Returs alloctions to be edited
         [HttpGet]
-        [Route("api/spends/admin/budgets/{referenceId}")]
+        [Route("api/spends/admin/budgets/{referenceId}/allocations")]
         public IHttpActionResult GetBudgetByReferenceId(string referenceId)
         {
             var user = HttpContext.Current.User as SecurityPrincipal;
             var curUser = System.Threading.Thread.CurrentPrincipal;
             logger.Info($"Get budget requested by {user.ForeName}");
 
-            SpendBudgetResponse spendBudgetResponse = _spendBudgetService.GetSpendBudget(new Guid(referenceId));
+            BudgetResponse budgetResponse = _budgetService.GetBudget(new Guid(referenceId));
 
-            if (spendBudgetResponse == null)
+            if (budgetResponse == null)
             {
                 logger.Warn($"Budget not found");
                 return NotFound();
             }
 
-            return Ok(spendBudgetResponse);
+            return Ok(budgetResponse);
         }
 
         [HttpPost]
         [Route("api/spends/admin/budgets")]
-        public IHttpActionResult InsertBudget(SpendBudgetRequest spendBudgetRequest)
+        public IHttpActionResult InsertBudget(BudgetRequest budgetRequest)
         {
-            if (spendBudgetRequest == null)
+            if (budgetRequest == null)
             {
                 return BadRequest("Spend budget is null");
             }
 
-            if (spendBudgetRequest.SpendCategoryId <= 0 || spendBudgetRequest.CareHomeId <= 0)
+            if (budgetRequest.SpendCategoryId <= 0 || budgetRequest.CareHomeId <= 0)
             {
                 return BadRequest("Care category id and care home id is required");
             }
 
-            if (string.IsNullOrEmpty(spendBudgetRequest.DateFrom.ToString()) || string.IsNullOrEmpty(spendBudgetRequest.DateTo.ToString()))
+            if (string.IsNullOrEmpty(budgetRequest.DateFrom.ToString()) || string.IsNullOrEmpty(budgetRequest.DateTo.ToString()))
             {
                 return BadRequest("Budget dates are required fields");
             }
 
-            if (spendBudgetRequest.SpendBudgetAllocations.FirstOrDefault().Amount <= 0)
+            if (budgetRequest.BudgetAllocations.FirstOrDefault().Amount <= 0)
             {
                 return BadRequest("Budget amount is required");
             }
 
             var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
             logger.Info($"Spend Budget created by {loggedInUser.ForeName}");
-            spendBudgetRequest.CreatedById = loggedInUser.Id;
-            spendBudgetRequest.UpdatedById = loggedInUser.Id;
+            budgetRequest.CreatedById = loggedInUser.Id;
+            budgetRequest.UpdatedById = loggedInUser.Id;
 
-            var result = _spendBudgetService.Insert(spendBudgetRequest);
+            var result = _budgetService.Insert(budgetRequest);
             return Ok(result);
         }
 
         [HttpPost]
         [Route("api/spends/admin/budgets/{referenceId}")]
-        public IHttpActionResult UpdateBudget(string referenceId, SpendBudgetRequest spendBudgetRequest)
+        public IHttpActionResult UpdateBudget(string referenceId, BudgetRequest budgetRequest)
         {
             if (string.IsNullOrEmpty(referenceId))
             {
                 return BadRequest("referenceId not found");
             }
 
-            if (spendBudgetRequest == null)
+            if (budgetRequest == null)
             {
                 return BadRequest("spendBudgetEntity not found");
             }
 
-            if (spendBudgetRequest.SpendCategoryId <= 0 || spendBudgetRequest.CareHomeId <= 0)
+            if (budgetRequest.SpendCategoryId <= 0 || budgetRequest.CareHomeId <= 0)
             {
                 return BadRequest("SpendCateCareHome id and amount not found");
             }
 
-            if (string.IsNullOrEmpty(spendBudgetRequest.DateFrom.ToString()) || string.IsNullOrEmpty(spendBudgetRequest.DateTo.ToString()))
+            if (string.IsNullOrEmpty(budgetRequest.DateFrom.ToString()) || string.IsNullOrEmpty(budgetRequest.DateTo.ToString()))
             {
                 return BadRequest("Missing required fields");
             }
 
             var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
             logger.Info($"Spend Budget created by {loggedInUser.ForeName}");
-            spendBudgetRequest.UpdatedById = loggedInUser.Id;
-            spendBudgetRequest.UpdatedDate = DateTime.Now;
+            budgetRequest.UpdatedById = loggedInUser.Id;
+            budgetRequest.UpdatedDate = DateTime.Now;
 
-            var result = _spendBudgetService.Update(spendBudgetRequest);
+            var result = _budgetService.Update(budgetRequest);
             return Ok(result);
         }
-
-
-
-
-
 
     }
 }

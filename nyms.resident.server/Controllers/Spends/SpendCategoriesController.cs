@@ -28,7 +28,6 @@ namespace nyms.resident.server.Controllers.Spends
         public IHttpActionResult GetMasterCategories()
         {
             var user = HttpContext.Current.User as SecurityPrincipal;
-            var curUser = System.Threading.Thread.CurrentPrincipal;
             logger.Info($"Get master categories requested by {user.ForeName}");
 
             IEnumerable <SpendMasterCategory> spendMasterCategories = _spendsCategoriesService.GetSpendMasterCategories();
@@ -47,12 +46,9 @@ namespace nyms.resident.server.Controllers.Spends
         public IHttpActionResult GetCategories()
         {
             var user = HttpContext.Current.User as SecurityPrincipal;
-            var curUser = System.Threading.Thread.CurrentPrincipal;
             logger.Info($"Get categories requested by {user.ForeName}");
 
-            IEnumerable<SpendCategory> spendCategories = _spendsCategoriesService.GetSpendCategories(); // _spendsCategoriesService.GetSpendCategoryEntities();
-
-            // TO DO: ONLY SHOW MGRS by home id...
+            IEnumerable<SpendCategory> spendCategories = _spendsCategoriesService.GetSpendCategories();
 
             if (spendCategories == null)
             {
@@ -78,9 +74,18 @@ namespace nyms.resident.server.Controllers.Spends
                 return BadRequest("Missing master category id");
             }
 
-            if (string.IsNullOrEmpty(spendCategoryRequest.Name)) // || string.IsNullOrEmpty(spendCategoryRequest.Period) || string.IsNullOrEmpty(spendCategoryRequest.PoPrefix))
+            if (string.IsNullOrEmpty(spendCategoryRequest.Name))
             {
                 return BadRequest("Missing required fields");
+            }
+
+            if (string.IsNullOrEmpty(spendCategoryRequest.CatCode))
+            {
+                spendCategoryRequest.CatCode = spendCategoryRequest.Name.Substring(0, 4).ToUpper();
+            }
+            else
+            {
+                spendCategoryRequest.CatCode = spendCategoryRequest.CatCode.Trim().ToUpper();
             }
 
             var loggedInUser = HttpContext.Current.User as SecurityPrincipal;

@@ -38,6 +38,7 @@ namespace nyms.resident.server.DataProviders.Impl
             string sql = @"SELECT id as id
                             ,spend_master_category_id as spendmastercategoryid 
                             ,name as name
+                            ,cat_code as catcode
                             ,active as active
                             FROM [dbo].[spend_category]
                             WHERE active = 'Y'";
@@ -71,10 +72,12 @@ namespace nyms.resident.server.DataProviders.Impl
         {
             string sql = @"INSERT INTO [dbo].[spend_category]
                                     ([spend_master_category_id]
-                                    ,[name])
+                                    ,[name]
+                                    ,[cat_code])
                                     VALUES 
                                     (@spendmastercategoryid
-                                    ,@name);
+                                    ,@name
+                                    ,@catcode);
                                     SELECT CAST(SCOPE_IDENTITY() as int)";
 
             string sqlInsRoles = @"INSERT INTO [dbo].[spend_category_roles]
@@ -87,6 +90,7 @@ namespace nyms.resident.server.DataProviders.Impl
             DynamicParameters dp = new DynamicParameters();
             dp.Add("spendmastercategoryid", spendCategoryEntity.SpendMasterCategoryId, DbType.Int32, ParameterDirection.Input);
             dp.Add("name", spendCategoryEntity.Name.Trim(), DbType.String, ParameterDirection.Input, 100);
+            dp.Add("catcode", spendCategoryEntity.CatCode, DbType.String, ParameterDirection.Input, 60);
 
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
@@ -115,6 +119,7 @@ namespace nyms.resident.server.DataProviders.Impl
             string sql = @"UPDATE [dbo].[spend_category] SET
                                     [spend_master_category_id] = @spendmastercategoryid
                                    ,[name] = @name
+                                   ,[cat_code] = @catcode
                                     WHERE [id] = @id";
 
             string sqlDelRoles = @"DELETE FROM [dbo].[spend_category_roles] WHERE [spend_category_id] = @spendcategoryid";
@@ -129,6 +134,7 @@ namespace nyms.resident.server.DataProviders.Impl
             DynamicParameters dp = new DynamicParameters();
             dp.Add("spendmastercategoryid", spendCategoryEntity.SpendMasterCategoryId, DbType.Int32, ParameterDirection.Input);
             dp.Add("name", spendCategoryEntity.Name.Trim(), DbType.String, ParameterDirection.Input, 100);
+            dp.Add("catcode", spendCategoryEntity.CatCode, DbType.String, ParameterDirection.Input, 60);
             dp.Add("id", spendCategoryEntity.Id, DbType.Int32, ParameterDirection.Input);
 
             using (IDbConnection conn = new SqlConnection(_connectionString))

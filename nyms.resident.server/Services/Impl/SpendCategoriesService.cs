@@ -40,6 +40,7 @@ namespace nyms.resident.server.Services.Impl
                     Id = cat.Id,
                     SpendMasterCategoryId = cat.SpendMasterCategoryId,
                     Name = cat.Name,
+                    CatCode = cat.CatCode,
                     Roles = ExtractRoles(cateRoles, cat.Id)
                 };
             }).ToArray();
@@ -89,6 +90,7 @@ namespace nyms.resident.server.Services.Impl
                 Id = spendCategoryRequest.Id,
                 SpendMasterCategoryId = spendCategoryRequest.SpendMasterCategoryId,
                 Name = spendCategoryRequest.Name,
+                CatCode = spendCategoryRequest.CatCode,
                 Active = spendCategoryRequest.Active,
                 SpendCategoryRoleEntities = roles
             };
@@ -101,13 +103,8 @@ namespace nyms.resident.server.Services.Impl
                 Id = spendCategoryEntity.Id,
                 SpendMasterCategoryId = spendCategoryEntity.SpendMasterCategoryId,
                 Name = spendCategoryEntity.Name,
-/*                Period = spendCategoryEntity.Period,
-                PoPrefix = spendCategoryEntity.PoPrefix,*/
+                CatCode = spendCategoryEntity.CatCode,
                 Active = spendCategoryEntity.Active,
-/*                SpendCategoryCareHomeId = spendCategoryEntity.SpendCategoryCareHomeId,
-                CareHomeId = spendCategoryEntity.CareHomeId,
-                MasterCategoryName = spendCategoryEntity.MasterCategoryName,
-                CareHomeName = spendCategoryEntity.CareHomeName*/
             };
         }
     }
