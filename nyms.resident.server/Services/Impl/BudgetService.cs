@@ -1,9 +1,11 @@
 ﻿using Microsoft.Ajax.Utilities;
 using nyms.resident.server.DataProviders.Interfaces;
+using nyms.resident.server.Model;
 using nyms.resident.server.Models;
 using nyms.resident.server.Services.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 
 namespace nyms.resident.server.Services.Impl
@@ -17,7 +19,7 @@ namespace nyms.resident.server.Services.Impl
             _spendBudgetDataProvider = spendBudgetDataProvider ?? throw new ArgumentNullException(nameof(spendBudgetDataProvider));
         }
 
-        public IEnumerable<BudgetResponse> GetBudgets()
+/*        public IEnumerable<BudgetResponse> GetBudgets()
         {
             var budgetEntities = _spendBudgetDataProvider.GetBudgets();
             IEnumerable<BudgetResponse> spendBudgets = budgetEntities.Select(e =>
@@ -26,7 +28,7 @@ namespace nyms.resident.server.Services.Impl
             });
 
             return spendBudgets.ToArray();
-        }
+        }*/
 
         public BudgetResponse GetBudget(Guid referenceId)
         {
@@ -36,7 +38,7 @@ namespace nyms.resident.server.Services.Impl
 
         public BudgetResponse Insert(BudgetRequest budgetRequest)
         {
-            // Request comes with ONE allocation entity. User can save ONLY ONE AMOUNT. But entity is handled as multiple (1-many)
+            // For Inserts, request comes with ONE allocation entity. User can save ONLY ONE AMOUNT. But entity is handled as multiple (1-many)
             if (budgetRequest.BudgetAllocations.FirstOrDefault().Approved == Constants.BUDGET_APPROVED)
             {
                 budgetRequest.BudgetAllocations.FirstOrDefault().ApprovedById = budgetRequest.CreatedById;
@@ -47,8 +49,27 @@ namespace nyms.resident.server.Services.Impl
             {
                 a.UpdatedById = budgetRequest.CreatedById;
             });
-            var spendBudgetEnityInserted = _spendBudgetDataProvider.Insert(ToEntity(budgetRequest));
-            return ToModel(spendBudgetEnityInserted);
+            //var spendBudgetEnityInserted = _spendBudgetDataProvider.Insert(ToEntity(budgetRequest));
+            //return ToModel(spendBudgetEnityInserted);
+
+            // Recurring budgets. Month starts at 1. 1=Jan. If less than Zero, than no recurring budgets. 
+            BudgetEntity inserted = null;
+            if (budgetRequest.Recurrence == null || budgetRequest.Recurrence.StartMonth <= 0)
+            {
+                // Standard insert. ONE budget entity
+                List<BudgetEntity> budgetEntities = new List<BudgetEntity>()
+                {
+                    ToEntity(budgetRequest)
+                };
+                inserted = _spendBudgetDataProvider.Insert(budgetEntities.ToArray());
+            }
+            else
+            {
+                var budgetEnitites = CreateRecurringBudgets(budgetRequest);
+                inserted = _spendBudgetDataProvider.Insert(budgetEnitites);
+            }
+
+            return ToModel(inserted);
         }
 
         public BudgetResponse Update(BudgetRequest budgetRequest)
@@ -57,20 +78,20 @@ namespace nyms.resident.server.Services.Impl
             // If budget Compleated do not change any fields
             // Else only update, dateFrom, dateTo, desc, poPrefix, status
             var existingBudget = GetBudget(budgetRequest.ReferenceId);
-            if (existingBudget.Status == Constants.BUDGET_STATUS_COMPLETED) // existingBudget.Status == "Cancelled"
+            if (existingBudget.Status == Constants.BUDGET_STATUS_COMPLETED)
             {
                 return null; // Todo: throw valid bus exception to be bubble upto UI
             }
 
             var unApprovedIds = existingBudget.BudgetAllocations.Where(a => a.Approved != "Y").Select(a => a.Id);
-            List<BudgetAllocation> unApprovedOrNewAmountList = new List<BudgetAllocation>();
+            List<BudgetAllocation> unApproved = new List<BudgetAllocation>();
             unApprovedIds.ForEach(id =>
             {
-                unApprovedOrNewAmountList.Add(budgetRequest.BudgetAllocations.Where(a => a.Id == id).FirstOrDefault());
+                unApproved.Add(budgetRequest.BudgetAllocations.Where(a => a.Id == id).FirstOrDefault());
             });
 
             // With unApproved list, when a user is approving, add date and user id
-            unApprovedOrNewAmountList.ForEach(a =>
+            unApproved.ForEach(a =>
             {
                 if (a.Approved == Constants.BUDGET_APPROVED)
                 {
@@ -81,28 +102,23 @@ namespace nyms.resident.server.Services.Impl
                 a.UpdatedById = budgetRequest.UpdatedById;
                 a.UpdatedDate = DateTime.Now;
             });
-
-            // find any new amount has been sent?
-            budgetRequest.BudgetAllocations.ForEach(a =>
-            {
-                if (a.Id == 0)
-                {
-                    // Ensure updated date and updated by id is filled in for new amounts
-                    a.UpdatedById = budgetRequest.UpdatedById;
-                    a.UpdatedDate = DateTime.Now;
-                    unApprovedOrNewAmountList.Add(a);
-                }
-            });
             
-            budgetRequest.BudgetAllocations = unApprovedOrNewAmountList;
+            budgetRequest.BudgetAllocations = unApproved;
 
             var spendBudgetEntityUpdated =_spendBudgetDataProvider.Update(ToEntity(budgetRequest));
             return ToModel(spendBudgetEntityUpdated);
         }
 
-        public IEnumerable<BudgetListResponse> GetBudgetListResponses()
+        // public IEnumerable<BudgetListResponse> GetBudgetListResponses()
+        // IEnumerable<BudgetListResponse> GetBudgetListResponses(int[] spendCategoryIds, string status = "Open")
+        public IEnumerable<BudgetListResponse> GetBudgetListResponsesForUser(DateTime dateFrom, DateTime dateTo, int[] spendCategoryIds)
         {
-            return _spendBudgetDataProvider.GetBudgetListResponses();
+            return _spendBudgetDataProvider.GetBudgetListResponsesForUser(dateFrom, dateTo, spendCategoryIds);
+        }
+
+        public IEnumerable<BudgetListResponse> GetBudgetListResponsesForAdmin(DateTime dateFrom, DateTime dateTo, int[] spendCategoryIds)
+        {
+            return _spendBudgetDataProvider.GetBudgetListResponsesForAdmin(dateFrom, dateTo, spendCategoryIds);
         }
 
         public BudgetListResponse GetBudgetListResponseByReferenceId(Guid referenceId)
@@ -110,14 +126,37 @@ namespace nyms.resident.server.Services.Impl
             return _spendBudgetDataProvider.GetBudgetListResponseByReferenceId(referenceId);
         }
 
-
-        // Spend Related (expenses)
-        public SpendRequest CreateSpend(SpendRequest spendRequest)
+        public BudgetResponse IncreaseBudgetAllocation(BudgetRequest budgetRequest)
         {
-            return _spendBudgetDataProvider.CreateSpend(spendRequest);
+            BudgetAllocation allocation = budgetRequest.BudgetAllocations.FirstOrDefault();
+            if (allocation.Approved == Constants.BUDGET_APPROVED)
+            {
+                allocation.ApprovedById = budgetRequest.UpdatedById;
+                allocation.ApprovedDate = DateTime.Now;
+            }
+            allocation.UpdatedById = budgetRequest.UpdatedById;
+            allocation.UpdatedDate = DateTime.Now;
+
+            var updated = _spendBudgetDataProvider.IncreaseBudgetAllocation(ToEntity(budgetRequest));
+            return ToModel(updated);
         }
 
 
+        // Spend Related (expenses)
+        public SpendRequest InsertSpend(SpendRequest spendRequest)
+        {
+            return _spendBudgetDataProvider.InsertSpend(spendRequest);
+        }
+
+        public bool TransferSpend(TransferSpendRequest transferSpendRequest)
+        {
+            return _spendBudgetDataProvider.TransferSpend(transferSpendRequest);
+        }
+
+        public IEnumerable<SpendResponse> GetSpends(int[] budgetIds)
+        {
+            return _spendBudgetDataProvider.GetSpends(budgetIds);
+        }
 
 
 
@@ -140,6 +179,7 @@ namespace nyms.resident.server.Services.Impl
                 Description = budgetRequest.Description,
                 PoPrefix = budgetRequest.PoPrefix,
                 Status = budgetRequest.Status,
+                Reason = budgetRequest.Reason,
                 CreatedById = budgetRequest.CreatedById,
                 UpdatedById = budgetRequest.UpdatedById,
                 UpdatedDate = budgetRequest.UpdatedDate,
@@ -157,7 +197,6 @@ namespace nyms.resident.server.Services.Impl
                 Approved = budgetAllocation.Approved,
                 ApprovedById = budgetAllocation.ApprovedById,
                 ApprovedDate = budgetAllocation.ApprovedDate,
-                Reason = budgetAllocation.Reason,
                 UpdatedById = budgetAllocation.UpdatedById,
                 UpdatedDate = DateTime.Now
             };
@@ -182,6 +221,7 @@ namespace nyms.resident.server.Services.Impl
                 Description = budgetEntity.Description,
                 PoPrefix = budgetEntity.PoPrefix,
                 Status = budgetEntity.Status,
+                Reason = budgetEntity.Reason,
                 CreatedById = budgetEntity.CreatedById,
                 UpdatedById = budgetEntity.UpdatedById,
                 BudgetAllocations = budgetAllocations
@@ -198,10 +238,53 @@ namespace nyms.resident.server.Services.Impl
                 Approved = budgetAllocationEntity.Approved,
                 ApprovedById = budgetAllocationEntity.ApprovedById,
                 ApprovedDate = budgetAllocationEntity.ApprovedDate,
-                Reason = budgetAllocationEntity.Reason,
                 UpdatedById = budgetAllocationEntity.UpdatedById,
                 UpdatedDate = budgetAllocationEntity.UpdatedDate
             };
         }
+
+
+        // Create recurring budgets based on start month and number of months
+        private IEnumerable<DatePair> GenerateMonthStartEndDates(int startMonth, int numOfMonths)
+        {
+            List<DatePair> dates = new List<DatePair>();
+            var year = DateTime.Now.Year;
+            for (int i = 0; i < numOfMonths; i++)
+            {
+                var date1 = new DateTime(year, startMonth, 1);
+                var lastDayOfMth = DateTime.DaysInMonth(year, startMonth);
+                var date2 = new DateTime(year, startMonth, lastDayOfMth);
+                DatePair datePair = new DatePair() { StartDate = date1, EndDate = date2 };
+                dates.Add(datePair);
+
+                startMonth++;
+                if (startMonth == 13)
+                {
+                    year++;
+                    startMonth = 1;
+                }
+            }
+            return dates.ToArray();
+        }
+
+        private IEnumerable<BudgetEntity> CreateRecurringBudgets(BudgetRequest budgetRequest)
+        {
+            var startMonth = budgetRequest.Recurrence.StartMonth;
+            var numOfMonths = budgetRequest.Recurrence.NumberOfMonths;
+
+            var listOfDates = GenerateMonthStartEndDates(startMonth, numOfMonths).ToArray();
+
+            // create n number of reqs entities
+            List<BudgetEntity> list = new List<BudgetEntity>();
+            for (int i = 0; i < numOfMonths; i++)
+            {
+                var temp = ToEntity(budgetRequest);
+                temp.DateFrom = listOfDates[i].StartDate;
+                temp.DateTo = listOfDates[i].EndDate;
+                list.Add(temp);
+            }
+            return list.ToArray();
+        }
+
     }
 }

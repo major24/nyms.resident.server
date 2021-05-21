@@ -23,5 +23,10 @@ namespace nyms.resident.server.Services.Impl
         {
             return _securityDataProvider.GetRolePermissions(userId);
         }
+
+        public IEnumerable<int> GetSpendCategoryRoleIds(int userId)
+        {
+            return _securityDataProvider.GetSpendCategoryRoleIds(userId);
+        }
     }
 }

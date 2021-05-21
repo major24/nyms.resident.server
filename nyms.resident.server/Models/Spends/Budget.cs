@@ -15,6 +15,7 @@ namespace nyms.resident.server.Models
         public string Description { get; set; }
         public string PoPrefix { get; set; }
         public string Status { get; set; }
+        public string Reason { get; set; }
         public int CreatedById { get; set; }
         public DateTime CreatedDate { get; set; }
         public int UpdatedById { get; set; }

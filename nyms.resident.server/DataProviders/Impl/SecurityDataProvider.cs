@@ -42,12 +42,34 @@ namespace nyms.resident.server.DataProviders.Impl
                         ON ur.role_id = sr.role_id 
                         WHERE ur.user_id = @userid";
 
+            DynamicParameters dp = new DynamicParameters();
+            dp.Add("userid", userId, DbType.Int32, ParameterDirection.Input);
+
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
-                DynamicParameters dp = new DynamicParameters();
-                dp.Add("userid", userId, DbType.Int32, ParameterDirection.Input);
                 return conn.QueryAsync<UserRolePermission>(sql, dp).Result;
+            }
+        }
+
+        public IEnumerable<int> GetSpendCategoryRoleIds(int userId)
+        {
+            string sql = @"SELECT DISTINCT scr.spend_category_id as spendcategoryid 
+                            FROM [dbo].[users] u 
+                            INNER JOIN [dbo].[users_roles] ur
+                            ON u.id = ur.user_id
+                            INNER JOIN [dbo].[spend_category_roles] scr
+                            ON scr.role_id = ur.role_id
+                            WHERE u.active = 'Y'
+                            AND u.id = @userid";
+
+            DynamicParameters dp = new DynamicParameters();
+            dp.Add("userid", userId, DbType.Int32, ParameterDirection.Input);
+
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                return conn.QueryAsync<int>(sql, dp).Result;
             }
         }
 

@@ -5,7 +5,7 @@ namespace nyms.resident.server.Model
     public class SpendResponse
     {
         public int Id { get; set; }
-        public int SpendBudgetId { get; set; }
+        public int BudgetId { get; set; }
         public string PoNumber { get; set; }
         public decimal Amount { get; set; }
         public decimal Vat { get; set; }

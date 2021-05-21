@@ -1,4 +1,5 @@
-﻿using nyms.resident.server.Models;
+﻿using nyms.resident.server.Model;
+using nyms.resident.server.Models;
 using System;
 using System.Collections.Generic;
 
@@ -6,14 +7,19 @@ namespace nyms.resident.server.Services.Interfaces
 {
     public interface IBudgetService
     {
-        IEnumerable<BudgetResponse> GetBudgets();
+        // IEnumerable<BudgetResponse> GetBudgets();
         BudgetResponse GetBudget(Guid referenceId);
         BudgetResponse Insert(BudgetRequest budgetRequest);
         BudgetResponse Update(BudgetRequest budgetRequest);
-        IEnumerable<BudgetListResponse> GetBudgetListResponses();
-        BudgetListResponse GetBudgetListResponseByReferenceId(Guid referenceId);
+        // IEnumerable<BudgetListResponse> GetBudgetListResponses();
+        IEnumerable<BudgetListResponse> GetBudgetListResponsesForUser(DateTime dateFrom, DateTime dateTo, int[] spendCategoryIds);
+        IEnumerable<BudgetListResponse> GetBudgetListResponsesForAdmin(DateTime dateFrom, DateTime dateTo, int[] spendCategoryIds);
 
+        BudgetListResponse GetBudgetListResponseByReferenceId(Guid referenceId);
+        BudgetResponse IncreaseBudgetAllocation(BudgetRequest budgetRequest);
         // Spend Related
-        SpendRequest CreateSpend(SpendRequest spendRequest);
+        SpendRequest InsertSpend(SpendRequest spendRequest);
+        bool TransferSpend(TransferSpendRequest transferSpendRequest);
+        IEnumerable<SpendResponse> GetSpends(int[] budgetIds);
     }
 }

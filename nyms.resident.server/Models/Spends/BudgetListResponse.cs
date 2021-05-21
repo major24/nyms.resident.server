@@ -15,6 +15,7 @@ namespace nyms.resident.server.Models
         public DateTime DateTo { get; set; }
         public string Description { get; set; }
         public string Status { get; set; }
+        public string Reason { get; set; }
         public string PoPrefix { get; set; }
         public Decimal BudgetTotal { get; set; }
         public string Approved { get; set; }
