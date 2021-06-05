@@ -59,14 +59,13 @@ namespace nyms.resident.server.Controllers.Spends
             else
             {
                 // Manager. Find by spend cate id and care home id
-                // var filteredBuds = FilterBudgets(permissions, groupedResponse);
                 var temp = budgetListResponses.Where(r => r.CareHomeId == permissions.FirstOrDefault().CareHomeId);
                 return Ok(temp);
             }
         }
 
         [HttpGet]
-        [Route("api/spends/user/budgets/{referenceId}/spends")]
+        [Route("api/spends/user/budgets/{referenceId}")]
         public IHttpActionResult GetBudgetAndSpendsByReferenceId(string referenceId)
         {
             var user = HttpContext.Current.User as SecurityPrincipal;
@@ -79,7 +78,6 @@ namespace nyms.resident.server.Controllers.Spends
 
 
         // Spends/Expenses recored by Users and Admin
-        // spends/users/spends
         [HttpPost]
         [Route("api/spends/user/spends")]
         public IHttpActionResult InsertSpend(SpendRequest spendRequest)

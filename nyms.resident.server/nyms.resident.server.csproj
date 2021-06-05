@@ -307,7 +307,6 @@
     <Compile Include="Models\Spends\DatePair.cs" />
     <Compile Include="Models\Spends\Recurrence.cs" />
     <Compile Include="Models\Spends\SpendCategory.cs" />
-    <Compile Include="Models\Spends\SpendCategoryCareHomeEntity.cs" />
     <Compile Include="Models\Spends\SpendCategoryRequest.cs" />
     <Compile Include="Models\Spends\SpendCategoryResponse.cs" />
     <Compile Include="Models\Spends\SpendMasterCategory.cs" />

@@ -5,7 +5,6 @@ using nyms.resident.server.Models;
 using nyms.resident.server.Services.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 
 namespace nyms.resident.server.Services.Impl
@@ -17,23 +16,6 @@ namespace nyms.resident.server.Services.Impl
         public BudgetService(IBudgetDataProvider spendBudgetDataProvider)
         {
             _spendBudgetDataProvider = spendBudgetDataProvider ?? throw new ArgumentNullException(nameof(spendBudgetDataProvider));
-        }
-
-/*        public IEnumerable<BudgetResponse> GetBudgets()
-        {
-            var budgetEntities = _spendBudgetDataProvider.GetBudgets();
-            IEnumerable<BudgetResponse> spendBudgets = budgetEntities.Select(e =>
-            {
-                return ToModel(e);
-            });
-
-            return spendBudgets.ToArray();
-        }*/
-
-        public BudgetResponse GetBudget(Guid referenceId)
-        {
-            var budgetEntity = _spendBudgetDataProvider.GetBudget(referenceId);
-            return ToModel(budgetEntity);
         }
 
         public BudgetResponse Insert(BudgetRequest budgetRequest)
@@ -49,8 +31,6 @@ namespace nyms.resident.server.Services.Impl
             {
                 a.UpdatedById = budgetRequest.CreatedById;
             });
-            //var spendBudgetEnityInserted = _spendBudgetDataProvider.Insert(ToEntity(budgetRequest));
-            //return ToModel(spendBudgetEnityInserted);
 
             // Recurring budgets. Month starts at 1. 1=Jan. If less than Zero, than no recurring budgets. 
             BudgetEntity inserted = null;
@@ -77,7 +57,7 @@ namespace nyms.resident.server.Services.Impl
             // If allocation is, Approved already, do not change the amount
             // If budget Compleated do not change any fields
             // Else only update, dateFrom, dateTo, desc, poPrefix, status
-            var existingBudget = GetBudget(budgetRequest.ReferenceId);
+            var existingBudget = GetBudgetListResponseByReferenceId(budgetRequest.ReferenceId);
             if (existingBudget.Status == Constants.BUDGET_STATUS_COMPLETED)
             {
                 return null; // Todo: throw valid bus exception to be bubble upto UI
@@ -109,8 +89,6 @@ namespace nyms.resident.server.Services.Impl
             return ToModel(spendBudgetEntityUpdated);
         }
 
-        // public IEnumerable<BudgetListResponse> GetBudgetListResponses()
-        // IEnumerable<BudgetListResponse> GetBudgetListResponses(int[] spendCategoryIds, string status = "Open")
         public IEnumerable<BudgetListResponse> GetBudgetListResponsesForUser(DateTime dateFrom, DateTime dateTo, int[] spendCategoryIds)
         {
             return _spendBudgetDataProvider.GetBudgetListResponsesForUser(dateFrom, dateTo, spendCategoryIds);
@@ -140,7 +118,6 @@ namespace nyms.resident.server.Services.Impl
             var updated = _spendBudgetDataProvider.IncreaseBudgetAllocation(ToEntity(budgetRequest));
             return ToModel(updated);
         }
-
 
         // Spend Related (expenses)
         public SpendRequest InsertSpend(SpendRequest spendRequest)

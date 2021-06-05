@@ -20,103 +20,196 @@ namespace nyms.resident.server.DataProviders.Impl
             _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
         }
 
-/*        public IEnumerable<BudgetEntity> GetBudgets()
+        // Budget response for User page. 
+        // Approved = Y 
+        // Status = 'Open'
+        // Dates and spend category ids
+        public IEnumerable<BudgetListResponse> GetBudgetListResponsesForUser(DateTime dateFrom, DateTime dateTo, int[] spendCategoryIds)
         {
-            string sql = @"SELECT id as id
-                            ,reference_id as referenceid
-                            ,spend_category_id as spendcategoryid
-                            ,care_home_id as carehomeid
-                            ,name as name
-                            ,date_from as datefrom
-                            ,date_to as dateto
-                            ,description as description
-                            ,po_prefix as poprefix
-                            ,status as status
-                            ,reason as reason
-                            ,created_by_id as createdbyid
-                            ,created_date as createddate
-                            ,updated_by_id as updatedbyid
-                            ,updated_date as updateddate
-                            FROM [dbo].[budgets]";
-            string sqlAllocations = @"SELECT id as id
-                            ,budget_id as budgetid
-                            ,amount as amount
-                            ,approved as approved
-                            ,approved_by_id as approvedbyid
-                            ,approved_date as approveddate
-                            ,updated_by_id as updatedbyid
-                            ,updated_date as updateddate
-                            FROM [dbo].[budget_allocations]";
+            string sql = @"SELECT 
+                         bu.id as id
+                        ,bu.reference_id as referenceId
+                        ,bu.spend_category_id as spendcategoryid
+                        ,bu.care_home_id as carehomeid
+                        ,bu.name as name
+                        ,bu.date_from as dateFrom
+                        ,bu.date_to as dateTo
+                        ,bu.description as description
+                        ,bu.po_prefix as poprefix
+                        ,bu.status as status
+                        ,sqttl.budget_total as budgettotal
+                        ,sqttl.approved as approved
+                        ,sqspndttl.spend_total as spendtotal
+                        ,ch.name as carehomename
+                        ,cat.name as spendcategoryname
+                        FROM (
+                        SELECT a.budget_id as bud_id, sum(a.amount) as budget_total, approved as approved FROM [dbo].[budget_allocations] as a
+                        GROUP BY a.budget_id, a.approved
+                        ) as sqttl
+                        LEFT JOIN 
+                        (SELECT * FROM [dbo].[budgets]) as bu
+                        on bu.id = sqttl.bud_id
+                        LEFT JOIN 
+                        (select b.budget_id as bud_id, sum(b.amount) as spend_total FROM [dbo].[spends] as b
+                        GROUP BY b.budget_id
+                        ) as sqspndttl
+                        on bu.id = sqspndttl.bud_id
+                        INNER JOIN 
+                        (SELECT id, name as name FROM [dbo].[care_homes]) as ch
+                        on ch.id = bu.care_home_id
+                        INNER JOIN
+                        (SELECT * FROM [dbo].[spend_category]) as cat
+                        ON cat.id = bu.spend_category_id
+                        WHERE bu.spend_category_id IN @spendcategoryids
+                        AND bu.status = @status
+                        AND approved = 'Y'
+						AND bu.date_from >= @datefrom
+						AND bu.date_to <= @dateto";
 
-            IEnumerable<BudgetEntity> budgetEntities;
-            IEnumerable<BudgetAllocationEntity> budgetAllocationEntities;
+            DynamicParameters dp = new DynamicParameters();
+            dp.Add("spendcategoryids", spendCategoryIds);
+            dp.Add("status", Constants.BUDGET_STATUS_OPEN, DbType.String);
+            dp.Add("datefrom", dateFrom.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input, 60);
+            dp.Add("dateto", dateTo.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input, 60);
 
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
-                budgetEntities = conn.QueryAsync<BudgetEntity>(sql).Result;
-                budgetAllocationEntities = conn.QueryAsync<BudgetAllocationEntity>(sqlAllocations).Result;
+                return conn.QueryAsync<BudgetListResponse>(sql, dp).Result;
             }
+        }
 
-            if (budgetEntities != null && budgetEntities.Any())
+        // Budget response for Admin page. 
+        // Dates and spend category ids only
+        public IEnumerable<BudgetListResponse> GetBudgetListResponsesForAdmin(DateTime dateFrom, DateTime dateTo, int[] spendCategoryIds)
+        {
+            string sql = @"SELECT 
+                         bu.id as id
+                        ,bu.reference_id as referenceId
+                        ,bu.spend_category_id as spendcategoryid
+                        ,bu.care_home_id as carehomeid
+                        ,bu.name as name
+                        ,bu.date_from as dateFrom
+                        ,bu.date_to as dateTo
+                        ,bu.description as description
+                        ,bu.po_prefix as poprefix
+                        ,bu.status as status
+                        ,sqttl.budget_total as budgettotal
+                        ,sqspndttl.spend_total as spendtotal
+                        ,ch.name as carehomename
+                        ,cat.name as spendcategoryname
+                        FROM (
+                        SELECT a.budget_id as bud_id, sum(a.amount) as budget_total
+                        FROM [dbo].[budget_allocations] as a
+                        GROUP BY a.budget_id --, a.approved
+                        ) as sqttl
+                        LEFT JOIN 
+                        (SELECT * FROM [dbo].[budgets]) as bu
+                        on bu.id = sqttl.bud_id
+                        LEFT JOIN 
+                        (select b.budget_id as bud_id, sum(b.amount) as spend_total FROM [dbo].[spends] as b
+                        GROUP BY b.budget_id
+                        ) as sqspndttl
+                        on bu.id = sqspndttl.bud_id
+                        INNER JOIN 
+                        (SELECT id, name as name FROM [dbo].[care_homes]) as ch
+                        on ch.id = bu.care_home_id
+                        INNER JOIN
+                        (SELECT * FROM [dbo].[spend_category]) as cat
+                        ON cat.id = bu.spend_category_id
+                        WHERE bu.spend_category_id IN @spendcategoryids
+						AND bu.date_from >= @datefrom
+						AND bu.date_to <= @dateto";
+
+            DynamicParameters dp = new DynamicParameters();
+            dp.Add("spendcategoryids", spendCategoryIds);
+            dp.Add("datefrom", dateFrom.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input, 60);
+            dp.Add("dateto", dateTo.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input, 60);
+
+            using (IDbConnection conn = new SqlConnection(_connectionString))
             {
-                budgetEntities.ForEach(b =>
+                conn.Open();
+                return conn.QueryAsync<BudgetListResponse>(sql, dp).Result;
+            }
+        }
+
+        public BudgetListResponse GetBudgetListResponseByReferenceId(Guid referenceId)
+        {
+            string sql = @"SELECT 
+                         bu.id as id
+                        ,bu.reference_id as referenceId
+                        ,bu.spend_category_id as spendcategoryid
+                        ,bu.care_home_id as carehomeid
+                        ,bu.name as name
+                        ,bu.date_from as dateFrom
+                        ,bu.date_to as dateTo
+                        ,bu.description as description
+                        ,bu.po_prefix as poprefix
+                        ,bu.status as status
+                        ,sqttl.budget_total as budgettotal
+                        ,sqspndttl.spend_total as spendtotal
+                        ,ch.name as carehomename
+                        ,cat.name as spendcategoryname
+                        FROM (
+                        SELECT a.budget_id as bud_id, sum(a.amount) as budget_total
+                        FROM [dbo].[budget_allocations] as a
+                        GROUP BY a.budget_id
+                        ) as sqttl
+                        LEFT JOIN 
+                        (SELECT * FROM [dbo].[budgets]
+                        WHERE reference_id = @referenceid) as bu
+                        on bu.id = sqttl.bud_id
+                        LEFT JOIN 
+                        (select b.budget_id as bud_id, sum(b.amount) as spend_total FROM [dbo].[spends] as b
+                        GROUP BY b.budget_id
+                        ) as sqspndttl
+                        on bu.id = sqspndttl.bud_id
+                        INNER JOIN 
+                        (SELECT id, name as name FROM [dbo].[care_homes]) as ch
+                        on ch.id = bu.care_home_id
+                        INNER JOIN
+                        (SELECT * FROM [dbo].[spend_category]) as cat
+                        ON cat.id = bu.spend_category_id";
+
+            string sqlSelSpends = @"SELECT 
+                                     sp.id as id
+                                    ,sp.budget_id as budgetid
+                                    ,sp.amount as amount
+                                    ,sp.po_number as ponumber
+                                    ,sp.notes as notes
+                                    ,sp.created_date as createddate
+                                    ,concat(u.forename, ' ', u.surname) as createdbyname
+                                    FROM [dbo].[spends] sp
+                                    INNER JOIN [dbo].[users] u
+                                    ON sp.created_by_id = u.id
+                                    WHERE sp.budget_id = @budgetid";
+
+            string sqlSelAlloc = @"SELECT 
+                                     a.id as id
+                                    ,a.budget_id as budgetid
+                                    ,a.amount as amount
+                                    ,a.approved as approved
+                                    ,a.approved_by_id as approvedbyid
+                                    FROM [dbo].[budget_allocations] a
+                                    WHERE a.budget_id = @budgetid";
+            // todo: add order by spends query reverse order
+
+            DynamicParameters dp = new DynamicParameters();
+            dp.Add("referenceid", referenceId, DbType.Guid, ParameterDirection.Input, 60);
+
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                var budget = conn.QueryFirstOrDefault<BudgetListResponse>(sql, dp);
+                if (budget != null && budget.Id > 0)
                 {
-                    b.BudgetAllocations = budgetAllocationEntities.Where(a => a.BudgetId == b.Id).ToArray();
-                });
+                    DynamicParameters dp2 = new DynamicParameters();
+                    dp2.Add("budgetid", budget.Id, DbType.Int32, ParameterDirection.Input);
+                    budget.BudgetAllocations = conn.Query<BudgetAllocation>(sqlSelAlloc, dp2);
+                    budget.SpendResponses = conn.Query<SpendResponse>(sqlSelSpends, dp2);
+                }
+                return budget;
             }
-
-            return budgetEntities;
-        }*/
-
-        public BudgetEntity GetBudget(Guid referenceId)
-        {
-            string sql = @"SELECT id as id
-                            ,reference_id as referenceid
-                            ,spend_category_id as spendcategoryid
-                            ,care_home_id as carehomeid
-                            ,name as name
-                            ,date_from as datefrom
-                            ,date_to as dateto
-                            ,description as description
-                            ,po_prefix as poprefix
-                            ,status as status
-                            ,reason as reason
-                            ,created_by_id as createdbyid
-                            ,created_date as createddate
-                            ,updated_by_id as updatedbyid
-                            ,updated_date as updateddate
-                            FROM [dbo].[budgets]
-                            WHERE reference_id = @referenceid";
-
-            string sqlAllocations = @"SELECT a.id as id
-                            ,budget_id as budgetid
-                            ,amount as amount
-                            ,approved as approved
-                            ,approved_by_id as approvedbyid
-                            ,approved_date as approveddate
-                            ,a.updated_by_id as updatedbyid
-                            ,a.updated_date as updateddate
-                            FROM [dbo].[budget_allocations] a
-							INNER JOIN [dbo].[budgets] b
-							ON b.id = a.budget_id
-							WHERE b.reference_id = @referenceid
-                            ORDER BY a.approved desc";
-
-            BudgetEntity budgetEntity;
-            IEnumerable<BudgetAllocationEntity> budgetAllocationEntities;
-
-            using (IDbConnection conn = new SqlConnection(_connectionString))
-            {
-                conn.Open();
-                DynamicParameters dp = new DynamicParameters();
-                dp.Add("referenceid", referenceId, DbType.Guid, ParameterDirection.Input, 60);
-                budgetEntity = conn.QueryFirstOrDefault<BudgetEntity>(sql, dp);
-                budgetAllocationEntities = conn.QueryAsync<BudgetAllocationEntity>(sqlAllocations, dp).Result;
-                budgetEntity.BudgetAllocations = budgetAllocationEntities;
-            }
-
-            return budgetEntity;
         }
 
         public BudgetEntity Insert(IEnumerable<BudgetEntity> budgetEntities)
@@ -161,8 +254,6 @@ namespace nyms.resident.server.DataProviders.Impl
                             ,@approveddate
                             ,@updatedbyid
                             ,@updateddate)";
-
-
 
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
@@ -330,196 +421,6 @@ namespace nyms.resident.server.DataProviders.Impl
             return budgetEntity;
         }
 
-        // Budget response for User page. 
-        // Approved = Y 
-        // Status = 'Open'
-        // Dates and spend category ids
-        public IEnumerable<BudgetListResponse> GetBudgetListResponsesForUser(DateTime dateFrom, DateTime dateTo, int[] spendCategoryIds)
-        {
-            string sql = @"SELECT 
-                         bu.id as id
-                        ,bu.reference_id as referenceId
-                        ,bu.spend_category_id as spendcategoryid
-                        ,bu.care_home_id as carehomeid
-                        ,bu.name as name
-                        ,bu.date_from as dateFrom
-                        ,bu.date_to as dateTo
-                        ,bu.description as description
-                        ,bu.po_prefix as poprefix
-                        ,bu.status as status
-                        ,sqttl.budget_total as budgettotal
-                        ,sqttl.approved as approved
-                        ,sqspndttl.spend_total as spendtotal
-                        ,ch.name as carehomename
-                        ,cat.name as spendcategoryname
-                        FROM (
-                        SELECT a.budget_id as bud_id, sum(a.amount) as budget_total, approved as approved FROM [dbo].[budget_allocations] as a
-                        GROUP BY a.budget_id, a.approved
-                        ) as sqttl
-                        LEFT JOIN 
-                        (SELECT * FROM [dbo].[budgets]) as bu
-                        on bu.id = sqttl.bud_id
-                        LEFT JOIN 
-                        (select b.budget_id as bud_id, sum(b.amount) as spend_total FROM [dbo].[spends] as b
-                        GROUP BY b.budget_id
-                        ) as sqspndttl
-                        on bu.id = sqspndttl.bud_id
-                        INNER JOIN 
-                        (SELECT id, name as name FROM [dbo].[care_homes]) as ch
-                        on ch.id = bu.care_home_id
-                        INNER JOIN
-                        (SELECT * FROM [dbo].[spend_category]) as cat
-                        ON cat.id = bu.spend_category_id
-                        WHERE bu.spend_category_id IN @spendcategoryids
-                        AND bu.status = @status
-                        AND approved = 'Y'
-						AND bu.date_from >= @datefrom
-						AND bu.date_to <= @dateto";
-
-            DynamicParameters dp = new DynamicParameters();
-            dp.Add("spendcategoryids", spendCategoryIds);
-            dp.Add("status", Constants.BUDGET_STATUS_OPEN, DbType.String);
-            dp.Add("datefrom", dateFrom.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input, 60);
-            dp.Add("dateto", dateTo.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input, 60);
-
-            using (IDbConnection conn = new SqlConnection(_connectionString))
-            {
-                conn.Open();
-                return conn.QueryAsync<BudgetListResponse>(sql, dp).Result;
-            }
-        }
-
-        // Budget response for Admin page. 
-        // Dates and spend category ids only
-        public IEnumerable<BudgetListResponse> GetBudgetListResponsesForAdmin(DateTime dateFrom, DateTime dateTo, int[] spendCategoryIds)
-        {
-            string sql = @"SELECT 
-                         bu.id as id
-                        ,bu.reference_id as referenceId
-                        ,bu.spend_category_id as spendcategoryid
-                        ,bu.care_home_id as carehomeid
-                        ,bu.name as name
-                        ,bu.date_from as dateFrom
-                        ,bu.date_to as dateTo
-                        ,bu.description as description
-                        ,bu.po_prefix as poprefix
-                        ,bu.status as status
-                        ,sqttl.budget_total as budgettotal
-                        --,sqttl.approved as approved
-                        ,sqspndttl.spend_total as spendtotal
-                        ,ch.name as carehomename
-                        ,cat.name as spendcategoryname
-                        FROM (
-                        SELECT a.budget_id as bud_id, sum(a.amount) as budget_total
-                            --, approved as approved 
-                        FROM [dbo].[budget_allocations] as a
-                        GROUP BY a.budget_id --, a.approved
-                        ) as sqttl
-                        LEFT JOIN 
-                        (SELECT * FROM [dbo].[budgets]) as bu
-                        on bu.id = sqttl.bud_id
-                        LEFT JOIN 
-                        (select b.budget_id as bud_id, sum(b.amount) as spend_total FROM [dbo].[spends] as b
-                        GROUP BY b.budget_id
-                        ) as sqspndttl
-                        on bu.id = sqspndttl.bud_id
-                        INNER JOIN 
-                        (SELECT id, name as name FROM [dbo].[care_homes]) as ch
-                        on ch.id = bu.care_home_id
-                        INNER JOIN
-                        (SELECT * FROM [dbo].[spend_category]) as cat
-                        ON cat.id = bu.spend_category_id
-                        WHERE bu.spend_category_id IN @spendcategoryids
-						AND bu.date_from >= @datefrom
-						AND bu.date_to <= @dateto";
-
-            DynamicParameters dp = new DynamicParameters();
-            dp.Add("spendcategoryids", spendCategoryIds);
-            dp.Add("datefrom", dateFrom.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input, 60);
-            dp.Add("dateto", dateTo.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input, 60);
-
-            using (IDbConnection conn = new SqlConnection(_connectionString))
-            {
-                conn.Open();
-                return conn.QueryAsync<BudgetListResponse>(sql, dp).Result;
-            }
-        }
-
-        public BudgetListResponse GetBudgetListResponseByReferenceId(Guid referenceId)
-        {
-            string sql = @"SELECT 
-                         bu.id as id
-                        ,bu.reference_id as referenceId
-                        ,bu.spend_category_id as spendcategoryid
-                        ,bu.care_home_id as carehomeid
-                        ,bu.name as name
-                        ,bu.date_from as dateFrom
-                        ,bu.date_to as dateTo
-                        ,bu.description as description
-                        ,bu.po_prefix as poprefix
-                        ,bu.status as status
-                        ,sqttl.budget_total as budgettotal
-                        --,sqttl.approved as approved
-                        ,sqspndttl.spend_total as spendtotal
-                        ,ch.name as carehomename
-                        ,cat.name as spendcategoryname
-                        FROM (
-                        SELECT a.budget_id as bud_id, sum(a.amount) as budget_total
-                        --,approved as approved 
-                        FROM [dbo].[budget_allocations] as a
-                        WHERE a.approved = 'Y'
-                        GROUP BY a.budget_id
-                        -- , a.approved
-                        ) as sqttl
-                        LEFT JOIN 
-                        (SELECT * FROM [dbo].[budgets]
-                        WHERE reference_id = @referenceid) as bu
-                        on bu.id = sqttl.bud_id
-                        LEFT JOIN 
-                        (select b.budget_id as bud_id, sum(b.amount) as spend_total FROM [dbo].[spends] as b
-                        GROUP BY b.budget_id
-                        ) as sqspndttl
-                        on bu.id = sqspndttl.bud_id
-                        INNER JOIN 
-                        (SELECT id, name as name FROM [dbo].[care_homes]) as ch
-                        on ch.id = bu.care_home_id
-                        INNER JOIN
-                        (SELECT * FROM [dbo].[spend_category]) as cat
-                        ON cat.id = bu.spend_category_id";
-
-            string sqlSelSpends = @"SELECT 
-                                     sp.id as id
-                                    ,sp.budget_id as budgetid
-                                    ,sp.amount as amount
-                                    ,sp.po_number as ponumber
-                                    ,sp.notes as notes
-                                    ,sp.created_date as createddate
-                                    ,concat(u.forename, ' ', u.surname) as createdbyname
-                                    FROM [dbo].[spends] sp
-                                    INNER JOIN [dbo].[users] u
-                                    ON sp.created_by_id = u.id
-                                    WHERE sp.budget_id = @budgetid";
-
-            // todo: add order by spends reverse order
-
-            DynamicParameters dp = new DynamicParameters();
-            dp.Add("referenceid", referenceId, DbType.Guid, ParameterDirection.Input, 60);
-
-            using (IDbConnection conn = new SqlConnection(_connectionString))
-            {
-                conn.Open();
-                var budget = conn.QueryFirstOrDefault<BudgetListResponse>(sql, dp);
-                if (budget != null && budget.Id > 0)
-                {
-                    DynamicParameters dp2 = new DynamicParameters();
-                    dp2.Add("budgetid", budget.Id, DbType.Int32, ParameterDirection.Input);
-                    budget.SpendResponses = conn.Query<SpendResponse>(sqlSelSpends, dp2);
-                }
-                return budget;
-            }
-        }
-
-
 
         // Spend Related
         public SpendRequest InsertSpend(SpendRequest spendRequest)
@@ -580,10 +481,9 @@ namespace nyms.resident.server.DataProviders.Impl
 
         public bool TransferSpend(TransferSpendRequest transferSpendRequest)
         {
-            //string newReason = "<br/>" + budgetEntity.Reason;
             string sql = @"UPDATE [dbo].[spends] SET
                         budget_id = (select id from budgets where reference_id = @transfertoreferenceid)
-                        , notes = notes + '<br /> TRF: ' + @notes
+                        , notes = notes + ' TRF: ' + @notes
                         WHERE id = @spendid";
 
             DynamicParameters dp = new DynamicParameters();

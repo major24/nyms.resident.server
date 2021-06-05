@@ -59,8 +59,8 @@ namespace nyms.resident.server.Controllers.Spends
         }
 
         [HttpGet]
-        [Route("api/spends/admin/budgets/{dateFrom}/{dateTo}/spends")]
-        public IHttpActionResult GetBudgetsAndSpendsForAdmin(string dateFrom, string dateTo)
+        [Route("api/spends/admin/budgets/{dateFrom}/{dateTo}/spendsreport")]
+        public IHttpActionResult GetBudgetsForSummryReport(string dateFrom, string dateTo)
         {
             if (string.IsNullOrEmpty(dateFrom)) throw new ArgumentNullException(nameof(dateFrom));
             if (string.IsNullOrEmpty(dateTo)) throw new ArgumentNullException(nameof(dateTo));
@@ -94,25 +94,6 @@ namespace nyms.resident.server.Controllers.Spends
             }
 
             return Ok(budgetListResponses);
-        }
-
-        // Cannot use with USER UI. Returns alloctions to be edited by admin
-        [HttpGet]
-        [Route("api/spends/admin/budgets/{referenceId}/allocations")]
-        public IHttpActionResult GetBudgetByReferenceId(string referenceId)
-        {
-            var user = HttpContext.Current.User as SecurityPrincipal;
-            logger.Info($"Get budget requested by {user.ForeName}");
-
-            BudgetResponse budgetResponse = _budgetService.GetBudget(new Guid(referenceId));
-
-            if (budgetResponse == null)
-            {
-                logger.Warn($"Budget not found");
-                return NotFound();
-            }
-
-            return Ok(budgetResponse);
         }
 
         [HttpPost]
