@@ -24,6 +24,9 @@
         public static readonly string BUDGET_STATUS_OPEN = "Open";
         public static readonly string BUDGET_STATUS_COMPLETED = "Completed";
         public static readonly string BUDGET_STATUS_CANCELLED = "Cancelled";
+
+        public static readonly string SPEND_TRAN_TYPE_DEBIT = "Debit";
+        public static readonly string SPEND_TRAN_TYPE_CREDIT = "Credit";
     }
 
     public enum ENQUIRY_STATUS

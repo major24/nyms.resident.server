@@ -304,14 +304,16 @@
     <Compile Include="Models\Spends\BudgetListResponse.cs" />
     <Compile Include="Models\Spends\BudgetRequest.cs" />
     <Compile Include="Models\Spends\BudgetResponse.cs" />
+    <Compile Include="Models\Spends\DatePair.cs" />
+    <Compile Include="Models\Spends\Recurrence.cs" />
     <Compile Include="Models\Spends\SpendCategory.cs" />
-    <Compile Include="Models\Spends\SpendCategoryCareHomeEntity.cs" />
     <Compile Include="Models\Spends\SpendCategoryRequest.cs" />
     <Compile Include="Models\Spends\SpendCategoryResponse.cs" />
     <Compile Include="Models\Spends\SpendMasterCategory.cs" />
     <Compile Include="Models\Spends\SpendCategoryEntity.cs" />
     <Compile Include="Models\Spends\SpendRequest.cs" />
     <Compile Include="Models\Spends\SpendResponse.cs" />
+    <Compile Include="Models\Spends\TransferSpendRequest.cs" />
     <Compile Include="Models\User\CareHomeRole.cs" />
     <Compile Include="Models\User\Role.cs" />
     <Compile Include="Models\User\UserRolePermission.cs" />

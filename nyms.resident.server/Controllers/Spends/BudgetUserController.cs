@@ -1,5 +1,4 @@
-﻿using Microsoft.Ajax.Utilities;
-using NLog;
+﻿using NLog;
 using nyms.resident.server.Filters;
 using nyms.resident.server.Models;
 using nyms.resident.server.Models.Authentication;
@@ -8,8 +7,6 @@ using nyms.resident.server.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Web;
 using System.Web.Http;
 
@@ -31,57 +28,44 @@ namespace nyms.resident.server.Controllers.Spends
 
 
         [HttpGet]
-        [Route("api/spends/user/budgets")]
-        public IHttpActionResult GetBudgetsForUser()
+        [Route("api/spends/user/budgets/{dateFrom}/{dateTo}")]
+        public IHttpActionResult GetBudgetsForUser(string dateFrom, string dateTo)
         {
+            if (string.IsNullOrEmpty(dateFrom)) throw new ArgumentNullException(nameof(dateFrom));
+            if (string.IsNullOrEmpty(dateTo)) throw new ArgumentNullException(nameof(dateTo));
+
+            DateTime.TryParse(dateFrom, out DateTime dataFromInput);
+            DateTime.TryParse(dateTo, out DateTime dateToInput);
+
+            if (dataFromInput == null || dateToInput == null) throw new ArgumentException("Invalid dates");
+
             var user = HttpContext.Current.User as SecurityPrincipal;
             logger.Info($"Get budget requested by {user.ForeName}");
 
-            IEnumerable<BudgetListResponse> budgetListResponses = _budgetService.GetBudgetListResponses();
+            // For user find allowed spend category ids
+            var spendCategoryIdsAllowed = _securityService.GetSpendCategoryRoleIds(user.Id).ToArray();
 
-            // Rule1: Users, only get Approved and Open budgets for processing
-            var filterApprovedAndOpenBudgetListResponses = budgetListResponses.Where(b =>
-            {
-                return b.Approved == Constants.BUDGET_APPROVED && b.Status == Constants.BUDGET_STATUS_OPEN;
-            }).ToArray();
+            // Rule1: Select by allowed spend category ids only
+            IEnumerable<BudgetListResponse> budgetListResponses = _budgetService.GetBudgetListResponsesForUser(dataFromInput,
+                                                                                                        dateToInput,
+                                                                                                        spendCategoryIdsAllowed);
 
-            if (filterApprovedAndOpenBudgetListResponses == null)
-            {
-                logger.Warn($"Budgets not found");
-                return NotFound();
-            }
-
-            var groupedByBudId = filterApprovedAndOpenBudgetListResponses.GroupBy(b => b.Id);
-            List<BudgetListResponse> groupedResponse = new List<BudgetListResponse>();
-
-            groupedByBudId.ForEach(g =>
-            {
-                var curBudget = g.FirstOrDefault();
-                decimal bTotal = 0;
-                g.ForEach(b =>
-                {
-                    bTotal += b.BudgetTotal;
-                });
-                curBudget.BudgetTotal = bTotal;
-                groupedResponse.Add(curBudget);
-            });
-
-            // Rule2: Access Control based on role(s)
+            // Rule2: Access Control based on care home role(s)
             var permissions = _securityService.GetRolePermissions(user.Id);
             if (IsAdmin(permissions))
             {
-                return Ok(groupedResponse);
+                return Ok(budgetListResponses);
             }
             else
             {
                 // Manager. Find by spend cate id and care home id
-                var filteredBuds = FilterBudgets(permissions, groupedResponse);
-                return Ok(filteredBuds);
+                var temp = budgetListResponses.Where(r => r.CareHomeId == permissions.FirstOrDefault().CareHomeId);
+                return Ok(temp);
             }
         }
 
         [HttpGet]
-        [Route("api/spends/user/budgets/{referenceId}/spends")]
+        [Route("api/spends/user/budgets/{referenceId}")]
         public IHttpActionResult GetBudgetAndSpendsByReferenceId(string referenceId)
         {
             var user = HttpContext.Current.User as SecurityPrincipal;
@@ -94,10 +78,9 @@ namespace nyms.resident.server.Controllers.Spends
 
 
         // Spends/Expenses recored by Users and Admin
-        // spends/users/spends
         [HttpPost]
         [Route("api/spends/user/spends")]
-        public IHttpActionResult CreateSpend(SpendRequest spendRequest)
+        public IHttpActionResult InsertSpend(SpendRequest spendRequest)
         {
             if (spendRequest == null)
             {
@@ -113,51 +96,16 @@ namespace nyms.resident.server.Controllers.Spends
             logger.Info($"Spend Budget created by {loggedInUser.ForeName}");
             spendRequest.CreatedById = loggedInUser.Id;
 
-            var result = _budgetService.CreateSpend(spendRequest);
-            return Ok(result);
-        }
-
-
-        private IEnumerable<BudgetListResponse> FilterBudgets(IEnumerable<UserRolePermission> permissions, IEnumerable<BudgetListResponse> budgetListResponses)
-        {
-            if (permissions.Any())
+            // Most of the spends are money spend, so [Debit] 
+            // Admin may credit all or some amount, will be [Credit]. 
+            // UI should the flag for Credit.
+            if (string.IsNullOrEmpty(spendRequest.TranType))
             {
-                List<BudgetListResponse> permittedBudgetListResponses = new List<BudgetListResponse>();
-                // Make distinct spend_category_id
-                Dictionary<int, int> dicSpendCategoryIds = new Dictionary<int, int>();
-                permissions.ForEach(p =>
-                {
-                    if (!dicSpendCategoryIds.ContainsKey(p.SpendCategoryId))
-                    {
-                        dicSpendCategoryIds.Add(p.SpendCategoryId, p.SpendCategoryId);
-                    }
-                });
-                dicSpendCategoryIds.ForEach(d => {
-                    var tmp = budgetListResponses.Where(bud => bud.SpendCategoryId == d.Key);
-                    // add to main list
-                    tmp.ForEach(bud =>
-                    {
-                        permittedBudgetListResponses.Add(bud);
-                    });
-                });
-
-                // care home filter
-                // get carehome id
-                var chIds = permissions.Select(p => p.CareHomeId).Distinct<int>();
-                List<BudgetListResponse> permittedCareHomeBudgetListResponses = new List<BudgetListResponse>();
-                chIds.ForEach(chId =>
-                {
-                    var tmp = permittedBudgetListResponses.FindAll(bud => bud.CareHomeId == chId);
-                    tmp.ForEach(bud =>
-                    {
-                        permittedCareHomeBudgetListResponses.Add(bud);
-                    });
-                });
-
-                return permittedCareHomeBudgetListResponses;
+                spendRequest.TranType = Constants.SPEND_TRAN_TYPE_DEBIT;
             }
-
-            return budgetListResponses;
+            
+            var result = _budgetService.InsertSpend(spendRequest);
+            return Ok(result);
         }
 
 

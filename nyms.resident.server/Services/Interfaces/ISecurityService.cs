@@ -7,5 +7,7 @@ namespace nyms.resident.server.Services.Interfaces
     {
         IEnumerable<Role> GetRoles();
         IEnumerable<UserRolePermission> GetRolePermissions(int userId);
+
+        IEnumerable<int> GetSpendCategoryRoleIds(int userId);
     }
 }
