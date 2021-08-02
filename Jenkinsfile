@@ -5,7 +5,7 @@ pipeline {
     stage('Fetch') {
       steps {
         echo 'Fetching code from git..'
-        git 'https://github.com/major24/nyms.resident.server'
+        git 'https://github.com/major24/nyms.resident.serverxx'
         echo 'Fetching - Done Success'
       }
     }
