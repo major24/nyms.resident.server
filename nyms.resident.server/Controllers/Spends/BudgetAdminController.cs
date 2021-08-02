@@ -29,7 +29,7 @@ namespace nyms.resident.server.Controllers.Spends
         }
 
         [HttpGet]
-        [Route("api/spends/admin/budgets/{dateFrom}/{dateTo}")]
+        [Route("api/admin/budgets/{dateFrom}/{dateTo}")]
         public IHttpActionResult GetBudgetsForAdmin(string dateFrom, string dateTo)
         {
             if (string.IsNullOrEmpty(dateFrom)) throw new ArgumentNullException(nameof(dateFrom));
@@ -46,7 +46,7 @@ namespace nyms.resident.server.Controllers.Spends
             // For user find allowed spend category ids
             var spendCategoryIdsAllowed = _securityService.GetSpendCategoryRoleIds(user.Id).ToArray();
 
-            IEnumerable <BudgetListResponse> budgetListResponses = _budgetService.GetBudgetListResponsesForAdmin(dateFromInput,
+            IEnumerable <BudgetListResponse> budgetListResponses = _budgetService.GetBudgetListResponses(dateFromInput,
                                                                                                         dateToInput,
                                                                                                         spendCategoryIdsAllowed);
             if (budgetListResponses == null || !budgetListResponses.Any())
@@ -59,7 +59,7 @@ namespace nyms.resident.server.Controllers.Spends
         }
 
         [HttpGet]
-        [Route("api/spends/admin/budgets/{dateFrom}/{dateTo}/spendsreport")]
+        [Route("api/admin/budgets/{dateFrom}/{dateTo}/spends")]
         public IHttpActionResult GetBudgetsForSummryReport(string dateFrom, string dateTo)
         {
             if (string.IsNullOrEmpty(dateFrom)) throw new ArgumentNullException(nameof(dateFrom));
@@ -76,7 +76,7 @@ namespace nyms.resident.server.Controllers.Spends
             // For user find allowed spend category ids
             var spendCategoryIdsAllowed = _securityService.GetSpendCategoryRoleIds(user.Id).ToArray();
 
-            IEnumerable<BudgetListResponse> budgetListResponses = _budgetService.GetBudgetListResponsesForAdmin(dateFromInput,
+            IEnumerable<BudgetListResponse> budgetListResponses = _budgetService.GetBudgetListResponses(dateFromInput,
                                                                                                         dateToInput,
                                                                                                         spendCategoryIdsAllowed);
             var budgetIds = budgetListResponses.Select(b => b.Id).Distinct().ToArray();
@@ -84,7 +84,7 @@ namespace nyms.resident.server.Controllers.Spends
             var sps = _budgetService.GetSpends(budgetIds);
             budgetListResponses.ForEach(b =>
             {
-                b.SpendResponses = sps.Where(s => s.BudgetId == b.Id).ToArray();
+                b.Spends = sps.Where(s => s.BudgetId == b.Id).ToArray();
             });
 
             if (budgetListResponses == null || !budgetListResponses.Any())
@@ -97,7 +97,7 @@ namespace nyms.resident.server.Controllers.Spends
         }
 
         [HttpPost]
-        [Route("api/spends/admin/budgets")]
+        [Route("api/admin/budgets")]
         public IHttpActionResult InsertBudget(BudgetRequest budgetRequest)
         {
             if (budgetRequest == null)
@@ -110,14 +110,22 @@ namespace nyms.resident.server.Controllers.Spends
                 return BadRequest("Care category id and care home id is required");
             }
 
-            if (string.IsNullOrEmpty(budgetRequest.DateFrom.ToString()) || string.IsNullOrEmpty(budgetRequest.DateTo.ToString()))
-            {
-                return BadRequest("Budget dates are required fields");
-            }
-
             if (budgetRequest.BudgetAllocations.FirstOrDefault().Amount <= 0)
             {
                 return BadRequest("Budget amount is required");
+            }
+
+            if (budgetRequest.BudgetType == BudgetType.Monthly && budgetRequest.BudgetMonth <= 0)
+            {
+                return BadRequest("Budget month is required field");
+            }
+
+            if (budgetRequest.BudgetType == BudgetType.Project)
+            {
+                if (string.IsNullOrEmpty(budgetRequest.DateFrom.ToString()) || string.IsNullOrEmpty(budgetRequest.DateTo.ToString()))
+                {
+                    return BadRequest("Budget dates are required fields");
+                }
             }
 
             var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
@@ -130,7 +138,7 @@ namespace nyms.resident.server.Controllers.Spends
         }
 
         [HttpPost]
-        [Route("api/spends/admin/budgets/{referenceId}")]
+        [Route("api/admin/budgets/{referenceId}")]
         public IHttpActionResult UpdateBudget(string referenceId, BudgetRequest budgetRequest)
         {
             if (string.IsNullOrEmpty(referenceId))
@@ -163,7 +171,7 @@ namespace nyms.resident.server.Controllers.Spends
         }
 
         [HttpPost]
-        [Route("api/spends/admin/budgets/{referenceId}/allocations")]
+        [Route("api/admin/budgets/{referenceId}/allocations")]
         public IHttpActionResult IncrementBudgetAllocationAmount(string referenceId, BudgetRequest budgetRequest)
         {
             if (string.IsNullOrEmpty(referenceId) || budgetRequest == null)
@@ -182,7 +190,7 @@ namespace nyms.resident.server.Controllers.Spends
         }
 
         [HttpPost]
-        [Route("api/spends/admin/spends/creditnote")]
+        [Route("api/admin/spends/creditnote")]
         public IHttpActionResult IssueCreditNote(SpendRequest spendRequest)
         {
             if (spendRequest == null || spendRequest.BudgetId <= 0)
@@ -201,7 +209,7 @@ namespace nyms.resident.server.Controllers.Spends
         }
 
         [HttpPost]
-        [Route("api/spends/admin/spends/tranferspend")]
+        [Route("api/admin/spends/tranferspend")]
         public IHttpActionResult TransferSpend(TransferSpendRequest transferSpendRequest)
         {
             if (!GuidConverter.IsValid(transferSpendRequest.TransferToBudgetReferenceId.ToString()))
@@ -214,8 +222,8 @@ namespace nyms.resident.server.Controllers.Spends
             }
 
             // Ensure we are not tranfering within the SAME budget
-            var budgetTo = _budgetService.GetBudgetListResponseByReferenceId(transferSpendRequest.TransferToBudgetReferenceId);
-            var found = budgetTo.SpendResponses.Where(sp => sp.Id == transferSpendRequest.TransferFromSpendId).FirstOrDefault();
+            var budgetTo = _budgetService.GetBudgetListResponse(transferSpendRequest.TransferToBudgetReferenceId);
+            var found = budgetTo.Spends.Where(sp => sp.Id == transferSpendRequest.TransferFromSpendId).FirstOrDefault();
             if (found != null)
             {
                 return BadRequest("Invalid request. You are trying to transer withing the same budget.");
@@ -225,6 +233,15 @@ namespace nyms.resident.server.Controllers.Spends
             logger.Info($"Spend is transfered from spend id {transferSpendRequest.TransferFromSpendId} to budget {transferSpendRequest.TransferToBudgetReferenceId} by {loggedInUser.ForeName}");
 
             var inserted = _budgetService.TransferSpend(transferSpendRequest);
+            // add comments
+            SpendComments spendComments = new SpendComments()
+            {
+                SpendId = transferSpendRequest.TransferFromSpendId,
+                Comments = transferSpendRequest.Comments,
+                CreatedById = loggedInUser.Id,
+                Status = Status.Completed
+            };
+            _budgetService.InsertSpendComment(spendComments);
 
             return Ok(inserted);
         }

@@ -7,9 +7,9 @@ namespace nyms.resident.server.Services.Interfaces
 {
     public interface IBudgetService
     {
-        IEnumerable<BudgetListResponse> GetBudgetListResponsesForUser(DateTime dateFrom, DateTime dateTo, int[] spendCategoryIds);
-        IEnumerable<BudgetListResponse> GetBudgetListResponsesForAdmin(DateTime dateFrom, DateTime dateTo, int[] spendCategoryIds);
-        BudgetListResponse GetBudgetListResponseByReferenceId(Guid referenceId);
+        IEnumerable<BudgetListResponse> GetBudgetListResponses(DateTime dateFrom, DateTime dateTo, int[] spendCategoryIds);
+        IEnumerable<BudgetListResponse> GetBudgetListResponsesApprovedAndOpened(DateTime dateFrom, DateTime dateTo, int[] spendCategoryIds);
+        BudgetListResponse GetBudgetListResponse(Guid referenceId);
         BudgetResponse Insert(BudgetRequest budgetRequest);
         BudgetResponse Update(BudgetRequest budgetRequest);
         BudgetResponse IncreaseBudgetAllocation(BudgetRequest budgetRequest);
@@ -17,6 +17,7 @@ namespace nyms.resident.server.Services.Interfaces
         // Spend Related
         SpendRequest InsertSpend(SpendRequest spendRequest);
         bool TransferSpend(TransferSpendRequest transferSpendRequest);
-        IEnumerable<SpendResponse> GetSpends(int[] budgetIds);
+        IEnumerable<Spend> GetSpends(int[] budgetIds);
+        void InsertSpendComment(SpendComments spendComments);
     }
 }

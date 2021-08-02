@@ -13,6 +13,6 @@ namespace nyms.resident.server.Models
         public string SpendCategoryName { get; set; }
 
         public IEnumerable<BudgetAllocation> BudgetAllocations { get; set; }
-        public IEnumerable<SpendResponse> SpendResponses { get; set; }
+        public IEnumerable<Spend> Spends { get; set; }
     }
 }

@@ -26,9 +26,8 @@ namespace nyms.resident.server.Controllers.Spends
             _securityService = securityService ?? throw new ArgumentNullException(nameof(securityService));
         }
 
-
         [HttpGet]
-        [Route("api/spends/user/budgets/{dateFrom}/{dateTo}")]
+        [Route("api/user/budgets/{dateFrom}/{dateTo}")]
         public IHttpActionResult GetBudgetsForUser(string dateFrom, string dateTo)
         {
             if (string.IsNullOrEmpty(dateFrom)) throw new ArgumentNullException(nameof(dateFrom));
@@ -46,7 +45,7 @@ namespace nyms.resident.server.Controllers.Spends
             var spendCategoryIdsAllowed = _securityService.GetSpendCategoryRoleIds(user.Id).ToArray();
 
             // Rule1: Select by allowed spend category ids only
-            IEnumerable<BudgetListResponse> budgetListResponses = _budgetService.GetBudgetListResponsesForUser(dataFromInput,
+            IEnumerable<BudgetListResponse> budgetListResponses = _budgetService.GetBudgetListResponsesApprovedAndOpened(dataFromInput,
                                                                                                         dateToInput,
                                                                                                         spendCategoryIdsAllowed);
 
@@ -65,13 +64,13 @@ namespace nyms.resident.server.Controllers.Spends
         }
 
         [HttpGet]
-        [Route("api/spends/user/budgets/{referenceId}")]
+        [Route("api/user/budgets/{referenceId}")]
         public IHttpActionResult GetBudgetAndSpendsByReferenceId(string referenceId)
         {
             var user = HttpContext.Current.User as SecurityPrincipal;
             logger.Info($"Get budget requested by {user.ForeName}");
 
-            var budgetListResponses = _budgetService.GetBudgetListResponseByReferenceId(new Guid(referenceId));
+            var budgetListResponses = _budgetService.GetBudgetListResponse(new Guid(referenceId));
 
             return Ok(budgetListResponses);
         }
@@ -79,7 +78,7 @@ namespace nyms.resident.server.Controllers.Spends
 
         // Spends/Expenses recored by Users and Admin
         [HttpPost]
-        [Route("api/spends/user/spends")]
+        [Route("api/user/spends")]
         public IHttpActionResult InsertSpend(SpendRequest spendRequest)
         {
             if (spendRequest == null)
@@ -108,6 +107,27 @@ namespace nyms.resident.server.Controllers.Spends
             return Ok(result);
         }
 
+        [HttpPost]
+        [Route("api/user/spends/comments")]
+        public IHttpActionResult InsertSpendComment(SpendComments spendComments)
+        {
+            if (spendComments == null)
+            {
+                return BadRequest("spend comments not found");
+            }
+
+            if (spendComments.SpendId <= 0 || string.IsNullOrEmpty(spendComments.Comments))
+            {
+                return BadRequest("Spend id and or comments not found");
+            }
+
+            var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
+            logger.Info($"Spend Budget created by {loggedInUser.ForeName}");
+            spendComments.CreatedById = loggedInUser.Id;
+
+            _budgetService.InsertSpendComment(spendComments);
+            return Ok(spendComments);
+        }
 
         private bool IsAdmin(IEnumerable<UserRolePermission> permissions)
         {

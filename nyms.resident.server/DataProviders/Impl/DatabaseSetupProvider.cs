@@ -69,6 +69,9 @@ namespace nyms.resident.server.DataProviders.Impl
                                     left join spends s on b.id = s.budget_id
                                     where cat.name like 'Test%'";
 
+            string sqlDelSpendComments = @"DELETE FROM [dbo].[spend_comments_statuses] 
+                                    WHERE spend_id in (
+                                        SELECT id FROM [dbo].[spends] WHERE [budget_id] = @id)";
             string sqlDelSpends = @"DELETE FROM [dbo].[spends] WHERE [budget_id] = @id";
             string sqlDelBudgetAllocations = @"DELETE FROM [dbo].[budget_allocations] WHERE [budget_id] = @id";
             string sqlDelBudget = @"DELETE FROM [dbo].[budgets] WHERE [id] = @id";
@@ -77,7 +80,6 @@ namespace nyms.resident.server.DataProviders.Impl
 
             List<int> CategoryIds = new List<int>();
             List<int> BudgetIds = new List<int>();
-            // List<int> SpendIds = new List<int>();
 
             using(SqlConnection conn = new SqlConnection(_connectionString))
             {
@@ -102,19 +104,20 @@ namespace nyms.resident.server.DataProviders.Impl
                     DynamicParameters dp = new DynamicParameters();
                     BudgetIds.ForEach(id => {
                         dp.Add("id", id, DbType.Int32, ParameterDirection.Input);
-                        var affRowsX = conn.Execute(sqlDelSpends, dp, transaction: tran);  
+                        var affRows0 = conn.Execute(sqlDelSpendComments, dp, transaction: tran);
+                        var affRows1 = conn.Execute(sqlDelSpends, dp, transaction: tran);  
                     });
                     BudgetIds.ForEach(id =>
                     {
                         dp.Add("id", id, DbType.Int32, ParameterDirection.Input);
-                        var affRows1 = conn.Execute(sqlDelBudgetAllocations, dp, transaction: tran);
-                        var affRows2 = conn.Execute(sqlDelBudget, dp, transaction: tran);
+                        var affRows2 = conn.Execute(sqlDelBudgetAllocations, dp, transaction: tran);
+                        var affRows3 = conn.Execute(sqlDelBudget, dp, transaction: tran);
                     });
                     CategoryIds.ForEach(id =>
                     {
                         dp.Add("id", id, DbType.Int32, ParameterDirection.Input); 
-                        var affRowsX1 = conn.Execute(sqlDelSpendRoles, dp, transaction: tran);
-                        var affRowsX2 = conn.Execute(sqlDelSpendsCategory, dp, transaction: tran);
+                        var affRows4 = conn.Execute(sqlDelSpendRoles, dp, transaction: tran);
+                        var affRows5 = conn.Execute(sqlDelSpendsCategory, dp, transaction: tran);
                     });
                     tran.Commit();
                 }
@@ -127,12 +130,10 @@ namespace nyms.resident.server.DataProviders.Impl
             string sqlSelTestBudgets = @"select id as id from budgets
                                     where name like 'Test%'";
 
-            // string sqlDelSpends = @"DELETE FROM [dbo].[spends] WHERE [budget_id] = @id";
             string sqlDelBudgetAllocations = @"DELETE FROM [dbo].[budget_allocations] WHERE [budget_id] = @id";
             string sqlDelBudget = @"DELETE FROM [dbo].[budgets] WHERE [id] = @id";
 
             List<int> BudgetIds = new List<int>();
-            // List<int> SpendIds = new List<int>();
 
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {

@@ -8,8 +8,8 @@ namespace nyms.resident.server.Models
         public int BudgetId { get; set; }
         public decimal Amount { get; set; }
         public string PoNumber { get; set; }
-        public string Notes { get; set; }
         public string TranType { get; set; }
+        public SpendComments SpendComments { get; set; }
         public int CreatedById { get; set; }
         public DateTime CreatedDate { get; set; }
     }

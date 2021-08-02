@@ -5,6 +5,7 @@ namespace nyms.resident.server.Models
     public class BudgetRequest : Budget
     {
         public IEnumerable<BudgetAllocation> BudgetAllocations { get; set; }
-        public Recurrence Recurrence { get; set; }
+        public int BudgetMonth { get; set; }
+        public int NumberOfMonths { get; set; }
     }
 }

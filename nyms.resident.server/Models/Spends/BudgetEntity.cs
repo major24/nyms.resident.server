@@ -10,6 +10,7 @@ namespace nyms.resident.server.Models
         public int SpendCategoryId { get; set; }
         public int CareHomeId { get; set; }
         public string Name { get; set; }
+        public BudgetType BudgetType { get; set; }
         public DateTime DateFrom { get; set; }
         public DateTime DateTo { get; set; }
         public string Description { get; set; }
