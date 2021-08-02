@@ -52,6 +52,7 @@ namespace nyms.resident.server
             container.RegisterType<ISpendCategoriesDataProvider, SpendCategoriesDataProvider>(new InjectionConstructor(connectionString));
             container.RegisterType<ISpendCategoriesService, SpendCategoriesService>();
             container.RegisterType<IBudgetDataProvider, BudgetDataProvider>(new InjectionConstructor(connectionString));
+            container.RegisterType<ISpendDataProvider, SpendDataProvider>(new InjectionConstructor(connectionString));
             container.RegisterType<IBudgetService, BudgetService>();
             container.RegisterType<ISecurityDataProvider, SecurityDataProvider>(new InjectionConstructor(connectionString));
             container.RegisterType<ISecurityService, SecurityService>();

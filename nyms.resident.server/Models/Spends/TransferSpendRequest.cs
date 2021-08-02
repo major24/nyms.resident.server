@@ -6,6 +6,6 @@ namespace nyms.resident.server.Models
     {
         public int TransferFromSpendId { get; set; }
         public Guid TransferToBudgetReferenceId { get; set; }
-        public string Notes { get; set; }
+        public string Comments { get; set; }
     }
 }
