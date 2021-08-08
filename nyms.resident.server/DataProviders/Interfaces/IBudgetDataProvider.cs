@@ -9,6 +9,7 @@ namespace nyms.resident.server.DataProviders.Interfaces
     {
         IEnumerable<BudgetListResponse> GetBudgetListResponses(DateTime dateFrom, DateTime dateTo, int[] spendCategoryIds);
         IEnumerable<BudgetListResponse> GetBudgetListResponsesApprovedAndOpened(DateTime dateFrom, DateTime dateTo, int[] spendCategoryIds);
+        IEnumerable<Budget> GetBudgetsApprovedAndOpened(int[] spendCategoryIds);
         BudgetListResponse GetBudgetListResponse(Guid referenceId);
         BudgetEntity Insert(IEnumerable<BudgetEntity> budgetEntities);
         BudgetEntity Update(BudgetEntity budgetEntity);

@@ -132,7 +132,39 @@ namespace nyms.resident.server.DataProviders.Impl
                 return conn.QueryAsync<BudgetListResponse>(sql, dp).Result;
             }
         }
-        
+
+        public IEnumerable<Budget> GetBudgetsApprovedAndOpened(int[] spendCategoryIds)
+        {
+            string sql = @"SELECT 
+                         bu.id as id
+                        ,bu.reference_id as referenceId
+                        ,bu.spend_category_id as spendcategoryid
+                        ,bu.care_home_id as carehomeid
+                        ,bu.name as name
+                        ,bu.budget_type as budgettype
+                        ,convert(varchar, bu.date_from, 23) as dateFrom
+                        ,convert(varchar, bu.date_to, 23) as dateTo
+                        ,bu.description as description
+                        ,bu.po_prefix as poprefix
+                        ,bu.status as status
+                        ,a.approved as approved
+						FROM [dbo].[budgets] as bu
+                        INNER JOIN [dbo].[budget_allocations] as a
+						ON bu.id = a.budget_id
+						WHERE bu.spend_category_id IN @spendcategoryids
+                        AND bu.status = 'Open'
+                        AND a.approved = 'Y';";
+
+            DynamicParameters dp = new DynamicParameters();
+            dp.Add("spendcategoryids", spendCategoryIds);
+
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                return conn.QueryAsync<Budget>(sql, dp).Result;
+            }
+        }
+
         public BudgetListResponse GetBudgetListResponse(Guid referenceId)
         {
             string sql = @"SELECT 

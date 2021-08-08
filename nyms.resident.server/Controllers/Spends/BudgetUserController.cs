@@ -64,6 +64,35 @@ namespace nyms.resident.server.Controllers.Spends
         }
 
         [HttpGet]
+        [Route("api/user/budgetnames/{budgetType}")]
+        public IHttpActionResult GetBudgetNamesForUser(BudgetType budgetType = BudgetType.Project)
+        {
+            var user = HttpContext.Current.User as SecurityPrincipal;
+            logger.Info($"Get budget names requested by {user.ForeName}");
+
+            // For user find allowed spend category ids
+            var spendCategoryIdsAllowed = _securityService.GetSpendCategoryRoleIds(user.Id).ToArray();
+
+            // Rule1: Select by allowed spend category ids only
+            IEnumerable<Budget> budgets = _budgetService.GetBudgetsApprovedAndOpened(spendCategoryIdsAllowed);
+
+            var budgetFilterByType = budgets.Where(b => b.BudgetType == budgetType);
+
+            // Rule2: Access Control based on care home role(s)
+            var permissions = _securityService.GetRolePermissions(user.Id);
+            if (IsAdmin(permissions))
+            {
+                return Ok(budgetFilterByType);
+            }
+            else
+            {
+                // Manager. Find by spend cate id and care home id
+                var temp = budgetFilterByType.Where(r => r.CareHomeId == permissions.FirstOrDefault().CareHomeId);
+                return Ok(temp);
+            }
+        }
+
+        [HttpGet]
         [Route("api/user/budgets/{referenceId}")]
         public IHttpActionResult GetBudgetAndSpendsByReferenceId(string referenceId)
         {

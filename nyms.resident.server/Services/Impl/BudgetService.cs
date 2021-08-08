@@ -29,6 +29,11 @@ namespace nyms.resident.server.Services.Impl
             return _spendBudgetDataProvider.GetBudgetListResponsesApprovedAndOpened(dateFrom, dateTo, spendCategoryIds);
         }
 
+        public IEnumerable<Budget> GetBudgetsApprovedAndOpened(int[] spendCategoryIds)
+        {
+            return _spendBudgetDataProvider.GetBudgetsApprovedAndOpened(spendCategoryIds);
+        }
+
         public BudgetListResponse GetBudgetListResponse(Guid referenceId)
         {
             // assemble budget and spends with comments
