@@ -27,40 +27,32 @@ namespace nyms.resident.server.Controllers.Spends
         }
 
         [HttpGet]
-        [Route("api/user/budgets/{dateFrom}/{dateTo}")]
-        public IHttpActionResult GetBudgetsForUser(string dateFrom, string dateTo)
+        [Route("api/user/budgets/{month}/{year}")]
+        public IHttpActionResult GetBudgetsForUserByMonth(int month, int year)
         {
-            if (string.IsNullOrEmpty(dateFrom)) throw new ArgumentNullException(nameof(dateFrom));
-            if (string.IsNullOrEmpty(dateTo)) throw new ArgumentNullException(nameof(dateTo));
+            if (month <= 0) throw new ArgumentException(nameof(month));
+            if (year <= 0) throw new ArgumentException(nameof(year));
 
-            DateTime.TryParse(dateFrom, out DateTime dataFromInput);
-            DateTime.TryParse(dateTo, out DateTime dateToInput);
+            var dateFrom = new DateTime(year, month, 1);
+            var lastDayOfMth = DateTime.DaysInMonth(year, month);
+            var dateTo = new DateTime(year, month, lastDayOfMth);
 
-            if (dataFromInput == null || dateToInput == null) throw new ArgumentException("Invalid dates");
+            return Ok(GetBudgetListResponses(dateFrom, dateTo));
+        }
 
-            var user = HttpContext.Current.User as SecurityPrincipal;
-            logger.Info($"Get budget requested by {user.ForeName}");
+        [HttpGet]
+        [Route("api/user/budgets/{dateFrom}/{dateTo}")]
+        public IHttpActionResult GetBudgetsForUser(string dateFromStr, string dateToStr)
+        {
+            if (string.IsNullOrEmpty(dateFromStr)) throw new ArgumentNullException(nameof(dateFromStr));
+            if (string.IsNullOrEmpty(dateToStr)) throw new ArgumentNullException(nameof(dateToStr));
 
-            // For user find allowed spend category ids
-            var spendCategoryIdsAllowed = _securityService.GetSpendCategoryRoleIds(user.Id).ToArray();
+            DateTime.TryParse(dateFromStr, out DateTime dateFrom);
+            DateTime.TryParse(dateToStr, out DateTime dateTo);
 
-            // Rule1: Select by allowed spend category ids only
-            IEnumerable<BudgetListResponse> budgetListResponses = _budgetService.GetBudgetListResponsesApprovedAndOpened(dataFromInput,
-                                                                                                        dateToInput,
-                                                                                                        spendCategoryIdsAllowed);
+            if (dateFrom == null || dateTo == null) throw new ArgumentException("Invalid dates");
 
-            // Rule2: Access Control based on care home role(s)
-            var permissions = _securityService.GetRolePermissions(user.Id);
-            if (IsAdmin(permissions))
-            {
-                return Ok(budgetListResponses);
-            }
-            else
-            {
-                // Manager. Find by spend cate id and care home id
-                var temp = budgetListResponses.Where(r => r.CareHomeId == permissions.FirstOrDefault().CareHomeId);
-                return Ok(temp);
-            }
+            return Ok(GetBudgetListResponses(dateFrom, dateTo));
         }
 
         [HttpGet]
@@ -156,6 +148,30 @@ namespace nyms.resident.server.Controllers.Spends
 
             _budgetService.InsertSpendComment(spendComments);
             return Ok(spendComments);
+        }
+
+        private IEnumerable<BudgetListResponse> GetBudgetListResponses(DateTime dateFrom, DateTime dateTo)
+        {
+            var user = HttpContext.Current.User as SecurityPrincipal;
+            // For user find allowed spend category ids
+            var spendCategoryIdsAllowed = _securityService.GetSpendCategoryRoleIds(user.Id).ToArray();
+
+            // Rule1: Select by allowed spend category ids only
+            IEnumerable<BudgetListResponse> budgetListResponses = _budgetService.GetBudgetListResponsesApprovedAndOpened(dateFrom,
+                                                                                                        dateTo,
+                                                                                                        spendCategoryIdsAllowed);
+
+            // Rule2: Access Control based on care home role(s)
+            var permissions = _securityService.GetRolePermissions(user.Id);
+            if (IsAdmin(permissions))
+            {
+                return budgetListResponses.ToArray();
+            }
+            else
+            {
+                // Manager. Find by spend cate id and care home id
+                return budgetListResponses.Where(r => r.CareHomeId == permissions.FirstOrDefault().CareHomeId).ToArray();
+            }
         }
 
         private bool IsAdmin(IEnumerable<UserRolePermission> permissions)
