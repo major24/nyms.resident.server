@@ -14,7 +14,7 @@ pipeline {
       steps {
         echo 'Building code from..!!'
         cmd_exec('echo "Run by build script is starting..."')
-        cmd_exec('mybuild.bat')
+        cmd_exec('echo mybuild.bat')
       }
     }
 
