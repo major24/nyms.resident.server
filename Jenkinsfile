@@ -12,7 +12,7 @@ pipeline {
 
     stage('Build') {
       steps {
-        echo 'Building code from..'
+        echo 'Building code from..!!'
         cmd_exec('echo "Run by build script is starting..."')
         cmd_exec('mybuild.bat')
       }
