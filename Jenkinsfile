@@ -13,7 +13,8 @@ pipeline {
     stage('Build') {
       steps {
         echo 'Building code from..'
-        bat 'mybuild.bat'
+        cmd_exec('echo "Run by build script is starting..."')
+        cmd_exec('mybuild.bat')
       }
     }
 
@@ -24,4 +25,8 @@ pipeline {
     }
 
   }
+}
+
+def cmd_exec(command) {
+    return bat(returnStdout: true, script: "${command}").trim()
 }
