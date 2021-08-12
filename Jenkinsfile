@@ -28,5 +28,5 @@ pipeline {
 }
 
 def cmd_exec(command) {
-    bat "chcp 65001\n${command}"
+    return bat(returnStdout: true, script: "${command}").trim()
 }
