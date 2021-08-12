@@ -13,7 +13,7 @@ pipeline {
     stage('Build') {
       steps {
         echo 'Building code from..'
-        call 'mybuild.bat'
+        bat 'mybuild.bat'
       }
     }
 
