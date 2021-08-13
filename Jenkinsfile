@@ -13,7 +13,7 @@ pipeline {
     stage('Build') {
       steps {
         echo 'Building code from..!!'
-        bat 'msbuild nyms.resident.server.sln'   //'c:\\Program Files (x86)\\Jenkins\\workspace\\mybuild.bat'
+        // bat 'msbuild nyms.resident.server.sln'   //'c:\\Program Files (x86)\\Jenkins\\workspace\\mybuild.bat'
       }
     }
 
