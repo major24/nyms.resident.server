@@ -13,7 +13,7 @@ pipeline {
     stage('Build') {
       steps {
         echo 'Building code from....'
-        bat 'msbuild nyms.resident.server.sln'
+        bat 'C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\MSBuild\\Current\\Bin\\msbuild.exe nyms.resident.server.sln'
       }
     }
 
