@@ -15,9 +15,7 @@ pipeline {
         echo 'Building code from..!!'
         // cmd_exec('echo "Run by build script is starting..."')
         // cmd_exec('echo "mybuild.bat"')
-        """
         call 'c:\\Program Files (x86)\\Jenkins\\workspace\\mybuild.bat'
-        """
       }
     }
 
