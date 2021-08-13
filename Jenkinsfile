@@ -13,8 +13,6 @@ pipeline {
     stage('Build') {
       steps {
         echo 'Building code from..!!'
-        // cmd_exec('echo "Run by build script is starting..."')
-        // cmd_exec('echo "mybuild.bat"')
         call 'c:\\Program Files (x86)\\Jenkins\\workspace\\mybuild.bat'
       }
     }
@@ -26,9 +24,4 @@ pipeline {
     }
 
   }
-}
-
-def cmd_exec(command) {
-    // return bat(returnStdout: true, script: "${command}").trim()
-  bat "chcp 65001\n${command}"
 }
