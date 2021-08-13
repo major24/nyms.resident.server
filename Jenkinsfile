@@ -13,6 +13,7 @@ pipeline {
     stage('Build') {
       steps {
         echo 'Building code from....'
+        bat 'msbuild nyms.resident.server.sln'
       }
     }
 
