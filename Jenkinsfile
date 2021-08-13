@@ -13,7 +13,7 @@ pipeline {
     stage('Build') {
       steps {
         echo 'Building code from..!!'
-        call 'c:\\Program Files (x86)\\Jenkins\\workspace\\mybuild.bat'
+        bat 'c:\\Program Files (x86)\\Jenkins\\workspace\\mybuild.bat'
       }
     }
 
