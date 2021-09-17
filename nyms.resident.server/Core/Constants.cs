@@ -27,6 +27,9 @@
 
         public static readonly string SPEND_TRAN_TYPE_DEBIT = "Debit";
         public static readonly string SPEND_TRAN_TYPE_CREDIT = "Credit";
+
+        // Meetings
+        public static readonly string MEETING_ACTION_DELETED = "Deleted";
     }
 
     public enum ENQUIRY_STATUS

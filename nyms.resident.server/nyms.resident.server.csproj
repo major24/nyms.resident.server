@@ -33,7 +33,7 @@
     <OutputPath>bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <WarningLevel>2</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -196,6 +196,9 @@
     <Compile Include="Controllers\Authentication\AuthenticationController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\Invoice\InvoicesController.cs" />
+    <Compile Include="Controllers\Meetings\MeetingActionItemController.cs" />
+    <Compile Include="Controllers\Meetings\MeetingCategoryController.cs" />
+    <Compile Include="Controllers\Meetings\MeetingController.cs" />
     <Compile Include="Controllers\Reports\ReportsController.cs" />
     <Compile Include="Controllers\Resident\CareHomeController.cs" />
     <Compile Include="Controllers\Resident\EnquiryController.cs" />
@@ -216,6 +219,9 @@
     <Compile Include="DataProviders\Impl\DatabaseSetupProvider.cs" />
     <Compile Include="DataProviders\Impl\EnquiryDataProvider.cs" />
     <Compile Include="DataProviders\Impl\InvoiceDataProvider.cs" />
+    <Compile Include="DataProviders\Impl\MeetingActionItemLookupDataProvider.cs" />
+    <Compile Include="DataProviders\Impl\MeetingCategoryLookupDataProvider.cs" />
+    <Compile Include="DataProviders\Impl\MeetingDataProvider.cs" />
     <Compile Include="DataProviders\Impl\PaymentProviderDataProvider.cs" />
     <Compile Include="DataProviders\Impl\PaymentTypeDataProvider.cs" />
     <Compile Include="DataProviders\Impl\ResidentContactDataProvider.cs" />
@@ -232,6 +238,9 @@
     <Compile Include="DataProviders\Interfaces\IEnquiryDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\ICareHomeDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\IInvoiceDataProvider.cs" />
+    <Compile Include="DataProviders\Interfaces\IMeetingActionItemLookupDataProvider.cs" />
+    <Compile Include="DataProviders\Interfaces\IMeetingCategoryLookupDataProvider.cs" />
+    <Compile Include="DataProviders\Interfaces\IMeetingDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\IPaymentProviderDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\IPaymentTypeDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\IResidentContactDataProvider.cs" />
@@ -261,6 +270,14 @@
     <Compile Include="Models\CareHome\CareHome.cs" />
     <Compile Include="Models\CareHome\CareHomeDivision.cs" />
     <Compile Include="Models\Enquiry\EnquiryResponse.cs" />
+    <Compile Include="Models\Meetings\Meeting.cs" />
+    <Compile Include="Models\Meetings\MeetingAction.cs" />
+    <Compile Include="Models\Meetings\MeetingActionDto.cs" />
+    <Compile Include="Models\Meetings\MeetingActionItem.cs" />
+    <Compile Include="Models\Meetings\MeetingActionItemDto.cs" />
+    <Compile Include="Models\Meetings\MeetingCategory.cs" />
+    <Compile Include="Models\Meetings\MeetingCategoryDto.cs" />
+    <Compile Include="Models\Meetings\MeetingDto.cs" />
     <Compile Include="Models\Reports\OccupancyReportResponse.cs" />
     <Compile Include="Models\Resident\ContactInfo.cs" />
     <Compile Include="Models\Enquiry\EnquiryAction.cs" />
@@ -333,6 +350,9 @@
     <Compile Include="Services\Impl\CareHomeService.cs" />
     <Compile Include="Services\Impl\EnquiryService.cs" />
     <Compile Include="Services\Impl\InvoiceService.cs" />
+    <Compile Include="Services\Impl\MeetingActionItemLookupService.cs" />
+    <Compile Include="Services\Impl\MeetingCategoryLookupService.cs" />
+    <Compile Include="Services\Impl\MeetingService.cs" />
     <Compile Include="Services\Impl\ReportService.cs" />
     <Compile Include="Services\Impl\ResidentService.cs" />
     <Compile Include="Services\Impl\ScheduleService.cs" />
@@ -344,6 +364,9 @@
     <Compile Include="Services\Interfaces\ICareHomeService.cs" />
     <Compile Include="Services\Interfaces\IEnquiryService.cs" />
     <Compile Include="Services\Interfaces\IInvoiceService.cs" />
+    <Compile Include="Services\Interfaces\IMeetingActionItemLookupService.cs" />
+    <Compile Include="Services\Interfaces\IMeetingCategoryLookupService.cs" />
+    <Compile Include="Services\Interfaces\IMeetingService.cs" />
     <Compile Include="Services\Interfaces\IReportService.cs" />
     <Compile Include="Services\Interfaces\IResidentService.cs" />
     <Compile Include="Services\Interfaces\IScheduleService.cs" />

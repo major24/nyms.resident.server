@@ -57,6 +57,15 @@ namespace nyms.resident.server
             container.RegisterType<ISecurityDataProvider, SecurityDataProvider>(new InjectionConstructor(connectionString));
             container.RegisterType<ISecurityService, SecurityService>();
 
+            container.RegisterType<IMeetingCategoryLookupDataProvider, MeetingCategoryLookupDataProvider>(new InjectionConstructor(connectionString));
+            container.RegisterType<IMeetingCategoryLookupService, MeetingCategoryLookupService>();
+            // container.RegisterType<IMeetingAgendaLookupDataProvider, MeetingAgendaLookupDataProvider>(new InjectionConstructor(connectionString));
+            // container.RegisterType<IMeetingAgendaLookupService, MeetingAgendaLookupService>();
+            container.RegisterType<IMeetingActionItemLookupDataProvider, MeetingActionItemLookupDataProvider>(new InjectionConstructor(connectionString));
+            container.RegisterType<IMeetingActionItemLookupService, MeetingActionItemLookupService>();
+            container.RegisterType<IMeetingDataProvider, MeetingDataProvider>(new InjectionConstructor(connectionString));
+            container.RegisterType<IMeetingService, MeetingService>();
+
             DependencyResolver.SetResolver(new Unity.Mvc5.UnityDependencyResolver(container));
 
             System.Web.Http.GlobalConfiguration.Configuration.DependencyResolver = new Unity.WebApi.UnityDependencyResolver(container);

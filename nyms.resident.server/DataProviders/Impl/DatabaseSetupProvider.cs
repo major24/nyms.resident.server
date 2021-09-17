@@ -194,6 +194,33 @@ namespace nyms.resident.server.DataProviders.Impl
             }
         }
 
+        public void ClearMeetingsAgendasActions()
+        {
+            string sqlDeleteActionCmts = @"delete from [dbo].[meeting_action_comments]";
+            string sqlDeleteActions = @"delete from [dbo].[meeting_actions]";
+            // string sqlDeleteSelAgendas = @"delete from [dbo].[meeting_selected_agendas]";
+            string sqlDeleteMeetings = @"delete from [dbo].[meetings]";
+            // string sqlDeleteActionItems = @"delete from [dbo].[meeting_action_items]";
+            string sqlDeleteAgendas = @"delete from [dbo].[meeting_agendas]";
+            string sqlDeleteCategories = @"delete from [dbo].[meeting_category]";
+
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+
+                using (var tran = conn.BeginTransaction())
+                {
+                    var affRows0 = conn.Execute(sqlDeleteActionCmts, transaction: tran);
+                    affRows0 = conn.Execute(sqlDeleteActions, transaction: tran);
+                    // affRows0 = conn.Execute(sqlDeleteSelAgendas, transaction: tran);
+                    affRows0 = conn.Execute(sqlDeleteMeetings, transaction: tran);
+                    // affRows0 = conn.Execute(sqlDeleteActionItems, transaction: tran);
+                    affRows0 = conn.Execute(sqlDeleteAgendas, transaction: tran);
+                    affRows0 = conn.Execute(sqlDeleteCategories, transaction: tran);
+                    tran.Commit();
+                }
+            }
+        }
 
         public void SeedDatabase()
         {
