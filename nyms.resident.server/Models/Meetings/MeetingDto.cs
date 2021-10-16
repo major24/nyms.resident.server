@@ -17,12 +17,5 @@ namespace nyms.resident.server.Models
         public IEnumerable<MeetingActionDto> MeetingActions { get; set; }
         // When an action is deleted on [Update] scenario, this will pass those deleted [action] ids, to mark as deleted.
         public int[] DeletedIds { get; set; }
-
-        /*        public string Status { get; set; }
-                public int CreatedById { get; set; }
-                public DateTime CreatedDate { get; set; }
-                public int UpdatedById { get; set; }
-                public DateTime UpdatedDate { get; set; }*/
-
     }
 }

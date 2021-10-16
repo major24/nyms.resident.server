@@ -74,10 +74,6 @@ namespace nyms.resident.server.Controllers.Meetings
             var meetingActionItems = _meetingActionItemLookupService.GetMeetingActionItems();
             if (meetingActionItems.Any())
             {
-                /*                meetingCategories.ForEach(c =>
-                                {
-                                    c.MeetingActionItems = meetingActionItems.Where(ai => ai.MeetingCategoryId == c.Id);
-                                });*/
                 // Filter action items to send back. make new dto
                 var meetingActionItemsDto = meetingActionItems.Select(a =>
                 {
@@ -88,7 +84,6 @@ namespace nyms.resident.server.Controllers.Meetings
                         Name = a.Name,
                         Description = a.Description,
                         IsAdhoc = a.IsAdhoc
-                        // MeetingAction = null
                     };
                 }).ToArray();
                 // from above list find matching items

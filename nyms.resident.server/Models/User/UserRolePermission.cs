@@ -1,5 +1,6 @@
 ﻿namespace nyms.resident.server.Models
 {
+    // DO NOT USE in the future. Instead use UserRoleAccess class
     public class UserRolePermission
     {
         public int UserId { get; set; }

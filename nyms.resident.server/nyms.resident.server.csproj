@@ -219,6 +219,7 @@
     <Compile Include="DataProviders\Impl\DatabaseSetupProvider.cs" />
     <Compile Include="DataProviders\Impl\EnquiryDataProvider.cs" />
     <Compile Include="DataProviders\Impl\InvoiceDataProvider.cs" />
+    <Compile Include="DataProviders\Impl\MeetingActionDataProvider.cs" />
     <Compile Include="DataProviders\Impl\MeetingActionItemLookupDataProvider.cs" />
     <Compile Include="DataProviders\Impl\MeetingCategoryLookupDataProvider.cs" />
     <Compile Include="DataProviders\Impl\MeetingDataProvider.cs" />
@@ -238,6 +239,7 @@
     <Compile Include="DataProviders\Interfaces\IEnquiryDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\ICareHomeDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\IInvoiceDataProvider.cs" />
+    <Compile Include="DataProviders\Interfaces\IMeetingActionDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\IMeetingActionItemLookupDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\IMeetingCategoryLookupDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\IMeetingDataProvider.cs" />
@@ -272,11 +274,15 @@
     <Compile Include="Models\Enquiry\EnquiryResponse.cs" />
     <Compile Include="Models\Meetings\Meeting.cs" />
     <Compile Include="Models\Meetings\MeetingAction.cs" />
+    <Compile Include="Models\Meetings\MeetingActionCompleteRequest.cs" />
     <Compile Include="Models\Meetings\MeetingActionDto.cs" />
+    <Compile Include="Models\Meetings\MeetingActionInspectRequest.cs" />
     <Compile Include="Models\Meetings\MeetingActionItem.cs" />
     <Compile Include="Models\Meetings\MeetingActionItemDto.cs" />
+    <Compile Include="Models\Meetings\MeetingActionResponse.cs" />
     <Compile Include="Models\Meetings\MeetingCategory.cs" />
     <Compile Include="Models\Meetings\MeetingCategoryDto.cs" />
+    <Compile Include="Models\Meetings\MeetingActionComment.cs" />
     <Compile Include="Models\Meetings\MeetingDto.cs" />
     <Compile Include="Models\Reports\OccupancyReportResponse.cs" />
     <Compile Include="Models\Resident\ContactInfo.cs" />
@@ -338,6 +344,7 @@
     <Compile Include="Models\Spends\TransferSpendRequest.cs" />
     <Compile Include="Models\User\CareHomeRole.cs" />
     <Compile Include="Models\User\Role.cs" />
+    <Compile Include="Models\User\UserRoleAccess.cs" />
     <Compile Include="Models\User\UserRolePermission.cs" />
     <Compile Include="Models\User\User.cs" />
     <Compile Include="Models\User\UserEntity.cs" />

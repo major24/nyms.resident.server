@@ -1,23 +1,18 @@
 ﻿using nyms.resident.server.Model;
 using nyms.resident.server.Models;
+using nyms.resident.server.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace nyms.resident.server.Services.Interfaces
+namespace nyms.resident.server.DataProviders.Interfaces
 {
-    public interface IMeetingService
+    public interface IMeetingActionDataProvider
     {
-        IEnumerable<Meeting> GetMeetings();
-        Meeting GetMeeting(Guid referenceId);
-        Meeting Insert(Meeting meeting);
-        Meeting Update(Meeting meeting, int[] deletedIds = null);
-
-        // Actions
         IEnumerable<MeetingActionResponse> GetActions();
-        MeetingActionCompleteRequest UpdateActionCompleted(MeetingActionCompleteRequest meetingActionCompleteRequest);
+        MeetingActionCompleteRequest UpdateActionCompleted(MeetingActionCompleteRequest meetingActionCompleteOrCommentRequest);
         IEnumerable<MeetingActionComment> GetComments(int[] meetingActionIds);
         MeetingActionComment InsertActionComment(MeetingActionComment meetingActionComment);
         MeetingActionInspectRequest UpdateActionInspected(MeetingActionInspectRequest meetingActionInspectRequest);

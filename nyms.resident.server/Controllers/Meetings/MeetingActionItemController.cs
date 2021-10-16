@@ -26,26 +26,6 @@ namespace nyms.resident.server.Controllers.Meetings
             _meetingActionItemService = meetingActionItemService ?? throw new ArgumentNullException(nameof(meetingActionItemService));
         }
 
-
-        // DO WE NEED this below?? it is part of categories/action-items
-
-/*        [HttpGet]
-        [Route("api/meetings/action-items")]
-        public IHttpActionResult GetMeetingActionItems()
-        {
-            var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
-            logger.Info($"Meeting action item fetched by {loggedInUser.ForeName}");
-
-            var meetingActionItems = _meetingActionItemService.GetMeetingActionItems();
-            if (meetingActionItems == null || !meetingActionItems.Any())
-            {
-                logger.Warn($"No meeting action items found");
-                return NotFound();
-            }
-
-            return Ok(meetingActionItems.ToArray());
-        }*/
-
         [HttpPost]
         [Route("api/meetings/action-items")]
         public IHttpActionResult InsertActionItem(MeetingActionItem meetingActionItem)

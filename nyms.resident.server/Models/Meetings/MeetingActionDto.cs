@@ -22,13 +22,5 @@ namespace nyms.resident.server.Models
 
         // Supporting property to manage data at client side
         public bool Checked { get; set; }
-
-        /*        public string Completed { get; set; }
-        public DateTime? ActualCompletionDate { get; set; }
-        public string Status { get; set; }
-        public int UpdatedById { get; set; }
-        public DateTime UpdatedDate { get; set; }
-        public int InspectedById { get; set; }
-        public DateTime? InspectedDate { get; set; }*/
     }
 }

@@ -17,7 +17,7 @@ namespace nyms.resident.server.DataProviders.Impl
             _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
         }
 
-        public IEnumerable<Role> GetRoles()
+/*        public IEnumerable<Role> GetRoles()
         {
             string sql = @"SELECT id as id, name as name FROM [dbo].[roles] 
                             WHERE [id] > 1 
@@ -28,7 +28,7 @@ namespace nyms.resident.server.DataProviders.Impl
                 conn.Open();
                 return conn.QueryAsync<Role>(sql).Result;
             }
-        }
+        }*/
 
         public IEnumerable<UserRolePermission> GetRolePermissions(int userId)
         {
@@ -70,6 +70,30 @@ namespace nyms.resident.server.DataProviders.Impl
             {
                 conn.Open();
                 return conn.QueryAsync<int>(sql, dp).Result;
+            }
+        }
+
+        public IEnumerable<UserRoleAccess> GetUserRoleAccesses()
+        {
+            string sql = @"SELECT u.id as userid
+                            ,u.forename as forename
+                            ,u.surname as surname
+                            ,u.active as activeuser
+                            ,r.id as roleid
+                            ,ur.care_home_id as carehomeid
+                            ,r.name as rolename
+                            ,r.active as activerole
+                            FROM [dbo].[users] u 
+                            INNER JOIN [dbo].[users_roles] ur
+                            ON u.id = ur.user_id
+                            INNER JOIN [dbo].[roles] r
+                            ON r.id = ur.role_id
+                            ORDER BY u.id";
+
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                return conn.QueryAsync<UserRoleAccess>(sql).Result;
             }
         }
 

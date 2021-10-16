@@ -12,6 +12,7 @@ using System.Net.Http;
 using System.Web;
 using System.Web.Http;
 using Microsoft.Ajax.Utilities;
+using nyms.resident.server.Model;
 
 namespace nyms.resident.server.Controllers.Meetings
 {
@@ -33,14 +34,47 @@ namespace nyms.resident.server.Controllers.Meetings
             var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
             logger.Info($"Meetings fetched by {loggedInUser.ForeName}");
 
-            var result = _meetingService.GetMeetings();
+            var meetings = _meetingService.GetMeetings();
 
-            if (result == null || !result.Any())
+            if (meetings == null || !meetings.Any())
             {
                 return NotFound();
             }
 
-            return Ok(result);
+            // return meetingDto list
+            IEnumerable<MeetingDto> meetingsDto = meetings.Select(meeting => {
+                // return meetingDto and actionsDto insted of meeting and actions                        
+                IEnumerable<MeetingActionDto> actionsDto = meeting.MeetingActions.Select(act =>
+                {
+                    return new MeetingActionDto()
+                    {
+                        Id = act.Id,
+                        MeetingCategoryId = act.MeetingCategoryId,
+                        MeetingActionItemId = act.MeetingActionItemId,
+                        Name = act.Name,
+                        Description = act.Description,
+                        IsAdhoc = act.IsAdhoc,
+                        OwnerId = act.OwnerId,
+                        StartDate = act.StartDate,
+                        CompletionDate = act.CompletionDate,
+                        Priority = act.Priority,
+                    };
+                }).ToArray();
+
+                return new MeetingDto()
+                {
+                    Id = meeting.Id,
+                    ReferenceId = meeting.ReferenceId,
+                    Title = meeting.Title,
+                    Description = meeting.Description,
+                    MeetingDate = meeting.MeetingDate,
+                    OwnerId = meeting.OwnerId,
+                    MeetingActions = actionsDto
+
+                };
+            }); 
+            
+            return Ok(meetingsDto);
         }
 
         [HttpGet]
@@ -90,13 +124,7 @@ namespace nyms.resident.server.Controllers.Meetings
                 MeetingActions = actionsDto
 
             };
-            /*            meeting.MeetingActions = actionsDto as MeetingAction[];
-
-                        // If actions found, add [Checked] prop to true, to manage in UI
-                        meeting.MeetingActions.ForEach(a =>
-                        {
-                            a.Checked = true;
-                        });*/
+            
             meetingDto.MeetingActions.ForEach(a =>
             {
                 a.Checked = true;
@@ -120,7 +148,7 @@ namespace nyms.resident.server.Controllers.Meetings
             // convert to meeting and meetingActions enity
             IEnumerable<MeetingAction> actions = meetingDto.MeetingActions.Select(a => {
                 return ToEntity(a);
-            });
+            }).ToArray();
             actions.ForEach(a =>
             {
                 a.CreatedById = loggedInUser.Id;
@@ -130,13 +158,6 @@ namespace nyms.resident.server.Controllers.Meetings
             Meeting meeting = ToEntity(meetingDto);
             meeting.MeetingActions = actions;
             meeting.CreatedById = loggedInUser.Id;
-
-
-            /*meeting.CreatedById = loggedInUser.Id;
-            meeting.MeetingActions.ForEach(a =>
-            {
-                a.CreatedById = loggedInUser.Id;
-            });*/
 
             meeting.ReferenceId = Guid.NewGuid();
             meeting.OwnerId = loggedInUser.Id;
@@ -159,7 +180,7 @@ namespace nyms.resident.server.Controllers.Meetings
             // convert to meeting and meetingActions enity
             IEnumerable<MeetingAction> actions = meetingDto.MeetingActions.Select(a => {
                 return ToEntity(a);
-            });
+            }).ToArray();
             actions.ForEach(a =>
             {
                 a.UpdatedById = loggedInUser.Id;
@@ -170,35 +191,123 @@ namespace nyms.resident.server.Controllers.Meetings
             meeting.MeetingActions = actions;
             meeting.UpdatedById = loggedInUser.Id;
 
-/*            IEnumerable<MeetingAction> actions = meetingDto.MeetingActions.Select(act =>
-            {
-                return new MeetingAction()
-                {
-                    Id = act.Id,
-                    MeetingCategoryId = act.MeetingCategoryId,
-                    MeetingActionItemId = act.MeetingActionItemId,
-                    Name = act.Name,
-                    Description = act.Description,
-                    IsAdhoc = act.IsAdhoc,
-                    OwnerId = act.OwnerId,
-                    StartDate = act.StartDate,
-                    CompletionDate = act.CompletionDate,
-                    Priority = act.Priority,
-                    UpdatedById = loggedInUser.Id
-                };
-            }).ToArray();*/
-
-
-
-            // meetingDto.UpdatedById = loggedInUser.Id;
-            /*            meetingDto.MeetingActions.ForEach(a =>
-                        {
-                            a.UpdatedById = loggedInUser.Id;
-                        });*/
-
             var result = _meetingService.Update(meeting, meetingDto.DeletedIds);
             return Ok(result);
         }
+
+
+        // =========================================================
+        // Actions - GET and POST status and comments...
+        // =========================================================
+        [HttpGet]
+        [Route("api/meetings/meetings/actions/xxx")]
+        public IHttpActionResult GetActionsTEMP(bool isPending, bool isCompleted, bool isInspected)
+        {
+            var x = isPending;
+            var xx = isCompleted;
+            var xxx = isInspected;
+            return GetActions(isPending, isCompleted, isInspected);
+        }
+
+        [HttpGet]
+        [Route("api/meetings/meetings/actions")]
+        public IHttpActionResult GetActions(bool isPending, bool isCompleted, bool isInspected)
+        {
+            // TODO-Need find filter. Meeting date or Last 50 records etc...
+            var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
+            logger.Info($"Meeting actions fetched by {loggedInUser.ForeName}");
+
+            var actions = _meetingService.GetActions();
+
+            if (actions == null || !actions.Any())
+            {
+                return NotFound();
+            }
+
+            // filer actions
+            IEnumerable<MeetingActionResponse> pendingActions = new List<MeetingActionResponse>();
+            IEnumerable<MeetingActionResponse> completedActions = new List<MeetingActionResponse>();
+            IEnumerable<MeetingActionResponse> inspectedActions = new List<MeetingActionResponse>();
+            // isCompleted = isInspected ? false :
+            if (isPending)
+            {
+                pendingActions = actions.Where(a => a.Completed == null).ToArray();
+            }
+            if (isInspected)
+            {
+                inspectedActions = actions.Where(a => a.Inspected != null).ToArray();
+            }
+            if (isCompleted)
+            {
+                completedActions = actions.Where(a => a.Completed != null).ToArray();
+            }
+
+            var merged = pendingActions.Concat(completedActions).Concat(inspectedActions).Distinct().ToArray();
+            
+            return Ok(merged);
+        }
+
+        [HttpPost]
+        [Route("api/meetings/meetings/actions/complete/{id}")]
+        public IHttpActionResult UpdateActionCompleted(int id, MeetingActionCompleteRequest meetingActionCompleteRequest)
+        {
+            if (meetingActionCompleteRequest == null || id < 0 || meetingActionCompleteRequest.Id < 0 || meetingActionCompleteRequest.Completed == "")
+            {
+                return BadRequest("Either action id or complete status not found");
+            }
+
+            var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
+            logger.Info($"Meeting action completed by {loggedInUser.ForeName}");
+
+            meetingActionCompleteRequest.CompletedById = loggedInUser.Id;
+            meetingActionCompleteRequest.CompletedDate = DateTime.Now;
+
+            var completed = _meetingService.UpdateActionCompleted(meetingActionCompleteRequest);
+
+            return Ok(completed);
+        }
+
+        [HttpPost]
+        [Route("api/meetings/meetings/actions/inspection/{id}")]
+        public IHttpActionResult UpdateActionInspected(int id, MeetingActionInspectRequest meetingActionInspectRequest)
+        {
+            if (meetingActionInspectRequest == null || id < 0 || meetingActionInspectRequest.Id < 0 || meetingActionInspectRequest.Inspected == "")
+            {
+                return BadRequest("Either action id or complete status not found");
+            }
+
+            var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
+            logger.Info($"Meeting action inspected by {loggedInUser.ForeName}");
+
+            meetingActionInspectRequest.InspectedById = loggedInUser.Id;
+            meetingActionInspectRequest.InspectedDate = DateTime.Now;
+
+            var completed = _meetingService.UpdateActionInspected(meetingActionInspectRequest);
+
+            return Ok(completed);
+        }
+
+        [HttpPost]
+        [Route("api/meetings/meetings/actions/comment/{id}")]
+        public IHttpActionResult InsertActionComment(int id, MeetingActionComment meetingActionComment)
+        {
+            if (meetingActionComment == null || id < 0 || meetingActionComment.Comment == "")
+            {
+                return BadRequest("Either action id or comment not found");
+            }
+
+            var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
+            logger.Info($"Meeting action commented by {loggedInUser.ForeName}");
+
+            meetingActionComment.MeetingActionId = id;
+            meetingActionComment.CreatedById = loggedInUser.Id;
+            meetingActionComment.CreatedDate = DateTime.Now;
+
+            var result = _meetingService.InsertActionComment(meetingActionComment);
+
+            return Ok(result);
+        }
+
 
         private Meeting ToEntity(MeetingDto meetingDto)
         {

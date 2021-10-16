@@ -19,10 +19,5 @@ namespace nyms.resident.server.Models
         public int UpdatedById { get; set; }
         public DateTime UpdatedDate { get; set; }
         public IEnumerable<MeetingAction> MeetingActions { get; set; }
-
-        // public string Active { get; set; }
-        // public int MeetingCategoryId { get; set; }
-        // public IEnumerable<int> MeetingAgendaIds { get; set; }
-        // public IEnumerable<MeetingAgenda> MeetingAgendas { get; set; }
     }
 }
