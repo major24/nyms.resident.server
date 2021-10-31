@@ -25,7 +25,6 @@ namespace nyms.resident.server.DataProviders.Impl
             string sql = @"SELECT [id] as id
                           ,[reference_id] as referenceid
                           ,[title] as title
-                          ,[description] as description
                           ,[meeting_date] as meetingdate
                           ,[owner_id] as ownerid
                           ,[status] as status
@@ -34,29 +33,40 @@ namespace nyms.resident.server.DataProviders.Impl
                         FROM [dbo].[meetings]
                         WHERE reference_id = @referenceid";
 
-            string sqlMeetingActions = @"SELECT m.id as id
-                          ,[meeting_id] as meetingid
-                          ,m.meeting_category_id as meetingcategoryid
-                          ,[meeting_action_item_id] as meetingactionitemid
-                          ,[owner_id] as ownerid
-                          ,[start_date] as startdate
-                          ,[completion_date] as completiondate
-                          ,[priority] as priority
-                          ,[completed] as completed
-                          ,[completed_date] as completeddate
-                          ,[status] as status
-                          ,[updated_by_id] as updatedbyid
-                          ,[updated_date] as updateddate
-                          ,a.name as name
-                          ,a.description as description
-                          ,a.is_adhoc as isadhoc
-                        FROM [dbo].[meeting_actions] m
-                        INNER JOIN [dbo].[meeting_action_items] a
-                        ON m.meeting_action_item_id = a.id
-                        WHERE meeting_id = @meetingid
-                        AND m.status IS NULL";
+            /*            string sqlMeetingActions = @"SELECT mact.id as id
+                                      ,[meeting_id] as meetingid
+                                      ,mact.meeting_category_id as meetingcategoryid
+                                      ,[meeting_action_item_id] as meetingactionitemid
+                                      ,mact.description as description
+                                      ,[owner_id] as ownerid
+                                      ,[start_date] as startdate
+                                      ,[completion_date] as completiondate
+                                      ,[priority] as priority
+                                      ,[completed] as completed
+                                      ,[completed_by_id] as completedbyid
+                                      ,[completed_date] as completeddate
+                                      ,[inspected] as inspected
+                                      ,[inspected_by_id] as inspectedbyid
+                                      ,[inspected_date] as inspecteddate
+                                      ,[inspection_status] as inspectionstatus
+                                      ,[updated_by_id] as updatedbyid
+                                      ,[updated_date] as updateddate
+                                      ,[action_status] as actionstatus
+                                      ,aitem.name as name
+                                      ,aitem.is_adhoc as isadhoc
+                                    FROM [dbo].[meeting_actions] mact
+                                    INNER JOIN [dbo].[meeting_action_items] aitem
+                                    ON mact.meeting_action_item_id = aitem.id
+                                    WHERE meeting_id = @meetingid";*/
 
             using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                DynamicParameters dp = new DynamicParameters();
+                dp.Add("referenceid", referenceId.ToString(), DbType.String, ParameterDirection.Input);
+                return conn.QuerySingle<Meeting>(sql, dp);
+            }
+
+/*            using (IDbConnection conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
                 using (var tran = conn.BeginTransaction())
@@ -65,69 +75,80 @@ namespace nyms.resident.server.DataProviders.Impl
                     dp.Add("referenceid", referenceId.ToString(), DbType.String, ParameterDirection.Input);
                     var meeting = conn.QuerySingle<Meeting>(sql, dp, commandType: CommandType.Text, transaction: tran);
 
-                    if (meeting != null)
+                    *//*if (meeting != null)
                     {
                         DynamicParameters dp2 = new DynamicParameters();
                         dp2.Add("meetingid", meeting.Id, DbType.Int32, ParameterDirection.Input);
                         meeting.MeetingActions = conn.QueryAsync<MeetingAction>(sqlMeetingActions, dp2, commandType: CommandType.Text, transaction: tran).Result;
-                    }
+                    }*//*
                     tran.Commit();
                     return meeting;
                 }
-            }
+            }*/
         }
 
-        public IEnumerable<Meeting> GetMeetings()
+        public IEnumerable<Meeting> GetMeetings(int lastN_Rows = 20)
         {
-            string sql = @"SELECT [id] as id
+            string sql = $@"SELECT TOP {lastN_Rows} [id] as id
                           ,[reference_id] as referenceid
                           ,[title] as title
-                          ,[description] as description
                           ,[meeting_date] as meetingdate
                           ,[owner_id] as ownerid
                           ,[status] as status
                           ,[created_by_id] as createdbyid
                           ,[created_date] as createddate
-                        FROM [dbo].[meetings]";
+                        FROM [dbo].[meetings]
+                        ORDER BY id DESC";
 
-            string sqlMeetingActions = @"SELECT m.id as id
-                          ,[meeting_id] as meetingid
-                          ,m.meeting_category_id as meetingcategoryid
-                          ,[meeting_action_item_id] as meetingactionitemid
-                          ,[owner_id] as ownerid
-                          ,[start_date] as startdate
-                          ,[completion_date] as completiondate
-                          ,[priority] as priority
-                          ,[completed] as completed
-                          ,[completed_date] as completeddate
-                          ,[status] as status
-                          ,[updated_by_id] as updatedbyid
-                          ,[updated_date] as updateddate
-                          ,a.name as name
-                          ,a.description as description
-                          ,a.is_adhoc as adhoc
-                        FROM [dbo].[meeting_actions] m
-                        INNER JOIN [dbo].[meeting_action_items] a
-                        ON m.meeting_action_item_id = a.id
-                        WHERE meeting_id = @meetingid";
+            /*            string sqlMeetingActions = @"SELECT mact.id as id
+                                      ,[meeting_id] as meetingid
+                                      ,mact.meeting_category_id as meetingcategoryid
+                                      ,[meeting_action_item_id] as meetingactionitemid
+                                      ,mact.description as description
+                                      ,[owner_id] as ownerid
+                                      ,[start_date] as startdate
+                                      ,[completion_date] as completiondate
+                                      ,[priority] as priority
+                                      ,[completed] as completed
+                                      ,[completed_by_id] as completedbyid
+                                      ,[completed_date] as completeddate
+                                      ,[inspected] as inspected
+                                      ,[inspected_by_id] as inspectedbyid
+                                      ,[inspected_date] as inspecteddate
+                                      ,[inspection_status] as inspectionstatus
+                                      ,[updated_by_id] as updatedbyid
+                                      ,[updated_date] as updateddate
+                                      ,[action_status] as actionstatus
+                                      ,aitem.name as name
+                                      ,aitem.is_adhoc as isadhoc
+                                    FROM [dbo].[meeting_actions] mact
+                                    INNER JOIN [dbo].[meeting_action_items] aitem
+                                    ON mact.meeting_action_item_id = aitem.id
+                                    WHERE meeting_id = @meetingid";*/
+
 
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
-                conn.Open();
+                return conn.QueryAsync<Meeting>(sql).Result;
+            }
+
+            //using (IDbConnection conn = new SqlConnection(_connectionString))
+            //{
+/*                conn.Open();
                 using (var tran = conn.BeginTransaction())
                 {
                     var meetings = conn.QueryAsync<Meeting>(sql, commandType: CommandType.Text, transaction: tran).Result;
 
-                    DynamicParameters dp = new DynamicParameters();
+                    *//*DynamicParameters dp = new DynamicParameters();
                     meetings.ForEach(m =>
                     {
                         dp.Add("meetingid", m.Id, DbType.Int32, ParameterDirection.Input);
                         m.MeetingActions = conn.QueryAsync<MeetingAction>(sqlMeetingActions, dp, commandType: CommandType.Text, transaction: tran).Result;
-                    });
+                    });*//*
                     tran.Commit();
                     return meetings;
                 }
-            }
+            }*/
         }
 
         public Meeting Insert(Meeting meeting)
@@ -135,14 +156,12 @@ namespace nyms.resident.server.DataProviders.Impl
             string sql = @"INSERT INTO [dbo].[meetings]
                             ([reference_id]
                             ,[title]
-                            ,[description]
                             ,[meeting_date]
                             ,[owner_id]
                             ,[created_by_id])
                             VALUES
                             (@referenceid
                             ,@title
-                            ,@description
                             ,@meetingdate
                             ,@ownerid
                             ,@createdbyid);
@@ -152,6 +171,7 @@ namespace nyms.resident.server.DataProviders.Impl
                             ([meeting_id]
                             ,[meeting_category_id]
                             ,[meeting_action_item_id]
+                            ,[description]
                             ,[owner_id]
                             ,[start_date]
                             ,[completion_date]
@@ -162,6 +182,7 @@ namespace nyms.resident.server.DataProviders.Impl
                             (@meetingid
                             ,@meetingcategoryid
                             ,@meetingactionitemid
+                            ,@description
                             ,@ownerid
                             ,@startdate
                             ,@completiondate
@@ -189,16 +210,15 @@ namespace nyms.resident.server.DataProviders.Impl
             DynamicParameters dp = new DynamicParameters();
             dp.Add("referenceid", meeting.ReferenceId, DbType.Guid, ParameterDirection.Input, 80);
             dp.Add("title", meeting.Title, DbType.String, ParameterDirection.Input);
-            dp.Add("description", meeting.Description, DbType.String, ParameterDirection.Input);
             dp.Add("meetingdate", meeting.MeetingDate.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input);
             dp.Add("ownerid", meeting.OwnerId, DbType.Int32, ParameterDirection.Input);
             dp.Add("createdbyid", meeting.CreatedById, DbType.Int32, ParameterDirection.Input);
 
-            // Find if any NEW ITEM, not exists in ITEMS table? If so insert them first.
-            // 3) Insert. [ActionsITEMS] table as. Dynamically added by user.
-            //       ID = 0, MeetingActionItemId = -1   (First insert to [Items] table and get the identity id before insert
-            var existingActions = meeting.MeetingActions.Where(a => a.MeetingActionItemId > 0).ToArray(); //MN RMV  .MeetingActionItemId > 0).ToArray();
-            var newActionsAndNewItems = meeting.MeetingActions.Where(a => a.Id == -1).ToArray(); // MN RMV .MeetingActionItemId == -1).ToArray();
+            // Newly added action item. Find if any action item, not exists in ITEMS table? If so insert them first.
+            // ID = 0, MeetingActionItemId = 0   (First insert to [Items] table and get the identity id before insert into meetingActions table
+            var newActionItems = meeting.MeetingActions.Where(a => a.MeetingActionItemId == 0).DistinctBy(a => a.Name).ToArray(); //(a => a.Id == -1).ToArray();
+            // find action items already in [items] table
+            // var existingActions = meeting.MeetingActions.Where(a => a.MeetingActionItemId > 0).ToArray();
 
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
@@ -208,7 +228,7 @@ namespace nyms.resident.server.DataProviders.Impl
                     var newMeetingId = conn.QuerySingle<int>(sql, dp, commandType: CommandType.Text, transaction: tran);
 
                     // Add NEW items not in ITEMS table
-                    newActionsAndNewItems.ForEach(act =>
+                    newActionItems.ForEach(act =>
                     {
                         var lastId = conn.QuerySingle<int?>(sqlSelLastId, commandType: CommandType.Text, transaction: tran);
                         int nextId = lastId == null ? 1 : (int)lastId + 1;
@@ -222,21 +242,37 @@ namespace nyms.resident.server.DataProviders.Impl
                         dpNewItem.Add("createdbyid", act.CreatedById, DbType.Int32, ParameterDirection.Input);
                         var affRows = conn.Execute(sqlInsItems, dpNewItem, transaction: tran);
 
-                        act.MeetingActionItemId = nextId; //.Id = nextId;
+                        act.MeetingActionItemId = nextId;
                     });
 
+                    // Once new Items added, get the ActionItemId and assign to newly arrived data, which will be zero
+                    if (newActionItems.Any())
+                    {
+                        newActionItems.ForEach(newAct =>
+                        {
+                            meeting.MeetingActions.ForEach(act =>
+                            {
+                                if (act.Name == newAct.Name)
+                                {
+                                    act.MeetingActionItemId = newAct.MeetingActionItemId;
+                                }
+                            });
+                        });
+                    }
+
                     // add actions, both brand new and existing items
-                    var mergedActions = existingActions.Union(newActionsAndNewItems).ToArray();
+                    // var mergedActions = existingActions.Union(newActionsAndNewItems).ToArray();
 
                     DynamicParameters dp2 = new DynamicParameters();
-                    mergedActions.ForEach(act =>
+                    meeting.MeetingActions.OrderBy(a => a.MeetingActionItemId).ForEach(act =>
                     {
                         dp2.Add("meetingid", newMeetingId, DbType.Int32, ParameterDirection.Input);
                         dp2.Add("meetingcategoryid", act.MeetingCategoryId, DbType.Int32, ParameterDirection.Input);
-                        dp2.Add("meetingactionitemid", act.MeetingActionItemId, DbType.Int32, ParameterDirection.Input); // MN RMV .MeetingActionItemId
+                        dp2.Add("meetingactionitemid", act.MeetingActionItemId, DbType.Int32, ParameterDirection.Input);
+                        dp2.Add("description", act.Description, DbType.String, ParameterDirection.Input);
                         dp2.Add("ownerid", act.OwnerId, DbType.Int32, ParameterDirection.Input);
-                        dp2.Add("startdate", act.StartDate?.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input);
-                        dp2.Add("completiondate", act.CompletionDate?.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input);
+                        dp2.Add("startdate", act.StartDate.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input);
+                        dp2.Add("completiondate", act.CompletionDate.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input);
                         dp2.Add("priority", act.Priority, DbType.String, ParameterDirection.Input);
                         dp2.Add("updatedbyid", meeting.CreatedById, DbType.Int32, ParameterDirection.Input);
                         dp2.Add("updateddate", DateTime.Now, DbType.String, ParameterDirection.Input);
@@ -252,14 +288,14 @@ namespace nyms.resident.server.DataProviders.Impl
         {
             string sqlUpdMeeting = @"UPDATE [dbo].[meetings] SET
                              [title] = @title
-                            ,[description] = @description
                             ,[meeting_date] = @meetingdate
                             ,[updated_by_id] = @updatedbyid
                             ,[updated_date] = @updateddate
                           WHERE reference_id = @referenceid;";
 
             string sqlUpdActions = @"UPDATE [dbo].[meeting_actions] SET
-                             [owner_id] = @ownerid
+                             [description] = @description
+                            ,[owner_id] = @ownerid
                             ,[start_date] = @startdate
                             ,[completion_date] = @completiondate
                             ,[priority] = @priority
@@ -271,6 +307,7 @@ namespace nyms.resident.server.DataProviders.Impl
                             ([meeting_id]
                             ,[meeting_category_id]
                             ,[meeting_action_item_id]
+                            ,[description]
                             ,[owner_id]
                             ,[start_date]
                             ,[completion_date]
@@ -279,6 +316,7 @@ namespace nyms.resident.server.DataProviders.Impl
                             (@meetingid
                             ,@meetingcategoryid
                             ,@meetingactionitemid
+                            ,@description
                             ,@ownerid
                             ,@startdate
                             ,@completiondate
@@ -302,29 +340,30 @@ namespace nyms.resident.server.DataProviders.Impl
                             ,@createdbyid);";
 
             string sqlDelActions = @"UPDATE [dbo].[meeting_actions] SET
-                             [status] = @status
+                             [action_status] = @actionstatus
                             ,[updated_by_id] = @updatedbyid
                             ,[updated_date] = @updateddate
                           WHERE id = @id;";
 
             // 1) Update. [Actions] table already has this item.
-            //          ID = N, MeetingActionItemId = N
+            //          ID > 0, MeetingActionItemId > 0
             // 2) Insert. [Actions] table does NOT have this entry. New action, but this action item already in [ITEMS] table.
             //          ID = 0, MeetingActionItemId = N
             // 3) Insert. [Actions] table does NOT have this entry. NOT in [ITEMS] table as well. Dynamically added by user.
+            //          ID = 0, MeetingActionItemId = 0   (First insert to [Items] table and get the identity id before insert
             //          ID = 0, MeetingActionItemId = -1   (First insert to [Items] table and get the identity id before insert
 
-            var existingActions = meeting.MeetingActions.Where(a => a.Id > 0 && a.Id > 0).ToArray(); // MN RMV  .MeetingActionItemId
-            var newActionsButItemExists = meeting.MeetingActions.Where(a => a.Id == 0 && a.Id > 0).ToArray(); // MN  .MeetingActionItemId
-            var newActionsAndNewItems = meeting.MeetingActions.Where(a => a.Id == -1).ToArray(); // MN  .MeetingActionItemId
+            var existingActions = meeting.MeetingActions.Where(a => a.Id > 0).ToArray(); // MN RMV  .MeetingActionItemId
+            var newActionsButItemExists = meeting.MeetingActions.Where(a => a.Id == 0 && a.MeetingActionItemId > 0).ToArray(); // MN  .MeetingActionItemId
+            var newActionsAndNewItems = meeting.MeetingActions.Where(a => a.MeetingActionItemId == 0).ToArray(); // MN  .MeetingActionItemId
 
             DynamicParameters dp = new DynamicParameters();
             dp.Add("referenceid", meeting.ReferenceId, DbType.Guid, ParameterDirection.Input, 80);
             dp.Add("title", meeting.Title, DbType.String, ParameterDirection.Input);
-            dp.Add("description", meeting.Description, DbType.String, ParameterDirection.Input);
+            // dp.Add("description", meeting.Description, DbType.String, ParameterDirection.Input);
             dp.Add("meetingdate", meeting.MeetingDate.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input);
             dp.Add("updatedbyid", meeting.UpdatedById, DbType.Int32, ParameterDirection.Input);
-            dp.Add("updateddate", DateTime.Now, DbType.String, ParameterDirection.Input);
+            dp.Add("updateddate", meeting.UpdatedDate, DbType.String, ParameterDirection.Input);
 
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
@@ -352,9 +391,10 @@ namespace nyms.resident.server.DataProviders.Impl
                         dpNewActions.Add("meetingid", meeting.Id, DbType.Int32, ParameterDirection.Input);
                         dpNewActions.Add("meetingcategoryid", act.MeetingCategoryId, DbType.Int32, ParameterDirection.Input);
                         dpNewActions.Add("meetingactionitemid", nextId, DbType.Int32, ParameterDirection.Input);
+                        dpNewActions.Add("description", act.Description, DbType.String, ParameterDirection.Input);
                         dpNewActions.Add("ownerid", act.OwnerId, DbType.Int32, ParameterDirection.Input);
-                        dpNewActions.Add("startdate", act.StartDate?.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input);
-                        dpNewActions.Add("completiondate", act.CompletionDate?.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input);
+                        dpNewActions.Add("startdate", act.StartDate.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input);
+                        dpNewActions.Add("completiondate", act.CompletionDate.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input);
                         dpNewActions.Add("priority", act.Priority, DbType.String, ParameterDirection.Input);
                         var affRows2 = conn.Execute(sqlInsActions, dpNewActions, transaction: tran);
                     });
@@ -366,8 +406,9 @@ namespace nyms.resident.server.DataProviders.Impl
                         dpMoreActions.Add("meetingid", meeting.Id, DbType.Int32, ParameterDirection.Input);
                         dpMoreActions.Add("meetingcategoryid", act.MeetingCategoryId, DbType.Int32, ParameterDirection.Input);
                         dpMoreActions.Add("meetingactionitemid", act.Id, DbType.Int32, ParameterDirection.Input); // MN  .MeetingActionItemId
+                        dpMoreActions.Add("description", act.Description, DbType.String, ParameterDirection.Input);
                         dpMoreActions.Add("ownerid", act.OwnerId, DbType.Int32, ParameterDirection.Input);
-                        dpMoreActions.Add("startdate", act.StartDate?.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input);
+                        dpMoreActions.Add("startdate", act.StartDate.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input);
                         dpMoreActions.Add("completiondate", act.CompletionDate, DbType.String, ParameterDirection.Input);
                         dpMoreActions.Add("priority", act.Priority, DbType.String, ParameterDirection.Input);
                         var affRows = conn.Execute(sqlInsActions, dpMoreActions, transaction: tran);
@@ -377,9 +418,10 @@ namespace nyms.resident.server.DataProviders.Impl
                     DynamicParameters dpExists = new DynamicParameters();
                     existingActions.ForEach(act =>
                     {
+                        dpExists.Add("description", act.Description, DbType.String, ParameterDirection.Input);
                         dpExists.Add("ownerid", act.OwnerId, DbType.Int32, ParameterDirection.Input);
-                        dpExists.Add("startdate", act.StartDate?.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input);
-                        dpExists.Add("completiondate", act.CompletionDate?.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input);
+                        dpExists.Add("startdate", act.StartDate.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input);
+                        dpExists.Add("completiondate", act.CompletionDate.ToString("yyyy-MM-dd"), DbType.String, ParameterDirection.Input);
                         dpExists.Add("priority", act.Priority, DbType.String, ParameterDirection.Input);
                         dpExists.Add("id", act.Id, DbType.Int32, ParameterDirection.Input);
                         dpExists.Add("updatedbyid", act.UpdatedById, DbType.Int32, ParameterDirection.Input);

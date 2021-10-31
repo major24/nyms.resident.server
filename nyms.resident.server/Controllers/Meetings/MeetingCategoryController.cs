@@ -19,86 +19,54 @@ namespace nyms.resident.server.Controllers.Meetings
     public class MeetingCategoryController : ApiController
     {
         private static Logger logger = Nlogger2.GetLogger();
-        private readonly IMeetingCategoryLookupService _meetingCategoryLookupService;
-        private readonly IMeetingActionItemLookupService _meetingActionItemLookupService; // IMeetingAgendaLookupService _meetingAgendaLookupService;
+        private readonly IMeetingCategoryAndActionItemLookupService _meetingCategoryLookupService;
 
-        public MeetingCategoryController(IMeetingCategoryLookupService meetingCategoryLookupService,
-            IMeetingActionItemLookupService meetingActionItemLookupService)
+        public MeetingCategoryController(IMeetingCategoryAndActionItemLookupService meetingCategoryAndActionItemsLookupService)
         {
-            _meetingCategoryLookupService = meetingCategoryLookupService ?? throw new ArgumentNullException(nameof(meetingCategoryLookupService));
-            _meetingActionItemLookupService = meetingActionItemLookupService ?? throw new ArgumentNullException(nameof(meetingActionItemLookupService));
+            _meetingCategoryLookupService = meetingCategoryAndActionItemsLookupService ?? throw new ArgumentNullException(nameof(meetingCategoryAndActionItemsLookupService));
         }
 
         [HttpGet]
-        [Route("api/meetings/categories")]
-        public IHttpActionResult GetMeetingCategories()
+        [Route("api/meetings/categories-and-actions-items")]
+        public IHttpActionResult GetMeetingCategoriesAndActionItems()
         {
             var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
             logger.Info($"Meeting Category fetched by {loggedInUser.ForeName}");
 
-            var meetingCategories = _meetingCategoryLookupService.GetMeetingCategories();
+            var meetingCategories = _meetingCategoryLookupService.GetMeetingCategoriesAndActionItems();
             if (meetingCategories == null || !meetingCategories.Any())
             {
                 logger.Warn($"No meeting categories found");
                 return NotFound();
             }
 
-            return Ok(meetingCategories.ToArray());
-        }
-
-        [HttpGet]
-        [Route("api/meetings/categories/action-items")]
-        public IHttpActionResult GetMeetingCategoriesAndAgendas()
-        {
-            var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
-            logger.Info($"Meeting Category fetched by {loggedInUser.ForeName}");
-
-            var meetingCategories = _meetingCategoryLookupService.GetMeetingCategories();
-            if (meetingCategories == null || !meetingCategories.Any())
+            var meetingCategoriesResponse = meetingCategories.Select(c =>
             {
-                logger.Warn($"No meeting categories found");
-                return NotFound();
-            }
-            // Filter DTO to send back
-            var meetingCategoriesDto = meetingCategories.Select(c =>
-            {
-                return new MeetingCategoryDto
+                var meetingActionItemsResponse = c.MeetingActionItems.Select(a =>
                 {
-                    Id = c.Id,
-                    Name = c.Name,
-                    Description = c.Description,
-                    MeetingActionItems = null
-                };
-            }).ToArray();
-
-            var meetingActionItems = _meetingActionItemLookupService.GetMeetingActionItems();
-            if (meetingActionItems.Any())
-            {
-                // Filter action items to send back. make new dto
-                var meetingActionItemsDto = meetingActionItems.Select(a =>
-                {
-                    return new MeetingActionItemDto
+                    return new MeetingActionItemResponse()
                     {
                         Id = a.Id,
                         MeetingCategoryId = a.MeetingCategoryId,
                         Name = a.Name,
                         Description = a.Description,
-                        IsAdhoc = a.IsAdhoc
+                        IsAdhoc = a.IsAdhoc == "Y" ? true : false
                     };
-                }).ToArray();
-                // from above list find matching items
-                meetingCategoriesDto.ForEach(c =>
-                {
-                    c.MeetingActionItems = meetingActionItemsDto.Where(ai => ai.MeetingCategoryId == c.Id).ToArray();
                 });
-            }
+                return new MeetingCategoryResponse()
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    MeetingActionItems = meetingActionItemsResponse
+                };
+            });
 
-            return Ok(meetingCategoriesDto.ToArray()); //meetingCategories.ToArray());
+            return Ok(meetingCategoriesResponse.ToArray());
         }
 
         [HttpPost]
-        [Route("api/meetings/categories")]
-        public IHttpActionResult InsertCategory(MeetingCategory meetingCategory)
+        [Route("api/meetings/categories-and-actions-items")]
+        public IHttpActionResult InsertCategoryAndActionItems(MeetingCategory meetingCategory)
         {
             if (meetingCategory == null)
             {
@@ -109,28 +77,55 @@ namespace nyms.resident.server.Controllers.Meetings
             logger.Info($"Meeting Category created by {loggedInUser.ForeName}");
             meetingCategory.CreatedById = loggedInUser.Id;
 
-            var result = _meetingCategoryLookupService.Insert(meetingCategory);
+            meetingCategory.MeetingActionItems.ForEach(a =>
+            {
+                a.IsAdhoc = a.IsAdhoc == "true" ? "Y" : "N";
+                a.CreatedById = loggedInUser.Id;
+            });
+
+            var result = _meetingCategoryLookupService.InsertCategoryAndActionItems(meetingCategory);
             return Ok(result);
         }
 
         [HttpPost]
-        [Route("api/meetings/categories/{id}")]
-        public IHttpActionResult UpdateCategory(int id, MeetingCategory meetingCategory)
+        [Route("api/meetings/categories/action-items/{id}")]
+        public IHttpActionResult UpdateActionItem(int id, MeetingActionItem meetingActionItem)
         {
             if (id <= 0)
             {
-                return BadRequest("meeting category id not found");
+                return BadRequest("meeting action item id not found");
             }
-            if (meetingCategory == null)
+            if (meetingActionItem == null)
             {
-                return BadRequest("meeting category not found");
+                return BadRequest("meeting action item not found");
             }
 
             var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
             logger.Info($"Meeting Category created by {loggedInUser.ForeName}");
-            meetingCategory.CreatedById = loggedInUser.Id;
+            meetingActionItem.CreatedById = loggedInUser.Id;
 
-            var result = _meetingCategoryLookupService.Update(meetingCategory);
+            meetingActionItem.IsAdhoc = (meetingActionItem.IsAdhoc == "true") ? "Y" : "N";
+
+            var result = _meetingCategoryLookupService.UpdateActionItem(meetingActionItem);
+            return Ok(result);
+        }
+
+        [HttpPost]
+        [Route("api/meetings/categories/action-items")]
+        public IHttpActionResult InsertActionItem(MeetingActionItem meetingActionItem)
+        {
+            if (meetingActionItem == null)
+            {
+                return BadRequest("meeting action item not found");
+            }
+
+            var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
+            logger.Info($"Meeting Category created by {loggedInUser.ForeName}");
+            meetingActionItem.CreatedById = loggedInUser.Id;
+
+            meetingActionItem.IsAdhoc = (meetingActionItem.IsAdhoc == "true") ? "Y" : "N";
+
+            var result = _meetingCategoryLookupService.InsertActionItem(meetingActionItem);
             return Ok(result);
         }
 

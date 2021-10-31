@@ -9,8 +9,8 @@ namespace nyms.resident.server.DataProviders.Interfaces
 {
     public interface IMeetingActionItemLookupDataProvider
     {
-        MeetingActionItem Insert(MeetingActionItem meetingActionItem);
-        IEnumerable<MeetingActionItem> GetMeetingActionItems();
-        MeetingActionItem Update(MeetingActionItem meetingActionItem);
+      /*  MeetingActionItem Insert(MeetingActionItem meetingActionItem);*/
+        // IEnumerable<MeetingActionItem> GetMeetingActionItems();
+/*        MeetingActionItem Update(MeetingActionItem meetingActionItem);*/
     }
 }

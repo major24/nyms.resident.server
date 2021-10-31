@@ -61,5 +61,30 @@
         FinanceAdmin = 4
     }
 
+    public enum ACTION_FREQUENCY
+    {
+        None = 0,
+        Weekly = 7,
+        Fortnight = 14
+    }
+
+    public enum ACTION_COMPLETED_STATUS
+    {
+        Yes = 0,
+        No = 1
+    }
+
+    public enum ACTION_AUDITED_STATUS
+    {
+        Pass = 0,
+        Fail = 1
+    }
+
+    public enum ACTION_COMMENT_TYPE
+    {
+        Owner = 0,
+        Auditor = 1
+    }
+
     
 }

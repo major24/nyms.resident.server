@@ -8,20 +8,20 @@ using System.Web;
 
 namespace nyms.resident.server.Services.Impl
 {
-    public class MeetingActionItemLookupService : IMeetingActionItemLookupService
+/*    public class MeetingActionItemLookupService : IMeetingActionItemLookupService
     {
         private readonly IMeetingActionItemLookupDataProvider _meetingActionItemLookupDataProvider;
-        public MeetingActionItemLookupService(IMeetingActionItemLookupDataProvider meetingActionItemLookupDataProvider)
+*//*        public MeetingActionItemLookupService(IMeetingActionItemLookupDataProvider meetingActionItemLookupDataProvider)
         {
             _meetingActionItemLookupDataProvider = meetingActionItemLookupDataProvider ?? throw new ArgumentNullException(nameof(meetingActionItemLookupDataProvider));
 
-        }
-        public IEnumerable<MeetingActionItem> GetMeetingActionItems()
+        }*/
+/*        public IEnumerable<MeetingActionItem> GetMeetingActionItems()
         {
             return _meetingActionItemLookupDataProvider.GetMeetingActionItems();
-        }
+        }*/
 
-        public MeetingActionItem Insert(MeetingActionItem meetingActionItem)
+/*        public MeetingActionItem Insert(MeetingActionItem meetingActionItem)
         {
             return _meetingActionItemLookupDataProvider.Insert(meetingActionItem);
         }
@@ -29,6 +29,6 @@ namespace nyms.resident.server.Services.Impl
         public MeetingActionItem Update(MeetingActionItem meetingActionItem)
         {
             return _meetingActionItemLookupDataProvider.Update(meetingActionItem);
-        }
-    }
+        }*//*
+    }*/
 }

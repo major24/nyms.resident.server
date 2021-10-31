@@ -25,9 +25,9 @@ namespace nyms.resident.server.Services.Impl
             return _meetingDataProvider.GetMeeting(referenceId);
         }
 
-        public IEnumerable<Meeting> GetMeetings()
+        public IEnumerable<Meeting> GetMeetings(int lastN_Rows = 20)
         {
-            return _meetingDataProvider.GetMeetings();
+            return _meetingDataProvider.GetMeetings(lastN_Rows);
         }
 
         public Meeting Insert(Meeting meeting)
@@ -40,54 +40,5 @@ namespace nyms.resident.server.Services.Impl
             return _meetingDataProvider.Update(meeting, deletedIds);
         }
 
-        public IEnumerable<MeetingActionResponse> GetActions()
-        {
-            var actions = _meetingActionDataProvider.GetActions().ToArray();
-            // get comments by meeting action ids retrieved above..
-            var meetingActionIds = actions.Select(a =>
-            {
-                return a.Id;
-            }).ToArray();
-
-            if (meetingActionIds.Any())
-            {
-                var cmts = _meetingActionDataProvider.GetComments(meetingActionIds);
-                actions.ForEach(a =>
-                {
-                    a.Comments = cmts.Where(c => c.MeetingActionId == a.Id).Select(c =>
-                    {
-                        return new MeetingActionComment()
-                        {
-                            MeetingActionId = c.MeetingActionId,
-                            CommentType = c.CommentType,
-                            Comment = c.Comment,
-                            CreatedById = c.CreatedById
-                        };
-                    });
-                });
-            }
-
-            return actions;
-        }
-
-        public MeetingActionCompleteRequest UpdateActionCompleted(MeetingActionCompleteRequest meetingActionCompleteRequest)
-        {
-            return _meetingActionDataProvider.UpdateActionCompleted(meetingActionCompleteRequest);
-        }
-
-        public MeetingActionInspectRequest UpdateActionInspected(MeetingActionInspectRequest meetingActionInspectRequest)
-        {
-            return _meetingActionDataProvider.UpdateActionInspected(meetingActionInspectRequest);
-        }
-
-        public IEnumerable<MeetingActionComment> GetComments(int[] meetingActionIds)
-        {
-            return _meetingActionDataProvider.GetComments(meetingActionIds);
-        }
-
-        public MeetingActionComment InsertActionComment(MeetingActionComment meetingActionComment)
-        {
-            return _meetingActionDataProvider.InsertActionComment(meetingActionComment);
-        }
     }
 }

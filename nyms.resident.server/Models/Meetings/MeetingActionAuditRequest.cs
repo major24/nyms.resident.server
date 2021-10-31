@@ -5,12 +5,12 @@ using System.Web;
 
 namespace nyms.resident.server.Models
 {
-    public class MeetingActionCompleteRequest
+    public class MeetingActionAuditRequest
     {
         public int Id { get; set; }
-        public ACTION_COMPLETED_STATUS Completed { get; set; }
-        public DateTime CompletedDate { get; set; }
-        public int CompletedById { get; set; }
+        public ACTION_AUDITED_STATUS Audited { get; set; }
+        public DateTime AuditedDate { get; set; }
+        public int AuditedById { get; set; }
         public string Comment { get; set; }
     }
 }

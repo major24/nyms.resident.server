@@ -14,12 +14,12 @@ namespace nyms.resident.server.DataProviders.Impl
     {
         private readonly string _connectionString;
 
-        public MeetingActionItemLookupDataProvider(string connectionString)
+/*        public MeetingActionItemLookupDataProvider(string connectionString)
         {
             _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
-        }
+        }*/
 
-        public IEnumerable<MeetingActionItem> GetMeetingActionItems()
+/*        public IEnumerable<MeetingActionItem> GetMeetingActionItems()
         {
             string sql = @"SELECT 
                          id as id
@@ -36,9 +36,9 @@ namespace nyms.resident.server.DataProviders.Impl
                 conn.Open();
                 return conn.QueryAsync<MeetingActionItem>(sql).Result;
             }
-        }
+        }*/
 
-        public MeetingActionItem Insert(MeetingActionItem meetingActionItem)
+/*        public MeetingActionItem Insert(MeetingActionItem meetingActionItem)
         {
             string sqlSelLastId = "SELECT MAX(id) FROM [dbo].[meeting_action_items]";
 
@@ -103,6 +103,6 @@ namespace nyms.resident.server.DataProviders.Impl
                 conn.Execute(sql, dp);
             }
             return meetingActionItem;
-        }
+        }*/
     }
 }

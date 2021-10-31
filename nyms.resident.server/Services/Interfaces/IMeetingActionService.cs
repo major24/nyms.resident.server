@@ -1,17 +1,15 @@
-﻿using nyms.resident.server.Model;
-using nyms.resident.server.Models;
-using nyms.resident.server.Models;
+﻿using nyms.resident.server.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace nyms.resident.server.DataProviders.Interfaces
+namespace nyms.resident.server.Services.Interfaces
 {
-    public interface IMeetingActionDataProvider
+    public interface IMeetingActionService
     {
-        IEnumerable<MeetingActionResponse> GetActionResponsesByMeetingIds(int[] meetingIds);
+        IEnumerable<MeetingActionResponse> GetActionsByMeetingIds(int[] meetingIds);
         IEnumerable<MeetingActionPendingJobsResponse> GetPendingActionsByOwnerId(int ownerId);
         IEnumerable<MeetingActionCompletedResponse> GetCompletedActions();
         MeetingActionUpdateRequest UpdateAction(MeetingActionUpdateRequest meetingActionUpdateRequest);
