@@ -9,16 +9,14 @@ namespace nyms.resident.server.Models
         public string SurName { get; set; }
         public string JwtToken { get; set; }
         public IEnumerable<CareHomeRole> Roles { get; set; }
-        // public string RefreshToken { get; set; }
 
-        public AuthenticationResponse(User user, string jwtToken) //, string refreshToken)
+        public AuthenticationResponse(User user, string jwtToken)
         {
             ReferenceId = user.ReferenceId.ToString();
             ForeName = user.ForeName;
             SurName = user.SurName;
             Roles = user.CareHomeRoles;
             JwtToken = jwtToken;
-            // RefreshToken = refreshToken;
         }
     }
 }

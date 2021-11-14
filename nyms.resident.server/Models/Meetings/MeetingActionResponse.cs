@@ -5,7 +5,7 @@ using System.Web;
 
 namespace nyms.resident.server.Models
 {
-    public class MeetingActionResponse // : MeetingAction
+    public class MeetingActionResponse
     {
         public int Id { get; set; }
         public int MeetingId { get; set; }

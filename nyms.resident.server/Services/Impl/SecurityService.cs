@@ -14,11 +14,6 @@ namespace nyms.resident.server.Services.Impl
             _securityDataProvider = securityDataProvider ?? throw new ArgumentNullException(nameof(securityDataProvider));
         }
 
-/*        public IEnumerable<Role> GetRoles()
-        {
-            return _securityDataProvider.GetRoles();
-        }*/
-
         public IEnumerable<UserRolePermission> GetRolePermissions(int userId)
         {
             return _securityDataProvider.GetRolePermissions(userId);

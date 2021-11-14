@@ -7,14 +7,14 @@ namespace nyms.resident.server.Models
 {
     public class MeetingActionRequest
     {
-        // meeting action item
+        // meeting action item tbl
         public int Id { get; set; } // MeetingAction tbl id
         public int MeetingCategoryId { get; set; }
         public int MeetingActionItemId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public string IsAdhoc { get; set; }
-        // meeting action
+        // meeting action tbl
         public int OwnerId { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime CompletionDate { get; set; }

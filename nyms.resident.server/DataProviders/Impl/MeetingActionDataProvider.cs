@@ -56,7 +56,7 @@ namespace nyms.resident.server.DataProviders.Impl
 
         public IEnumerable<MeetingActionPendingJobsResponse> GetPendingActions()
         {
-            return GetPendingActions(-1); // -1 is to retch all
+            return GetPendingActions(-1); // -1 is to fetch all
         }
         public IEnumerable<MeetingActionPendingJobsResponse> GetPendingActions(int ownerId)
         {

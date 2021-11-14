@@ -22,7 +22,6 @@ namespace nyms.resident.server.Models
         public string Audited { get; set; }
         public int AuditedById { get; set; }
         public DateTime? AuditedDate { get; set; }
-        // public string InspectionStatus { get; set; }
         public int UpdatedById { get; set; }
         public DateTime UpdatedDate { get; set; }
         public string ActionStatus { get; set; }

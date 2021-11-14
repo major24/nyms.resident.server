@@ -29,7 +29,6 @@
         public static readonly string SPEND_TRAN_TYPE_CREDIT = "Credit";
 
         // Meetings
-        public static readonly string MEETING_ACTION_DELETED = "Deleted";
     }
 
     public enum ENQUIRY_STATUS
@@ -58,7 +57,9 @@
         SuperAdmin = 1,
         Admin = 2,
         Manger = 3,
-        FinanceAdmin = 4
+        FinanceAdmin = 4,
+        MeetingActionUser = 5,
+        MeetingAuditor = 6
     }
 
     public enum ACTION_FREQUENCY

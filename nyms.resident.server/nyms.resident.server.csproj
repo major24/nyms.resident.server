@@ -239,7 +239,6 @@
     <Compile Include="DataProviders\Interfaces\ICareHomeDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\IInvoiceDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\IMeetingActionDataProvider.cs" />
-    <Compile Include="DataProviders\Interfaces\IMeetingActionItemLookupDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\IMeetingCategoryAndActionItemLookupDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\IMeetingDataProvider.cs" />
     <Compile Include="DataProviders\Interfaces\IPaymentProviderDataProvider.cs" />

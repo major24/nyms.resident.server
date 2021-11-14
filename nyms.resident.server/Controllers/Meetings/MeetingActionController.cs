@@ -176,7 +176,6 @@ namespace nyms.resident.server.Controllers.Meetings
                 MeetingActionItemId = meetingActionRequestDto.MeetingActionItemId,
                 Name = meetingActionRequestDto.Name,
                 Description = meetingActionRequestDto.Description,
-                // IsAdhoc = meetingActionDto.IsAdhoc,
                 OwnerId = meetingActionRequestDto.OwnerId,
                 StartDate = meetingActionRequestDto.StartDate,
                 CompletionDate = meetingActionRequestDto.CompletionDate,
