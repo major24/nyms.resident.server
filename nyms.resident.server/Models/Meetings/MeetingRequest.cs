@@ -14,7 +14,5 @@ namespace nyms.resident.server.Models
         public int OwnerId { get; set; }
 
         public IEnumerable<MeetingActionRequest> MeetingActions { get; set; }
-        // When an action is deleted on [Update] scenario, this will pass those deleted [action] ids, to mark as deleted.
-        public int[] DeletedIds { get; set; }
     }
 }

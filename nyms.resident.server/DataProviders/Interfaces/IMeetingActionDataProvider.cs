@@ -12,8 +12,9 @@ namespace nyms.resident.server.DataProviders.Interfaces
     public interface IMeetingActionDataProvider
     {
         IEnumerable<MeetingActionResponse> GetActionResponsesByMeetingIds(int[] meetingIds);
-        IEnumerable<MeetingActionPendingJobsResponse> GetPendingActionsByOwnerId(int ownerId);
-        IEnumerable<MeetingActionCompletedResponse> GetCompletedActions();
+        IEnumerable<MeetingActionPendingJobsResponse> GetPendingActions();
+        IEnumerable<MeetingActionPendingJobsResponse> GetPendingActions(int ownerId);
+        IEnumerable<MeetingActionCompletedResponse> GetCompletedActions(int lastN_Rows);
         MeetingActionUpdateRequest UpdateAction(MeetingActionUpdateRequest meetingActionUpdateRequest);
         MeetingActionCompleteRequest UpdateActionCompleted(MeetingActionCompleteRequest meetingActionCompleteRequest);
         MeetingActionAuditRequest UpdateActionAudited(MeetingActionAuditRequest meetingActionAuditRequest);

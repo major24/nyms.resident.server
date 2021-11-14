@@ -34,13 +34,14 @@ namespace nyms.resident.server.DataProviders.Impl
                           ,act.start_date as startdate
                           ,act.completion_date as completiondate
                           ,act.priority as priority
+                          ,act.completed as completed
 						  ,items.name as name
                           ,items.is_adhoc as isadhoc
 						  ,usr.forename as forename
                         FROM [dbo].[meeting_actions] act
 						INNER JOIN [dbo].[meeting_action_items] items
 						ON act.meeting_action_item_id = items.id
-						INNER JOIN [dbo].[users] usr
+						LEFT JOIN [dbo].[users] usr
 						ON act.owner_id = usr.id
                         WHERE meeting_id IN @meetingids
                         ORDER BY completion_date";
@@ -53,7 +54,11 @@ namespace nyms.resident.server.DataProviders.Impl
             }
         }
 
-        public IEnumerable<MeetingActionPendingJobsResponse> GetPendingActionsByOwnerId(int ownerId)
+        public IEnumerable<MeetingActionPendingJobsResponse> GetPendingActions()
+        {
+            return GetPendingActions(-1); // -1 is to retch all
+        }
+        public IEnumerable<MeetingActionPendingJobsResponse> GetPendingActions(int ownerId)
         {
             string whereClause = ownerId == -1 ? " WHERE act.owner_id > @ownerid" : " WHERE act.owner_id = @ownerid";
 
@@ -87,9 +92,9 @@ namespace nyms.resident.server.DataProviders.Impl
             }
         }
 
-        public IEnumerable<MeetingActionCompletedResponse> GetCompletedActions()
+        public IEnumerable<MeetingActionCompletedResponse> GetCompletedActions(int lastN_Rows = 20)
         {
-            var sql = $@"SELECT TOP 100 act.id as id
+            var sql = $@"SELECT TOP {lastN_Rows} act.id as id
                         ,act.description as description
                         ,act.owner_id as ownerid
                         ,act.completion_date as completiondate
@@ -102,6 +107,8 @@ namespace nyms.resident.server.DataProviders.Impl
                         ,act.completed_date as completeddate
                         ,act.completed_by_Id as completedbyid
 				        ,usrcomp.forename as completedbyname
+						,cmts.comment_type as commenttype
+						,cmts.comments as comment
                         FROM [dbo].[meeting_actions] act
                         INNER JOIN [dbo].[meeting_action_items] itm
                         ON act.meeting_action_item_id = itm.id
@@ -111,50 +118,20 @@ namespace nyms.resident.server.DataProviders.Impl
                         ON act.meeting_category_id = cat.id
                         INNER JOIN [dbo].[meetings] meet
                         ON act.meeting_id = meet.id
+						INNER JOIN [dbo].[meeting_action_comments] cmts
+						ON act.id = cmts.meeting_action_id
 						INNER JOIN [dbo].[users] usrcomp
 						ON act.completed_by_id = usrcomp.id
                         WHERE act.completed IS NOT NULL
-                        ORDER BY act.completion_date ASC";
+						AND cmts.comment_type = 'Owner'
+						AND act.audited IS NULL
+                        ORDER BY act.completion_date DESC";
 
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
                 return conn.QueryAsync<MeetingActionCompletedResponse>(sql).Result;
             }
         }
-
-        /* USE this for ActionReport Query. has audit JOIN as well
-         * var sql = $@"SELECT TOP 100 act.id as id
-                        ,act.description as description
-                        ,act.owner_id as ownerid
-                        ,act.completion_date as completiondate
-                        ,act.priority as priority
-                        ,itm.name as name
-                        ,usr.forename as forename
-                        ,cat.name as categoryname
-                        ,meet.title as title
-                        ,act.completed as completed
-                        ,act.completed_date as completeddate
-                        ,act.audited as audited
-                        ,act.audited_date as auditeddate
-                        ,act.completed_by_Id as completedbyid
-				        ,usrcomp.forename as completedbyname
-				        ,usraudit.forename as auditedbyname
-                        FROM [dbo].[meeting_actions] act
-                        INNER JOIN [dbo].[meeting_action_items] itm
-                        ON act.meeting_action_item_id = itm.id
-                        INNER JOIN [dbo].[users] usr
-                        ON act.owner_id = usr.id
-                        INNER JOIN [dbo].[meeting_category] cat
-                        ON act.meeting_category_id = cat.id
-                        INNER JOIN [dbo].[meetings] meet
-                        ON act.meeting_id = meet.id
-						INNER JOIN [dbo].[users] usrcomp
-						ON act.completed_by_id = usrcomp.id
-						INNER JOIN [dbo].[users] usraudit
-						ON act.audited_by_id = usraudit.id
-                        WHERE act.completed IS NOT NULL
-                        ORDER BY act.completion_date ASC";
-         */
 
         public MeetingActionUpdateRequest UpdateAction(MeetingActionUpdateRequest meetingActionUpdateRequest)
         {
@@ -279,8 +256,6 @@ namespace nyms.resident.server.DataProviders.Impl
             }
             return meetingActionAuditRequest;
         }
-
-
 
         public IEnumerable<MeetingActionComment> GetComments(int[] meetingActionIds)
         {

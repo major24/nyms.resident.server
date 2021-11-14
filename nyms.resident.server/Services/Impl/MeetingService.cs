@@ -35,9 +35,9 @@ namespace nyms.resident.server.Services.Impl
             return _meetingDataProvider.Insert(meeting);
         }
 
-        public Meeting Update(Meeting meeting, int[] deletedIds = null)
+        public Meeting Update(Meeting meeting)
         {
-            return _meetingDataProvider.Update(meeting, deletedIds);
+            return _meetingDataProvider.Update(meeting);
         }
 
     }

@@ -20,31 +20,49 @@ namespace nyms.resident.server.Controllers.Meetings
     {
         private static Logger logger = Nlogger2.GetLogger();
         private readonly IMeetingActionService _meetingActionService;
+        private readonly IUserService _userService;
 
-        public MeetingActionController(IMeetingActionService meetingActionService)
+        public MeetingActionController(IMeetingActionService meetingActionService, IUserService userService)
         {
             _meetingActionService = meetingActionService ?? throw new ArgumentNullException(nameof(meetingActionService));
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         }
 
         [HttpGet]
-        [Route("api/meetings/actions/owners/{id}")]
-        // public IHttpActionResult GetActions(bool isPending, bool isCompleted, bool isInspected)
-        public IHttpActionResult GetPendingActionsByOwnerId(int id)
+        [Route("api/meetings/actions/pending/owners")]
+        public IHttpActionResult GetPendingActions()
         {
-            if (id == 0)
+            var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
+            logger.Info($"Meeting actions fetched by {loggedInUser.ForeName}");
+
+            var actions = _meetingActionService.GetPendingActions();
+
+            return Ok(actions);
+        }
+
+        [HttpGet]
+        [Route("api/meetings/actions/pending/owners/{userRefId}")]
+        public IHttpActionResult GetPendingActionsByOwnerId(string userRefId)
+        {
+            if (string.IsNullOrEmpty(userRefId))
             {
-                return BadRequest("Owner Id required");
+                return BadRequest("Owner ReferenceId required");
+            }
+
+            Models.User user = _userService.GetByRefereneId(new Guid(userRefId)).Result;
+            if (user == null)
+            {
+                return BadRequest("Owner not found");
             }
 
             var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
             logger.Info($"Meeting actions fetched by {loggedInUser.ForeName}");
 
-            var actions = _meetingActionService.GetPendingActionsByOwnerId(id);
+            var actions = _meetingActionService.GetPendingActions(user.Id);
 
             return Ok(actions);
         }
 
-        //public IEnumerable<MeetingActionReportResponse> GetCompletedActions();
         // Return completed but not audited records. Remove the userid who called this ftn
         [HttpGet]
         [Route("api/meetings/actions/completed/unaudited")]
@@ -53,9 +71,9 @@ namespace nyms.resident.server.Controllers.Meetings
             var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
             logger.Info($"Meeting completed actions fetched by {loggedInUser.ForeName}");
 
-            var actions = _meetingActionService.GetCompletedActions();
+            var actions = _meetingActionService.GetCompletedActions(5);
 
-            var filtered = actions.Where(a => a.CompletedById != loggedInUser.Id).ToArray();
+            var filtered = actions.Where(a => a.CompletedById != loggedInUser.Id).ToList();
 
             return Ok(filtered);
         }
@@ -169,85 +187,3 @@ namespace nyms.resident.server.Controllers.Meetings
 }
 
 
-
-
-
-/*        private static Logger logger = Nlogger2.GetLogger();
-        private readonly IMeetingActionItemLookupService _meetingActionItemService;*/
-
-/*        public MeetingActionItemController(IMeetingActionItemLookupService meetingActionItemService)
-        {
-            _meetingActionItemService = meetingActionItemService ?? throw new ArgumentNullException(nameof(meetingActionItemService));
-        }*/
-
-/*        [HttpPost]
-        [Route("api/meetings/action-items")]
-        public IHttpActionResult InsertActionItem(MeetingActionItem meetingActionItem)
-        {
-            if (meetingActionItem == null)
-            {
-                return BadRequest("meeting meeting actionItem not found");
-            }
-
-            var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
-            logger.Info($"Meeting action item submitted by {loggedInUser.ForeName}");
-            meetingActionItem.CreatedById = loggedInUser.Id;
-
-            var result = _meetingActionItemService.Insert(meetingActionItem);
-            return Ok(result);
-        }*/
-
-/*        [HttpPost]
-        [Route("api/meetings/action-items/{id}")]
-        public IHttpActionResult UpdateActionItem(int id, MeetingActionItem meetingActionItem)
-        {
-            if (id <= 0)
-            {
-                return BadRequest("meeting meeting actionItem id not found");
-            }
-            if (meetingActionItem == null)
-            {
-                return BadRequest("meeting meeting actionItem not found");
-            }
-
-            var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
-            logger.Info($"Meeting action item updated by {loggedInUser.ForeName}");
-            meetingActionItem.CreatedById = loggedInUser.Id;
-
-            var result = _meetingActionItemService.Update(meetingActionItem);
-            return Ok(result);
-        }*/
-
-
-/*            // TODO-Need find filter. Meeting date or Last 50 records etc...
-            var loggedInUser = HttpContext.Current.User as SecurityPrincipal;
-            logger.Info($"Meeting actions fetched by {loggedInUser.ForeName}");
-
-            var actions = _meetingActionService.GetActionsByMeetingIds(null);
-
-            if (actions == null || !actions.Any())
-            {
-                return NotFound();
-            }
-
-            // filer actions
-            IEnumerable<MeetingActionResponse> pendingActions = new List<MeetingActionResponse>();
-            IEnumerable<MeetingActionResponse> completedActions = new List<MeetingActionResponse>();
-            IEnumerable<MeetingActionResponse> inspectedActions = new List<MeetingActionResponse>();*/
-// isCompleted = isInspected ? false :
-/*            if (isPending)
-            {
-                pendingActions = actions.Where(a => a.Completed == null).ToArray();
-            }
-            if (isInspected)
-            {
-                inspectedActions = actions.Where(a => a.Inspected != null).ToArray();
-            }
-            if (isCompleted)
-            {
-                completedActions = actions.Where(a => a.Completed != null).ToArray();
-            }*/
-
-// var merged = pendingActions.Concat(completedActions).Concat(inspectedActions).Distinct().ToArray();
-
-// return Ok(merged);

@@ -45,30 +45,12 @@ namespace nyms.resident.server.Controllers.Meetings
 
             // convert Meeting to MeetingResponse obj
             var meetingsResp = meetings.Select(m => {
-                return new MeetingResponse()
-                {
-                    Id = m.Id,
-                    ReferenceId = m.ReferenceId,
-                    Title = m.Title,
-                    MeetingDate = m.MeetingDate,
-                    OwnerId = m.OwnerId
-                };
+                return ToMeetingResponse(m);
             }).ToArray();
-
-            var meetingIds = meetingsResp.Select(m => m.Id).ToArray();
-
-            var actions = _meetingActionService.GetActionsByMeetingIds(meetingIds);
-
-            // assign actions to respective meeting obj
-            meetingsResp.ForEach(m =>
-            {
-                m.MeetingActions = actions.Where(a => a.MeetingId == m.Id).ToArray();
-            });
             
             return Ok(meetingsResp);
         }
 
-        // TODO. NOT sure below is done. Remove if not need when developing UI
         [HttpGet]
         [Route("api/meetings/meetings/{referenceId}")]
         public IHttpActionResult GetMeeting(string referenceId)
@@ -87,42 +69,16 @@ namespace nyms.resident.server.Controllers.Meetings
             {
                 return NotFound();
             }
-            // return meetingDto and actionsDto insted of meeting and actions                        
-            IEnumerable<MeetingActionRequest> actionsDto = meeting.MeetingActions.Select(act =>
-            {
-                return new MeetingActionRequest()
-                {
-                    Id = act.Id,
-                    MeetingCategoryId = act.MeetingCategoryId,
-                    MeetingActionItemId = act.MeetingActionItemId,
-                    Name = act.Name,
-                    Description = act.Description,
-/*                    IsAdhoc = act.IsAdhoc,*/
-                    OwnerId = act.OwnerId,
-                    StartDate = act.StartDate,
-                    CompletionDate = act.CompletionDate,
-                    Priority = act.Priority,
-                };
-            }).ToArray();
-            // return meetingDto
-            MeetingRequest meetingDto = new MeetingRequest()
-            {
-                Id = meeting.Id,
-                ReferenceId = meeting.ReferenceId,
-                Title = meeting.Title,
-                // Description = meeting.Description,
-                MeetingDate = meeting.MeetingDate,
-                OwnerId = meeting.OwnerId,
-                MeetingActions = actionsDto
 
-            };
-            
-            meetingDto.MeetingActions.ForEach(a =>
-            {
-                a.Checked = true;
-            });
+            // convert Meeting to MeetingResponse obj
+            var meetingsResp = ToMeetingResponse(meeting);
 
-            return Ok(meetingDto);
+            var meetingIds = new int[] { meetingsResp.Id };
+
+            // assign actions to respective meeting obj
+            meetingsResp.MeetingActions = _meetingActionService.GetActionsByMeetingIds(meetingIds);
+
+            return Ok(meetingsResp);
         }
 
         [HttpPost]
@@ -146,7 +102,7 @@ namespace nyms.resident.server.Controllers.Meetings
 
             // Repetitive actions for fortnight or weekly
             // Weekly = Every 7 days / Fortnight = Every 14 days / Monthly = Once a month
-            var frequentActions = meetingRequest.MeetingActions.Where(a => a.Frequency != ACTION_FREQUENCY.None).ToArray();    //!string.IsNullOrEmpty(a.Frequency));
+            var frequentActions = meetingRequest.MeetingActions.Where(a => a.Frequency != ACTION_FREQUENCY.None).ToArray();
             
             if (frequentActions.Any())
             {
@@ -207,7 +163,20 @@ namespace nyms.resident.server.Controllers.Meetings
                 OwnerId = meetingActionRequest.OwnerId,
                 StartDate = meetingActionRequest.StartDate,
                 CompletionDate = meetingActionRequest.CompletionDate,
-                Priority = meetingActionRequest.Priority
+                Priority = meetingActionRequest.Priority,
+                IsAdhoc = meetingActionRequest.IsAdhoc == "true" ? "Y" : "N"
+            };
+        }
+
+        private MeetingResponse ToMeetingResponse(Meeting meeting)
+        {
+            return new MeetingResponse()
+            {
+                Id = meeting.Id,
+                ReferenceId = meeting.ReferenceId,
+                Title = meeting.Title,
+                MeetingDate = meeting.MeetingDate,
+                OwnerId = meeting.OwnerId
             };
         }
 

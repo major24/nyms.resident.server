@@ -51,17 +51,18 @@ namespace nyms.resident.server.Controllers.Meetings
                         Name = a.Name,
                         Description = a.Description,
                         IsAdhoc = a.IsAdhoc == "Y" ? true : false
-                    };
+                    };                  
                 });
+
                 return new MeetingCategoryResponse()
                 {
                     Id = c.Id,
                     Name = c.Name,
                     MeetingActionItems = meetingActionItemsResponse
                 };
-            });
+            }).ToArray();
 
-            return Ok(meetingCategoriesResponse.ToArray());
+            return Ok(meetingCategoriesResponse);
         }
 
         [HttpPost]

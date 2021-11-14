@@ -21,14 +21,19 @@ namespace nyms.resident.server.Services.Impl
             return _meetingActionDataProvider.GetActionResponsesByMeetingIds(meetingIds);
         }
 
-        public IEnumerable<MeetingActionPendingJobsResponse> GetPendingActionsByOwnerId(int ownerId)
+        public IEnumerable<MeetingActionPendingJobsResponse> GetPendingActions()
         {
-            return _meetingActionDataProvider.GetPendingActionsByOwnerId(ownerId);
+            return _meetingActionDataProvider.GetPendingActions();
         }
 
-        public IEnumerable<MeetingActionCompletedResponse> GetCompletedActions()
+        public IEnumerable<MeetingActionPendingJobsResponse> GetPendingActions(int ownerId)
         {
-            return _meetingActionDataProvider.GetCompletedActions();
+            return _meetingActionDataProvider.GetPendingActions(ownerId);
+        }
+
+        public IEnumerable<MeetingActionCompletedResponse> GetCompletedActions(int lastN_Rows = 20)
+        {
+            return _meetingActionDataProvider.GetCompletedActions(lastN_Rows);
         }
 
         public MeetingActionUpdateRequest UpdateAction(MeetingActionUpdateRequest meetingActionUpdateRequest)

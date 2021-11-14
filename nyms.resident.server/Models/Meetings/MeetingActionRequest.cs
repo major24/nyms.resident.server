@@ -13,7 +13,7 @@ namespace nyms.resident.server.Models
         public int MeetingActionItemId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        // public string IsAdhoc { get; set; }
+        public string IsAdhoc { get; set; }
         // meeting action
         public int OwnerId { get; set; }
         public DateTime StartDate { get; set; }

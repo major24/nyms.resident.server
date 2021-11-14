@@ -68,8 +68,7 @@ namespace nyms.resident.server.Controllers.User
                 return BadRequest($"Must provide a user reference id");
             }
 
-            // Guid _referenceId = new Guid(referenceId);
-            var user = _userService.GetByRefereneId(new Guid(referenceId)).Result; //   .GetCareHomeUser(_referenceId).Result;
+            var user = _userService.GetByRefereneId(new Guid(referenceId)).Result;
             if (user == null)
             {
                 logger.Error($"No user info found for {referenceId}.");

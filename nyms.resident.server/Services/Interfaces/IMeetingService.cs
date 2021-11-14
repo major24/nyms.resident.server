@@ -13,13 +13,6 @@ namespace nyms.resident.server.Services.Interfaces
         IEnumerable<Meeting> GetMeetings(int lastN_Rows);
         Meeting GetMeeting(Guid referenceId);
         Meeting Insert(Meeting meeting);
-        Meeting Update(Meeting meeting, int[] deletedIds = null);
-
-        // Actions
-/*        IEnumerable<MeetingActionResponse> GetActions();
-        MeetingActionCompleteRequest UpdateActionCompleted(MeetingActionCompleteRequest meetingActionCompleteRequest);
-        IEnumerable<MeetingActionComment> GetComments(int[] meetingActionIds);
-        MeetingActionComment InsertActionComment(MeetingActionComment meetingActionComment);
-        MeetingActionInspectRequest UpdateActionInspected(MeetingActionInspectRequest meetingActionInspectRequest);*/
+        Meeting Update(Meeting meeting);
     }
 }

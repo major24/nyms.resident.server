@@ -220,7 +220,6 @@
     <Compile Include="DataProviders\Impl\EnquiryDataProvider.cs" />
     <Compile Include="DataProviders\Impl\InvoiceDataProvider.cs" />
     <Compile Include="DataProviders\Impl\MeetingActionDataProvider.cs" />
-    <Compile Include="DataProviders\Impl\MeetingActionItemLookupDataProvider.cs" />
     <Compile Include="DataProviders\Impl\MeetingCategoryAndActionItemLookupDataProvider.cs" />
     <Compile Include="DataProviders\Impl\MeetingDataProvider.cs" />
     <Compile Include="DataProviders\Impl\PaymentProviderDataProvider.cs" />
@@ -285,7 +284,6 @@
     <Compile Include="Models\Meetings\MeetingActionResponse.cs" />
     <Compile Include="Models\Meetings\MeetingActionUpdateRequest.cs" />
     <Compile Include="Models\Meetings\MeetingCategory.cs" />
-    <Compile Include="Models\Meetings\MeetingCategoryDto.cs" />
     <Compile Include="Models\Meetings\MeetingActionComment.cs" />
     <Compile Include="Models\Meetings\MeetingCategoryResponse.cs" />
     <Compile Include="Models\Meetings\MeetingRequest.cs" />
@@ -363,7 +361,6 @@
     <Compile Include="Services\Impl\CareHomeService.cs" />
     <Compile Include="Services\Impl\EnquiryService.cs" />
     <Compile Include="Services\Impl\InvoiceService.cs" />
-    <Compile Include="Services\Impl\MeetingActionItemLookupService.cs" />
     <Compile Include="Services\Impl\MeetingActionService.cs" />
     <Compile Include="Services\Impl\MeetingCategoryAndActionItemsLookupService.cs" />
     <Compile Include="Services\Impl\MeetingService.cs" />
@@ -378,7 +375,6 @@
     <Compile Include="Services\Interfaces\ICareHomeService.cs" />
     <Compile Include="Services\Interfaces\IEnquiryService.cs" />
     <Compile Include="Services\Interfaces\IInvoiceService.cs" />
-    <Compile Include="Services\Interfaces\IMeetingActionItemLookupService.cs" />
     <Compile Include="Services\Interfaces\IMeetingActionService.cs" />
     <Compile Include="Services\Interfaces\IMeetingCategoryAndActionItemLookupService.cs" />
     <Compile Include="Services\Interfaces\IMeetingService.cs" />

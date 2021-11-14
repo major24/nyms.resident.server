@@ -10,8 +10,9 @@ namespace nyms.resident.server.Services.Interfaces
     public interface IMeetingActionService
     {
         IEnumerable<MeetingActionResponse> GetActionsByMeetingIds(int[] meetingIds);
-        IEnumerable<MeetingActionPendingJobsResponse> GetPendingActionsByOwnerId(int ownerId);
-        IEnumerable<MeetingActionCompletedResponse> GetCompletedActions();
+        IEnumerable<MeetingActionPendingJobsResponse> GetPendingActions();
+        IEnumerable<MeetingActionPendingJobsResponse> GetPendingActions(int ownerId);
+        IEnumerable<MeetingActionCompletedResponse> GetCompletedActions(int lastN_Rows);
         MeetingActionUpdateRequest UpdateAction(MeetingActionUpdateRequest meetingActionUpdateRequest);
         MeetingActionCompleteRequest UpdateActionCompleted(MeetingActionCompleteRequest meetingActionCompleteRequest);
         MeetingActionAuditRequest UpdateActionAudited(MeetingActionAuditRequest meetingActionAuditRequest);

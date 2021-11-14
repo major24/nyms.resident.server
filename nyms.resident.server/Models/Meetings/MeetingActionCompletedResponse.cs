@@ -15,10 +15,11 @@ namespace nyms.resident.server.Models
         public string Priority { get; set; }
         public string Forename { get; set; }
         public string CategoryName { get; set; }
-        public string Title { get; set; }
         public ACTION_COMPLETED_STATUS Completed { get; set; }
         public int CompletedById { get; set; }
         public string CompletedByName { get; set; }
         public DateTime CompletedDate { get; set; }
+        public string CommentType { get; set; }
+        public string Comment { get; set; }
     }
 }

@@ -8,6 +8,7 @@ namespace nyms.resident.server.Models
     public class UserRoleAccess
     {
         public int UserId { get; set; }
+        public Guid ReferenceId { get; set; }
         public string Forename { get; set; }
         public string Surname { get; set; }
         public int RoleId { get; set; }

@@ -12,6 +12,6 @@ namespace nyms.resident.server.DataProviders.Interfaces
         IEnumerable<Meeting> GetMeetings(int lastN_Rows);
         Meeting GetMeeting(Guid referenceId);
         Meeting Insert(Meeting meeting);
-        Meeting Update(Meeting meeting, int[] deletedIds = null);
+        Meeting Update(Meeting meeting);
     }
 }

@@ -19,26 +19,6 @@ namespace nyms.resident.server.Models
         public DateTime CompletionDate { get; set; }
         public string Priority { get; set; }
         public string Forename { get; set; }
-
-
-/*        public string Completed { get; set; }
-        public DateTime? CompletedDate { get; set; }
-        public string Inspected { get; set; }
-        public int InspectedById { get; set; }
-        public DateTime? InspectedDate { get; set; }
-        public string InspectionStatus { get; set; }
-        public int UpdatedById { get; set; }
-        public DateTime UpdatedDate { get; set; }*/
-
-
-        // public string CompletedByForename { get; set; }
-        // public string CompletedBySurname { get; set; }
-/*        public string UpdatedByForename { get; set; }
-        public string UpdatedBySurname { get; set; }*/
-        // public string InspectedByForename { get; set; }
-        // public string InspectedBySurname { get; set; }
-/*        public string NewComment { get; set; }
-        public IEnumerable<MeetingActionComment> Comments { get; set; }*/
-       /* public string NewCommentType { get; set; }*/
+        public string Completed { get; set; }
     }
 }

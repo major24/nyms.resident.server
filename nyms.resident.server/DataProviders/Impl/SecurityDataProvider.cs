@@ -17,19 +17,6 @@ namespace nyms.resident.server.DataProviders.Impl
             _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
         }
 
-/*        public IEnumerable<Role> GetRoles()
-        {
-            string sql = @"SELECT id as id, name as name FROM [dbo].[roles] 
-                            WHERE [id] > 1 
-                            AND [active] = 'Y'";
-
-            using (IDbConnection conn = new SqlConnection(_connectionString))
-            {
-                conn.Open();
-                return conn.QueryAsync<Role>(sql).Result;
-            }
-        }*/
-
         public IEnumerable<UserRolePermission> GetRolePermissions(int userId)
         {
             string sql = @"SELECT 
@@ -76,6 +63,7 @@ namespace nyms.resident.server.DataProviders.Impl
         public IEnumerable<UserRoleAccess> GetUserRoleAccesses()
         {
             string sql = @"SELECT u.id as userid
+                            ,u.reference_id as referenceid
                             ,u.forename as forename
                             ,u.surname as surname
                             ,u.active as activeuser
