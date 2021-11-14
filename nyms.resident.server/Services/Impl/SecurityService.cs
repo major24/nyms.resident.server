@@ -14,11 +14,6 @@ namespace nyms.resident.server.Services.Impl
             _securityDataProvider = securityDataProvider ?? throw new ArgumentNullException(nameof(securityDataProvider));
         }
 
-        public IEnumerable<Role> GetRoles()
-        {
-            return _securityDataProvider.GetRoles();
-        }
-
         public IEnumerable<UserRolePermission> GetRolePermissions(int userId)
         {
             return _securityDataProvider.GetRolePermissions(userId);
@@ -27,6 +22,11 @@ namespace nyms.resident.server.Services.Impl
         public IEnumerable<int> GetSpendCategoryRoleIds(int userId)
         {
             return _securityDataProvider.GetSpendCategoryRoleIds(userId);
+        }
+
+        public IEnumerable<UserRoleAccess> GetUserRoleAccesses()
+        {
+            return _securityDataProvider.GetUserRoleAccesses();
         }
     }
 }

@@ -57,10 +57,15 @@ namespace nyms.resident.server
             container.RegisterType<ISecurityDataProvider, SecurityDataProvider>(new InjectionConstructor(connectionString));
             container.RegisterType<ISecurityService, SecurityService>();
 
+            container.RegisterType<IMeetingCategoryAndActionItemLookupDataProvider, MeetingCategoryAndActionItemLookupDataProvider>(new InjectionConstructor(connectionString));
+            container.RegisterType<IMeetingCategoryAndActionItemLookupService, MeetingCategoryAndActionItemsLookupService>();
+            container.RegisterType<IMeetingDataProvider, MeetingDataProvider>(new InjectionConstructor(connectionString));
+            container.RegisterType<IMeetingService, MeetingService>();
+            container.RegisterType<IMeetingActionDataProvider, MeetingActionDataProvider>(new InjectionConstructor(connectionString));
+            container.RegisterType<IMeetingActionService, MeetingActionService>();
+
             DependencyResolver.SetResolver(new Unity.Mvc5.UnityDependencyResolver(container));
-
             System.Web.Http.GlobalConfiguration.Configuration.DependencyResolver = new Unity.WebApi.UnityDependencyResolver(container);
-
         }
     }
 }

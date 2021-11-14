@@ -23,7 +23,7 @@ namespace nyms.resident.server.DataProviders.Impl
             throw new NotImplementedException();
         }
 
-        public IEnumerable<CareHome> GetCareHomes()  //<CareHomeDetail>
+        public IEnumerable<CareHome> GetCareHomes()
         {
             using (IDbConnection conn = new SqlConnection(_connectionString))
             {
@@ -103,17 +103,6 @@ namespace nyms.resident.server.DataProviders.Impl
                     }).ToArray();
                 }
 
-/*                // assemble care home divisions
-                IEnumerable<CareHomeDivision> careHomeDivisions = GetCareHomeDivisions();
-                if (careHomeDivisions != null && careHomeDivisions.Any())
-                {
-                    var _x = careHomes.Select(ch =>
-                    {
-                        ch.CareHomeDivisions = careHomeDivisions.Where(chd => chd.CareHomeId == ch.Id).ToArray();
-                        return ch;
-                    }).ToArray();
-                }*/
-
                 // return assebled carehomes...
                 return careHomes;
             }
@@ -134,11 +123,6 @@ namespace nyms.resident.server.DataProviders.Impl
                                 INNER JOIN[dbo].[care_homes_local_authorities] chla
                                     ON la.id = chla.local_authority_id
                                 WHERE la.active = 'Y'";
-/*                string sql = @"SELECT la.id as id, la.name as name, la.care_home_id as carehomeid
-                                FROM local_authorities la
-                                INNER JOIN care_homes ch
-                                ON ch.id = la.care_home_id
-                                WHERE la.active = 'Y'";*/
 
                 conn.Open();
                 var result = conn.QueryAsync<LocalAuthority>(sql).Result;

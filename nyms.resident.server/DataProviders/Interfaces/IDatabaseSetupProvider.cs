@@ -7,5 +7,6 @@
         void ClearSpendsDatabase();
         void ClearBudgetsDatabase();
         void ClearTestUsers();
+        void ClearMeetingsAgendasActions();
     }
 }

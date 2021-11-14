@@ -9,7 +9,7 @@ using System.Web.Http;
 
 namespace nyms.resident.server.Controllers
 {
-    // [AdminAuthenticationFilter]
+    [AdminAuthenticationFilter]
     public class TestDbController : ApiController
     {
         private readonly IUserService _userService;
@@ -120,6 +120,23 @@ namespace nyms.resident.server.Controllers
             }
         }
 
+
+        // Meetins and agendas
+        [HttpPost]
+        [Route("api/database/meetings/clear")]
+        public HttpResponseMessage ClearMeetingsAgendasAndActions()
+        {
+            try
+            {
+                _databaseSetupProvider.ClearMeetingsAgendasActions();
+                return Request.CreateResponse(HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                HttpResponseMessage response = Request.CreateResponse(HttpStatusCode.InternalServerError, $"Error: {ex.Message}");
+                return response;
+            }
+        }
 
 
     }
